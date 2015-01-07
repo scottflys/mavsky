@@ -80,7 +80,7 @@ void debug_print(int subsystem, char* fmt, ...) {
     va_start(argptr, fmt);
     vsprintf(formatted_string, fmt, argptr);
     va_end(argptr);
-    console_print("%d \t%s\n", millis(), formatted_string);
+    console_print("%d \t%s\r\n", millis(), formatted_string);
   }
 }
 

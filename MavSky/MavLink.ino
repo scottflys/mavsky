@@ -130,8 +130,8 @@ void process_mavlink_packets() {
           break;
   
         case MAVLINK_MSG_ID_SYS_STATUS : 
-          mav.battery_voltage = mavlink_msg_sys_status_get_voltage_battery(&msg);     // 1 = 1mV
-          mav.battery_current = mavlink_msg_sys_status_get_current_battery(&msg);     // 1 = 10mA
+          mav.battery_voltage = max(mavlink_msg_sys_status_get_voltage_battery(&msg), 0);     // 1 = 1mV              // avoid negative values
+          mav.battery_current = max(mavlink_msg_sys_status_get_current_battery(&msg), 0);     // 1 = 10mA
           mavlink_average_push(mav.battery_voltage, mav.battery_voltage_buffer, &(mav.battery_voltage_buffer_start), &(mav.battery_voltage_buffer_length), MAV_HISTORY_BUFFER_SIZE);
           mavlink_average_push(mav.battery_current, mav.battery_current_buffer, &(mav.battery_current_buffer_start), &(mav.battery_current_buffer_length), MAV_HISTORY_BUFFER_SIZE);
           mav.battery_remaining = mavlink_msg_sys_status_get_battery_remaining(&msg); //battery capacity reported in %

@@ -1,4 +1,4 @@
-//  Copyright (c) Scott Simpson 2014
+//  Copyright (c) Scott Simpson 2015
 //  
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "Logger.h"
 #include "MavLink.h"
 
-#define PRODUCT_STRING  "MAVSky Version 1.1.0"
+#define PRODUCT_STRING  "MAVSky Version 1.1.1"
 
 #define DEBUG_SERIAL    Serial
 #define MAVLINK_SERIAL  Serial2
@@ -51,7 +51,7 @@ void setup()  {
   delay(5000);
 
   pinMode(LEDPIN, OUTPUT);
-  console_print("%s\nStarting\n]", PRODUCT_STRING);
+  console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
 
   telem_data_init();  
   frsky_init();

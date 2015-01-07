@@ -1,8 +1,8 @@
 
+#define EEPROM_INIT_VALUE_110                            0x55
+#define EEPROM_INIT_VALUE_111                            0x56
 
-void telem_data_init() {
-  if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) != EEPROM_INIT_VALUE) {
-    console_print("Resetting EEPROM to default settings\n");
+void telem_data_factory_reset() {
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_VFAS, EEPROM_VALUE_MAP_VFAS_AVERAGE10);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_CURRENT, EEPROM_VALUE_MAP_CURRENT_AVERAGE10);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCX, EEPROM_VALUE_MAP_ACCX_PEAK_AVERAGE10);
@@ -11,7 +11,19 @@ void telem_data_init() {
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING);
     EEPROM.write(EEPROM_ADDR_HDOP_THRESHOLD, 5);
-    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE);
+    EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
+    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_111);
+}
+
+void telem_data_init() {
+  if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) == EEPROM_INIT_VALUE_110) {                // version 1.1.0
+    console_print("Upgrading EEPROM schema from 1.1.0\r\n");
+    EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);   
+    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_111); 
+  } else if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) == EEPROM_INIT_VALUE_111) {         // version 1.1.1
+  } else {
+    console_print("Resetting EEPROM to default schema\r\n");
+    telem_data_factory_reset();
   }
 }
 

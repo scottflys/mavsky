@@ -114,7 +114,7 @@ void frsky_process_sensor_request(uint8_t sensorId) {
       
     case SENSOR_ID_FAS:
       add_timestamp(TIMESTAMP_FRSKY_FAS);
-      if(!mavlink_sys_status_data_valid()) {
+      if(!mavlink_sys_status_data_valid() || !EEPROM.read(EEPROM_ADDR_FRSKY_VFAS_ENABLE)) {
         break;
       }
       switch(next_fas) {

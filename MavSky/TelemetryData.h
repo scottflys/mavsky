@@ -22,8 +22,9 @@
 #define EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED         6
 #define EEPROM_ADDR_MAP_TELEM_DATA_T2                7
 #define EEPROM_ADDR_HDOP_THRESHOLD                   8
+#define EEPROM_ADDR_FRSKY_VFAS_ENABLE                9
 
-#define EEPROM_INIT_VALUE                            0x55
+
 
 #define EEPROM_VALUE_MAP_VFAS_DIRECT                 1
 #define EEPROM_VALUE_MAP_VFAS_AVERAGE10              2
