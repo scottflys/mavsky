@@ -326,8 +326,9 @@ end
 
 local function drawHdop(x,y)
 	local hdop = getValue("a2")			-- a2 is hdop*10
-    if hdop > 999 then
-        hdop = 999
+    if hdop > 99 then
+        hdop = 99
+        lcd.drawText(x-22, y+3, ">", SMLSIZE)  
     end
 	lcd.drawNumber (x, y, hdop, PREC1 + MIDSIZE)
     local t = lcd.getLastPos() + 1
@@ -457,8 +458,8 @@ local function run(event)
     drawCurrent(32, 26)
     drawTotalCurrent(32, 40)
 
-    drawSats(76, 40)	
-    drawHdop(126, 40)
+    drawSats(72, 40)	
+    drawHdop(130, 40)
     
     drawHeadingHud(107, 26)
     

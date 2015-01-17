@@ -16,10 +16,19 @@
 
 local debugLabelWidth = 60
 local debugRowHeight = 7
-local debugColWidth = 70
+local debugColWidth = 68
 
 local function printData(col, row, label, token)
 	local val = getValue(token)
+	local x = (col - 1) * debugColWidth
+    local y = row * debugRowHeight - 6
+    lcd.drawText(x, y, label, SMLSIZE)
+    lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
+end
+
+local function printNum(col, row, label, token, precision)
+	local val = getValue(token)
+    val = math.floor(val * precision) / precision
 	local x = (col - 1) * debugColWidth
     local y = row * debugRowHeight - 6
     lcd.drawText(x, y, label, SMLSIZE)
@@ -52,8 +61,8 @@ local function run(event)
 
 	printData(3, 1, "gps-spd", "gps-speed")	
 	printData(3, 2, "heading", "heading")	
-	printData(3, 3, "lat", "latitude")	
-	printData(3, 4, "long", "longitude")	
+	printNum(3, 3, "lat", "latitude", 10000)	
+	printNum(3, 4, "long", "longitude", 10000)	
 	printData(3, 5, "power", "power")	
 	printData(3, 6, "vert-spd", "vertical-speed")	
 	printData(3, 7, "temp1", "temp1")	
