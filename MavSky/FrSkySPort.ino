@@ -17,7 +17,7 @@
 // longitude      <- gps_longitude
 // rpm            <- used for text message
 // temp1          <- gps_sats_visible * 10 + gps_fixtype
-// temp2          <- battery_remaining, mission_current_seq, temperature, wp_dist  // *configurable
+// temp2          <- battery_remaining, mission_current_seq, temperature, wp_dist, hdop, armed // *configurable
 // vertical-speed <- ap_climb_rate              // 100 = 1m/s
 // vfas           <- average_voltage, voltage   // 10  = 1mv                     *configurable
 

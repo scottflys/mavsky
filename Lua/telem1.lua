@@ -411,30 +411,52 @@ end
 
 local function drawTopPanel()
     lcd.drawFilledRectangle(0, 0, 212, 9, 0)
-  
+    
     local flightModeNumber = getValue("fuel") + 1
     if flightModeNumber < 1 or flightModeNumber > 17 then
         flightModeNumber = 13
     end
-
     lcd.drawText(1, 1, FlightMode[flightModeNumber].Name, INVERS)
 
-    lcd.drawTimer(lcd.getLastPos() + 10, 1, model.getTimer(0).value, INVERS)
+    lcd.drawTimer(lcd.getLastPos() + 5, 1, model.getTimer(0).value, INVERS)
 
-    lcd.drawText(lcd.getLastPos() + 10, 1, "TX:", INVERS)
+    lcd.drawText(lcd.getLastPos() + 5, 1, "TX:", INVERS)
     lcd.drawNumber(lcd.getLastPos() + 16, 1, getValue("tx-voltage")*10, 0+PREC1+INVERS)
 
     lcd.drawText(lcd.getLastPos(), 1, "v", INVERS)
 
-    lcd.drawText(lcd.getLastPos() + 12, 1, "rssi:", INVERS)
+    lcd.drawText(lcd.getLastPos() + 5, 1, "rssi:", INVERS)
     lcd.drawNumber(lcd.getLastPos() + 10, 1, getValue("rssi"), 0+INVERS)
 end
 
 local function drawBottomPanel()
-    lcd.drawFilledRectangle(0, 54, 212, 63, 0)
+    local temp2 = getValue("temp2")
+    local armed = 0
+    local disarmed = 0
+    
+    if temp2 == 21844 then
+        disarmed = 1
+    elseif temp2 == 21845 then
+        armed = 1        
+    end
+    
+    local textAttributes = 0
+    if armed == 1 then
+        textAttributes = INVERS
+        lcd.drawFilledRectangle(0, 54, 211, 63, BLINK)
+    else
+        lcd.drawLine(0, 53, 211, 53, SOLID, FORCE)
+    end
+
     if getTime() < (messageLatestTimestamp + 1000) then
         local footerMessage = getLatestMessage()
-        lcd.drawText(2, 55, footerMessage, INVERS)
+        lcd.drawText(1, 55, footerMessage, textAttributes)
+    else    
+        if armed == 1 then
+            lcd.drawText(1, 55, "Armed", textAttributes)
+        elseif disarmed == 1 then
+            lcd.drawText(1, 55, "Disarmed", textAttributes)
+        end            
     end
 end
     

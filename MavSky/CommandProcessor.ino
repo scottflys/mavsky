@@ -21,7 +21,7 @@ void do_help() {
   console_print("map accy     [direct|average10|average50|peak10|peak50]\r\n");
   console_print("map accz     [direct|average10|average50|peak10|peak50]\r\n");
   console_print("map gpsspeed [kph|mps]\r\n");
-  console_print("map t2       [batt_remain|mission_seq|temp|wp_dist|hdop]\r\n");
+  console_print("map t2       [batt_remain|mission_seq|temp|wp_dist|hdop|armed]\r\n");
   console_print("set hdop     [1-10]\r\n");
   console_print("frsky vfas   [enable|disable]\r\n");
   console_print("factory\r\n");
@@ -199,19 +199,25 @@ void do_map_dump() {
   } 
   switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_T2)) {
     case EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING:
-     console_print("batt_remain routed to t2\r\n");
+     console_print("batt_remain routed to temp2\r\n");
      break;
     case EEPROM_VALUE_MAP_DATA_T2_MISSION_CURRENT_SEQ:
-     console_print("mission_seq routed to t2\r\n");
+     console_print("mission_seq routed to temp2\r\n");
      break;
     case EEPROM_VALUE_MAP_DATA_T2_TEMPERATURE:
-     console_print("temp routed to t2\r\n");
+     console_print("temp routed to temp2\r\n");
      break;
     case EEPROM_VALUE_MAP_DATA_T2_WP_DIST:
-     console_print("wp_dist routed to t2\r\n");
+     console_print("wp_dist routed to temp2\r\n");
+     break;
+    case EEPROM_VALUE_MAP_DATA_T2_HDOP:
+     console_print("hdop routed to temp2\r\n");
+     break;
+    case EEPROM_VALUE_MAP_DATA_T2_ARMED:
+     console_print("armed routed to temp2\r\n");
      break;
    default:
-     console_print("Invalid data routed to t2\r\n");
+     console_print("Invalid data routed to temp2\r\n");
      break;    
   }    
 }
@@ -310,10 +316,10 @@ void do_map(char* p) {
     if(p != NULL) {
       if(strcmp(p, "kph") == 0) {
         EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
-        console_print("gpsspeed mps routed to gps-speed\r\n");
-      } else if(strcmp(p, "mps") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
         console_print("gpsspeed kph routed to gps-speed\r\n");
+      } else if(strcmp(p, "mps") == 0) {
+        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_MPS);
+        console_print("gpsspeed mps routed to gps-speed\r\n");
       }
     }
   } else if(strcmp(p, "t2") == 0) {
@@ -334,6 +340,9 @@ void do_map(char* p) {
       } else if(strcmp(p, "hdop") == 0) {
         EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_HDOP);
         console_print("hdop routed to t2\r\n");
+      } else if(strcmp(p, "armed") == 0) {
+        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_ARMED);
+        console_print("armed routed to t2\r\n");
       }
     }
   }

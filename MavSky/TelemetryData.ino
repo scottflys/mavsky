@@ -9,7 +9,7 @@ void telem_data_factory_reset() {
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCY, EEPROM_VALUE_MAP_ACCY_PEAK_AVERAGE10);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCZ, EEPROM_VALUE_MAP_ACCZ_PEAK_AVERAGE10);    
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
-    EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING);
+    EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_ARMED);
     EEPROM.write(EEPROM_ADDR_HDOP_THRESHOLD, 5);
     EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
     EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_111);
@@ -27,7 +27,7 @@ void telem_data_init() {
   }
 }
 
-uint16_t telem_data_get_value(uint16_t telemetry_data_value_id) {
+uint32_t telem_data_get_value(uint16_t telemetry_data_value_id) {
   switch(telemetry_data_value_id) {
     case TELEM_DATA_VFAS:
       switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_VFAS)) {
@@ -150,6 +150,11 @@ uint16_t telem_data_get_value(uint16_t telemetry_data_value_id) {
             hdop_val = 100;
           }
           return hdop_val;
+          break;        
+        case EEPROM_VALUE_MAP_DATA_T2_ARMED:
+          uint16_t armed;
+          armed = ((mav.base_mode >> 7) & 0x0001) | 0x5554;        // set all upper bits to this pattern to recognize armed/disarmed in lua                 
+          return armed;
           break;
       }
       break;

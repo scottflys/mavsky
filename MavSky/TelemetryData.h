@@ -60,5 +60,6 @@
 #define EEPROM_VALUE_MAP_DATA_T2_TEMPERATURE         3
 #define EEPROM_VALUE_MAP_DATA_T2_WP_DIST             4
 #define EEPROM_VALUE_MAP_DATA_T2_HDOP                5
+#define EEPROM_VALUE_MAP_DATA_T2_ARMED               6
 
 #endif
