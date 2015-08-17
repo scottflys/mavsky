@@ -1,4 +1,6 @@
---
+-- 
+-- MavSky telem2.lua 1.2.0
+-- 
 --  Copyright (c) Scott Simpson
 --
 -- 	This program is free software: you can redistribute it and/or modify

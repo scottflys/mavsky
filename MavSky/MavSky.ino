@@ -29,7 +29,7 @@
 #include "Logger.h"
 #include "MavLink.h"
 
-#define PRODUCT_STRING  "MAVSky Version 1.1.2"
+#define PRODUCT_STRING  "MAVSky Version 1.2.0"
 
 #define DEBUG_SERIAL    Serial
 #define MAVLINK_SERIAL  Serial2
