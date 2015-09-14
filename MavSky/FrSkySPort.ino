@@ -45,6 +45,7 @@ uint8_t next_vario = 0;
 uint8_t next_gps = 0;
 uint8_t next_default = 0;
 uint8_t gps_first_position_good = 0;
+bool motor_armed = 0;
 
 // Scale factor for roll/pitch:
 // We need to scale down 360 deg to fit when max value is 256, and 256 equals 362 deg
@@ -213,8 +214,12 @@ void frsky_process_sensor_request(uint8_t sensorId) {
         case 8:
           frsky_send_package(FR_ID_FUEL, mav.custom_mode);   
           break;      
+        case 9:
+          motor_armed = mav.base_mode & (1 << 7);
+          frsky_send_package(FR_ID_AIR_SPEED_FIRST, motor_armed);  // whle base mode or only arm flag?  
+          break;      
       }
-      if(++next_default > 8) {
+      if(++next_default > 9) {
         next_default = 0;
       }
       break;
