@@ -12,8 +12,11 @@ int debugMavAttitudeEnable = 0;
 int debugMavStatusEnable = 0;
 int debugMavTextEnable = 0;
 int debugMavOtherEnable = 0;
+int debugMavRangeFinderEnable = 0;  
 int debugFrskyAllEnable = 0;
 int debugFrskyRpmEnable = 0;
+int debugFrskyVarioEnable = 0; 
+int debugFrskyFasEnable = 0;   
 int debugTempEnable = 0;
 
 void debug_init() {
@@ -62,9 +65,24 @@ void debug_print(int subsystem, char* fmt, ...) {
       if(debugMavOtherEnable || debugMavAllEnable) {
         print_enable = 1;
       }
-      break; 
+      break;
+    case LOG_MAV_RANGEFINDER :
+      if(debugMavRangeFinderEnable || debugMavAllEnable) {
+        print_enable = 1;
+      }
+      break;
      case LOG_FRSKY_RPM :
       if(debugFrskyRpmEnable || debugFrskyAllEnable) {
+        print_enable = 1;
+      } 
+      break;
+     case LOG_FRSKY_VARIO :
+      if(debugFrskyVarioEnable || debugFrskyAllEnable) {
+        print_enable = 1;
+      } 
+      break;
+     case LOG_FRSKY_FAS :
+      if(debugFrskyFasEnable || debugFrskyAllEnable) {
         print_enable = 1;
       } 
       break;         

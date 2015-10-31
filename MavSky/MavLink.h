@@ -52,7 +52,14 @@ typedef struct MavClass {
   // MAVLINK_MSG_ID_STATUSTEXT
   uint16_t   ap_status_severity;
   mavlink_statustext_t statustext;
-  
+
+  // MAVLINK_MSG_ID_RANGEFINDER
+  int32_t   rangefinder_distance;
+
+  // MAVLINK_MSG_ID_BATTERY_STATUS
+  uint16_t  current_consumed;    
+  uint16_t  energy_consumed;    
+
   // Calculated
   
   int16_t    battery_current_buffer[MAV_HISTORY_BUFFER_SIZE];

@@ -3,7 +3,7 @@
 
 // To disable a specific sensor, just comment out the sensor_id define (place // first on the line defining the sensor id)
 #define SENSOR_ID_VARIO             0x00 // 0
-//#define SENSOR_ID_FLVSS             0xA1 // 1
+#define SENSOR_ID_FLVSS             0xA1 // 1
 #define SENSOR_ID_FAS               0x22 // 2
 #define SENSOR_ID_GPS               0x83 // 3
 #define SENSOR_ID_RPM               0xE4 // 4
@@ -15,7 +15,6 @@
 // Frsky-specific
 #define START_STOP                  0x7e
 #define DATA_FRAME                  0x10
-
 
 //Frsky DATA ID's 
 #define FR_ID_ALTITUDE              0x0100	//ALT_FIRST_ID
@@ -35,17 +34,15 @@
 #define FR_ID_GPS_ALT               0x0820	//GPS_ALT_FIRST_ID                // getValue(213)? $D5
 #define FR_ID_SPEED                 0x0830 	//GPS_SPEED_FIRST_ID              // getValue(211)
 #define FR_ID_GPS_COURSE            0x0840	//GPS_COURS_FIRST_ID
-#define FR_ID_GPS_TIME_DATE         0x0850      //GPS_TIME_DATE_FIRST_ID
+#define FR_ID_GPS_TIME_DATE         0x0850  //GPS_TIME_DATE_FIRST_ID
 #define FR_ID_A3_FIRST              0x0900 	//A3_FIRST_ID
 #define FR_ID_A4_FIRST              0x0910 	//A4_FIRST_ID
 #define FR_ID_AIR_SPEED_FIRST       0x0A00 	//AIR_SPEED_FIRST_ID
-#define FR_ID_RSSI                  0xF101      // used by the radio system
-#define FR_ID_ADC1                  0xF102      //ADC1_ID
+#define FR_ID_RSSI                  0xF101  // used by the radio system
+#define FR_ID_ADC1                  0xF102  //ADC1_ID
 #define FR_ID_ADC2                  0xF103	//ADC2_ID                        // getValue(203)  (mav.hdop / 4)
-#define FR_ID_BATT                  0xF104      // used by the radio system
-#define FR_ID_SWR                   0xF105      // used by the radio system
-
-
+#define FR_ID_BATT                  0xF104  // used by the radio system
+#define FR_ID_SWR                   0xF105  // used by the radio system
 
 /* The following are defined at frsky_sport.cpp (v2.08) but not used here
 

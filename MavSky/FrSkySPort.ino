@@ -1,13 +1,13 @@
 
-// a1                                           // dont know how to set this one 
-// a2             <- gps_hdop / 4
-// a3             <- roll
-// a4             <- pitch   
+// a1                                       
+// a2            
+// a3             
+// a4         
 // accx           <- average_xacc, xacc         //                               *configurable
 // accy           <- average_yacc, yacc         //                               *configurable
 // accz           <- average_zacc, zacc         //                               *configurable
 // air-speed      <-                            // todo - dont know how to set this
-// altitude       <- bar_altitude               // 100 = 1m     from barometer
+// altitude       <- bar_altitude               // 100 = 1m                      *configurable    2015-08-23
 // current        <- average_current, current   // 10  = 10ma                    *configurable
 // fuel           <- custom_mode                //
 // gps-altitude   <- gps_altitude               // 100 = 1m     from gps
@@ -44,7 +44,6 @@ uint8_t next_fas = 0;
 uint8_t next_vario = 0;
 uint8_t next_gps = 0;
 uint8_t next_default = 0;
-uint8_t gps_first_position_good = 0;
 
 // Scale factor for roll/pitch:
 // We need to scale down 360 deg to fit when max value is 256, and 256 equals 362 deg
@@ -55,7 +54,6 @@ void frsky_init(void)  {
   frsky_port_C3 = 0x10;            // Tx invert
   frsky_port_C1 = 0xA0;            // Single wire mode
   frsky_port_S2 = 0x10;            // Rx Invert
-  frsky_send_text_message("Initializing...");
 }
 
 int frsky_online() {  
@@ -86,13 +84,7 @@ void frsky_process(void) {
 
 void frsky_process_sensor_request(uint8_t sensorId) {
   uint32_t latlong = 0;
-  uint8_t hdop_threshold;
 
-  if(!gps_first_position_good) {
-    if(mav.gps_fixtype == 3 && mav.gps_hdop <= (EEPROM.read(EEPROM_ADDR_HDOP_THRESHOLD) * 100)) {
-      gps_first_position_good = 1;
-    }
-  }
   switch(sensorId) {
     case SENSOR_ID_VARIO:
       add_timestamp(TIMESTAMP_FRSKY_VARIO);
@@ -101,10 +93,11 @@ void frsky_process_sensor_request(uint8_t sensorId) {
       }
       switch(next_vario) {
         case 0:
-          frsky_send_package(FR_ID_VARIO, mav.ap_climb_rate);       // 100 = 1m/s        
+          frsky_send_package(FR_ID_VARIO, mav.ap_climb_rate);       // 100 = 1m/s  
           break;
         case 1: 
-          frsky_send_package(FR_ID_ALTITUDE, mav.bar_altitude);   // from barometer, 100 = 1m
+          int32_t alt_val = telem_data_get_value(TELEM_DATA_ALT);
+          frsky_send_package(FR_ID_ALTITUDE, alt_val);   //from barometer or rangefinder, 100 = 1m
           break;
       }
       if(++next_vario > 1) {
@@ -119,10 +112,13 @@ void frsky_process_sensor_request(uint8_t sensorId) {
       }
       switch(next_fas) {
         case 0:
-          frsky_send_package(FR_ID_VFAS, telem_data_get_value(TELEM_DATA_VFAS) / 10);       // Sends voltage as a VFAS value
+          uint16_t volt_val;
+          volt_val = telem_data_get_value(TELEM_DATA_VFAS) / 10;
+          frsky_send_package(FR_ID_VFAS, volt_val);       // Sends voltage as a VFAS value
           break;
         case 1:
-          frsky_send_package(FR_ID_CURRENT, telem_data_get_value(TELEM_DATA_CURRENT) / 10);
+          int16_t curr_val = telem_data_get_value(TELEM_DATA_CURRENT) / 10;
+          frsky_send_package(FR_ID_CURRENT, curr_val);
           break;
       }
       if(++next_fas > 1)
@@ -131,15 +127,15 @@ void frsky_process_sensor_request(uint8_t sensorId) {
   
     case SENSOR_ID_GPS:
       add_timestamp(TIMESTAMP_FRSKY_GPS);
-      if(!mavlink_gps_data_valid() || !gps_first_position_good) {
+      if(!mavlink_gps_data_valid()) {
         break;
       }
       switch(next_gps)  {
         case 0:                 // Sends the longitude value, setting bit 31 high
           if(mav.gps_longitude < 0) {
-            latlong=((abs(mav.gps_longitude)/100)*6)  | 0xC0000000;
+            latlong=((abs(mav.gps_longitude)/100)*6) | 0xC0000000;
           } else {
-            latlong=((abs(mav.gps_longitude)/100)*6)  | 0x80000000;
+            latlong=((abs(mav.gps_longitude)/100)*6) | 0x80000000;
           }
           frsky_send_package(FR_ID_LATLONG, latlong);
           break;
@@ -152,14 +148,13 @@ void frsky_process_sensor_request(uint8_t sensorId) {
           frsky_send_package(FR_ID_LATLONG, latlong);
           break;  
         case 2:
-          frsky_send_package(FR_ID_GPS_ALT, mav.gps_altitude / 10);        // from GPS,  100=1m
+          frsky_send_package(FR_ID_GPS_ALT, mav.gps_altitude / 10);                                     // from GPS,  100=1m
           break;
-        case 3:
-          //frsky_send_package(FR_ID_SPEED, mav.gps_speed * 36);             // shows up on taranis as km/hr             
-          frsky_send_package(FR_ID_SPEED, telem_data_get_value(TELEM_DATA_GPS_SPEED));                   // shows up on taranis as km/hr             
+        case 3:          
+          frsky_send_package(FR_ID_SPEED, telem_data_get_value(TELEM_DATA_GPS_SPEED));                  // shows up on taranis as km/hr             
           break;
         case 4:
-          frsky_send_package(FR_ID_GPS_COURSE, mav.heading * 100);         // 10000 = 100 deg            // todo - this isn't GPS, but using mavlink_gps_data_valid() to check validity of this whole section
+          frsky_send_package(FR_ID_GPS_COURSE, mav.heading * 100);                                      // 10000 = 100 deg   
           break;
       }
       if(++next_gps > 4) {
@@ -170,60 +165,23 @@ void frsky_process_sensor_request(uint8_t sensorId) {
     case SENSOR_ID_RPM:
       add_timestamp(TIMESTAMP_FRSKY_RPM);
       uint16_t data_word;
-      data_word = telem_text_get_word();
+      data_word = telem_next_extension_word();
       debug_print(LOG_FRSKY_RPM, "FRSKY SENSOR_ID_RPM: %d", data_word);            
       frsky_send_package(FR_ID_RPM, data_word);   
       break;
-  
-    case 0x45:
-    case 0xC6:
+
+    case SENSOR_ID_SP2UH:
       add_timestamp(TIMESTAMP_FRSKY_OTHER);
-      int32_t gps_status;
       switch(next_default) {
         case 0:      
-          int16_t hdop_val;
-          hdop_val = mav.gps_hdop / 4;
-          if(hdop_val > 249) {
-            hdop_val = 249;
-          }
-          frsky_send_package(FR_ID_ADC2, hdop_val);                         //  value must be between 0 and 255.  1 produces 0.4          
-          break;       
-        case 1:
-          frsky_send_package(FR_ID_ACCX, telem_data_get_value(TELEM_DATA_ACCX));    
-          break;
-        case 2:
-          frsky_send_package(FR_ID_ACCY, telem_data_get_value(TELEM_DATA_ACCY)); 
-          break; 
-        case 3:
-          frsky_send_package(FR_ID_ACCZ, telem_data_get_value(TELEM_DATA_ACCZ)); 
-          break; 
-        case 4:
-          gps_status = (mav.gps_satellites_visible*10) + mav.gps_fixtype;
-          frsky_send_package(FR_ID_T1, gps_status); 
-          break; 
-        case 5:
-          frsky_send_package(FR_ID_A3_FIRST, handle_A2_A3_value((mav.roll_angle+180)/scalefactor));
-          break;
-        case 6:
-          frsky_send_package(FR_ID_A4_FIRST, handle_A2_A3_value((mav.pitch_angle+180)/scalefactor));
-          break;
-        case 7:
-          frsky_send_package(FR_ID_T2, telem_data_get_value(TELEM_DATA_T2));                    
-          break;
-        case 8:
-          frsky_send_package(FR_ID_FUEL, mav.custom_mode);   
-          break;      
+          frsky_send_package(FR_ID_FUEL, mav.battery_remaining); 
+          break;               
       }
-      if(++next_default > 8) {
+      if(++next_default > 1) {
         next_default = 0;
-      }
+      }      
       break;
   }
-}
-
-uint32_t handle_A2_A3_value(uint32_t value)
-{
-  return (value *330-165)/0xFF;
 }
 
 void frsky_send_byte(uint8_t byte) {

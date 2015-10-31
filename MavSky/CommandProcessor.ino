@@ -8,8 +8,8 @@ int cmd_index = 0;
 
 void do_help() {
   console_print("%s\r\n", PRODUCT_STRING);
-  console_print("debug mav [all|heartbeat|gps|attitude|imu|vfr|status|text|other] [on|off]\r\n"); 
-  console_print("debug frsky [all|rpm] [on|off]\r\n"); 
+  console_print("debug mav [all|heartbeat|gps|attitude|imu|vfr|status|text|rangefinder|other] [on|off]\r\n"); 
+  console_print("debug frsky [all|vario|fcs|rpm] [on|off]\r\n"); 
   console_print("debug temp [on|off]\r\n"); 
   console_print("dump\r\n");
   console_print("timing\r\n");
@@ -20,9 +20,7 @@ void do_help() {
   console_print("map accx     [direct|average10|average50|peak10|peak50]\r\n");
   console_print("map accy     [direct|average10|average50|peak10|peak50]\r\n");
   console_print("map accz     [direct|average10|average50|peak10|peak50]\r\n");
-  console_print("map gpsspeed [kph|mps]\r\n");
-  console_print("map t2       [batt_remain|mission_seq|temp|wp_dist|hdop|armed]\r\n");
-  console_print("set hdop     [1-10]\r\n");
+  console_print("map alt      [baro|rangefinder]\r\n");                                    
   console_print("frsky vfas   [enable|disable]\r\n");
   console_print("factory\r\n");
 }
@@ -62,6 +60,9 @@ void do_dump() {
   console_print("HDOP:                      %.2f\r\n", mav.gps_hdop / 100.0);
   console_print("Satellites visible:        %d\r\n", mav.gps_satellites_visible);
   console_print("Temperature:               %d\r\n", mav.temperature);
+  console_print("Barometric Altitude:       %d\r\n", mav.bar_altitude);    
+  console_print("RangeFinder Altitude:      %d\r\n", mav.rangefinder_distance);      
+  console_print("Temperature:               %d\r\n", mav.temperature);
   console_print("Mavlink imu:               x:%-4d y:%-4d z:%-4d\r\n", mav.imu_xacc, mav.imu_yacc, mav.imu_zacc);
   
   imu_xacc_ave = mavlink_get_average(mav.imu_xacc_buffer, mav.imu_xacc_buffer_start, mav.imu_xacc_buffer_length, 10, MAV_HISTORY_BUFFER_SIZE);
@@ -86,6 +87,7 @@ void do_times() {
   console_print("Mavlink mission current:   %d\r\n", get_timestamp_delta(TIMESTAMP_MAVLINK_MSG_ID_MISSION_CURRENT));
   console_print("Mavlink scaled pressure:   %d\r\n", get_timestamp_delta(TIMESTAMP_MAVLINK_MSG_ID_SCALED_PRESSURE));
   console_print("Mavlink controller output: %d\r\n", get_timestamp_delta(TIMESTAMP_MAVLINK_MSG_ID_CONTROLLER_OUTPUT));
+  console_print("Mavlink rangefinder:       %d\r\n", get_timestamp_delta(TIMESTAMP_MAVLINK_MSG_ID_RANGEFINDER));            //2015-08-22
   console_print("FrSky vario:               %d\r\n", get_timestamp_delta(TIMESTAMP_FRSKY_VARIO)); 
   console_print("FrSky fas:                 %d\r\n", get_timestamp_delta(TIMESTAMP_FRSKY_FAS)); 
   console_print("FrSky gps:                 %d\r\n", get_timestamp_delta(TIMESTAMP_FRSKY_GPS)); 
@@ -186,38 +188,12 @@ void do_map_dump() {
      console_print("Invalid data routed to accz\r\n");
      break;    
   }      
-  switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED)) {
-    case EEPROM_VALUE_MAP_GPS_SPEED_KPH:
-     console_print("gpsspeed kph routed to gps-speed\r\n");
+  switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_ALT)) {
+    case EEPROM_VALUE_MAP_DATA_ALT_BARO:
+     console_print("barometric altitude routed to alt\r\n");
      break;
-   case EEPROM_VALUE_MAP_GPS_SPEED_MPS:
-     console_print("gpsspeed mps routed to gps-speed\r\n");
-     break;
-   default:
-     console_print("Invalid data routed to gps-speed\r\n");
-     break;    
-  } 
-  switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_T2)) {
-    case EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING:
-     console_print("batt_remain routed to temp2\r\n");
-     break;
-    case EEPROM_VALUE_MAP_DATA_T2_MISSION_CURRENT_SEQ:
-     console_print("mission_seq routed to temp2\r\n");
-     break;
-    case EEPROM_VALUE_MAP_DATA_T2_TEMPERATURE:
-     console_print("temp routed to temp2\r\n");
-     break;
-    case EEPROM_VALUE_MAP_DATA_T2_WP_DIST:
-     console_print("wp_dist routed to temp2\r\n");
-     break;
-    case EEPROM_VALUE_MAP_DATA_T2_HDOP:
-     console_print("hdop routed to temp2\r\n");
-     break;
-    case EEPROM_VALUE_MAP_DATA_T2_ARMED:
-     console_print("armed routed to temp2\r\n");
-     break;
-   default:
-     console_print("Invalid data routed to temp2\r\n");
+    case EEPROM_VALUE_MAP_DATA_ALT_RANGEFINDER:
+     console_print("rangefinder altitude routed to alt\r\n");
      break;    
   }    
 }
@@ -311,56 +287,17 @@ void do_map(char* p) {
         console_print("accz peak50 routed to accz\r\n");
       }
     }
-  } else if(strcmp(p, "gpsspeed") == 0) {
+  } else if(strcmp(p, "alt") == 0) {
     p = strtok(NULL, " ");
     if(p != NULL) {
-      if(strcmp(p, "kph") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
-        console_print("gpsspeed kph routed to gps-speed\r\n");
-      } else if(strcmp(p, "mps") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_MPS);
-        console_print("gpsspeed mps routed to gps-speed\r\n");
+      if(strcmp(p, "baro") == 0) {
+        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ALT, EEPROM_VALUE_MAP_DATA_ALT_BARO);
+        console_print("barometric altitude routed to alt\r\n");
+      } else if(strcmp(p, "rangefinder") == 0) {
+        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ALT, EEPROM_VALUE_MAP_DATA_ALT_RANGEFINDER);
+        console_print("rangefinder altitude routed to alt\r\n");
       }
     }
-  } else if(strcmp(p, "t2") == 0) {
-    p = strtok(NULL, " ");
-    if(p != NULL) {
-      if(strcmp(p, "batt_remain") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING);
-        console_print("batt_remain routed to t2\r\n");
-      } else if(strcmp(p, "batt_remain") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_MISSION_CURRENT_SEQ);
-        console_print("mission_seq routed to t2\r\n");
-      } else if(strcmp(p, "batt_remain") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_TEMPERATURE);
-        console_print("temp routed to t2\r\n");
-      } else if(strcmp(p, "batt_remain") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_WP_DIST);
-        console_print("wp_dist routed to t2\r\n");
-      } else if(strcmp(p, "hdop") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_HDOP);
-        console_print("hdop routed to t2\r\n");
-      } else if(strcmp(p, "armed") == 0) {
-        EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_ARMED);
-        console_print("armed routed to t2\r\n");
-      }
-    }
-  }
-}
-
-void do_set() {
-  uint8_t n;
-  char* p;
-  
-  p = strtok(NULL, " ");
-  if(strcmp(p, "hdop") == 0) {
-    p = strtok(NULL, " ");
-    if(p != NULL) {
-      n = atoi(p);
-      EEPROM.write(EEPROM_ADDR_HDOP_THRESHOLD, n);
-    }
-    n = EEPROM.read(EEPROM_ADDR_HDOP_THRESHOLD);
-    console_print("hdop threshold set to %d\r\n", n);
   }
 }
 
@@ -430,6 +367,10 @@ void do_command(char *cmd_buffer) {
         } else if (strcmp(p, "other") == 0) {
             p = strtok(NULL, " ");
             parse_debug_on_off(p, &debugMavOtherEnable, "Mav Other");
+        //2015-08-22
+        } else if (strcmp(p, "rangefinder") == 0) {
+            p = strtok(NULL, " ");
+            parse_debug_on_off(p, &debugMavRangeFinderEnable, "Mav RangeFinder");
         } else {
           console_print("Unknown parameter %s\r\n", p);
         }
@@ -441,6 +382,12 @@ void do_command(char *cmd_buffer) {
         } else if (strcmp(p, "rpm") == 0) {
             p = strtok(NULL, " ");
             parse_debug_on_off(p, &debugFrskyRpmEnable, "FrSky RPM");
+        } else if (strcmp(p, "vario") == 0) {
+            p = strtok(NULL, " ");
+            parse_debug_on_off(p, &debugFrskyVarioEnable, "FrSky Vario");
+        } else if (strcmp(p, "fas") == 0) {
+            p = strtok(NULL, " ");
+            parse_debug_on_off(p, &debugFrskyFasEnable, "FrSky Fas");
         } 
       } else if(strcmp(p, "temp") == 0) {
         p = strtok(NULL, " ");
@@ -459,8 +406,6 @@ void do_command(char *cmd_buffer) {
        } else {
          do_map(p);
        }
-    } else if(strcmp(p, "set") == 0) {
-       do_set();
     } else if(strcmp(p, "frsky") == 0) {
        do_frsky();
     } else if(strcmp(p, "factory") == 0) {

@@ -1,6 +1,8 @@
 
 #define EEPROM_INIT_VALUE_110                            0x55
 #define EEPROM_INIT_VALUE_111                            0x56
+#define EEPROM_INIT_VALUE_120                            0x57    
+#define EEPROM_INIT_VALUE_210                            0x58    
 
 void telem_data_factory_reset() {
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_VFAS, EEPROM_VALUE_MAP_VFAS_AVERAGE10);
@@ -8,19 +10,13 @@ void telem_data_factory_reset() {
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCX, EEPROM_VALUE_MAP_ACCX_PEAK_AVERAGE10);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCY, EEPROM_VALUE_MAP_ACCY_PEAK_AVERAGE10);
     EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ACCZ, EEPROM_VALUE_MAP_ACCZ_PEAK_AVERAGE10);    
-    EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED, EEPROM_VALUE_MAP_GPS_SPEED_KPH);
-    EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_T2, EEPROM_VALUE_MAP_DATA_T2_ARMED);
-    EEPROM.write(EEPROM_ADDR_HDOP_THRESHOLD, 5);
+    EEPROM.write(EEPROM_ADDR_MAP_TELEM_DATA_ALT, EEPROM_VALUE_MAP_DATA_ALT_BARO);   
     EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
-    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_111);
+    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_210);
 }
 
 void telem_data_init() {
-  if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) == EEPROM_INIT_VALUE_110) {                // version 1.1.0
-    console_print("Upgrading EEPROM schema from 1.1.0\r\n");
-    EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);   
-    EEPROM.write(EEPROM_ADDR_HAS_BEEN_INITIALIZED, EEPROM_INIT_VALUE_111); 
-  } else if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) == EEPROM_INIT_VALUE_111) {         // version 1.1.1
+  if(EEPROM.read(EEPROM_ADDR_HAS_BEEN_INITIALIZED) == EEPROM_INIT_VALUE_210) {         // version 2.1.0
   } else {
     console_print("Resetting EEPROM to default schema\r\n");
     telem_data_factory_reset();
@@ -118,115 +114,157 @@ uint32_t telem_data_get_value(uint16_t telemetry_data_value_id) {
       break;
 
     case TELEM_DATA_GPS_SPEED:
-      switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_GPS_SPEED)) {
-        case EEPROM_VALUE_MAP_GPS_SPEED_KPH:
-          return mav.gps_speed * 36;
-          break;
-        case EEPROM_VALUE_MAP_GPS_SPEED_MPS:
-          return mav.gps_speed * 10;
-          break;
-      }
-      break;
-  // temp2          <- battery_remaining, mission_current_seq, temperature, wp_dist  // *configurable
-
-    case TELEM_DATA_T2:
-      switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_T2)) {
-        case EEPROM_VALUE_MAP_DATA_T2_BATTERY_REMAINING:
-          return mav.battery_remaining;
-          break;
-        case EEPROM_VALUE_MAP_DATA_T2_MISSION_CURRENT_SEQ:
-          return mav.mission_current_seq;
-          break;
-        case EEPROM_VALUE_MAP_DATA_T2_TEMPERATURE:
-          return mav.temperature;
-          break;
-        case EEPROM_VALUE_MAP_DATA_T2_WP_DIST:
-          return mav.wp_dist;
-          break;
-        case EEPROM_VALUE_MAP_DATA_T2_HDOP:
-          int16_t hdop_val;
-          hdop_val = mav.gps_hdop / 10;
-          if(hdop_val > 100) {
-            hdop_val = 100;
-          }
-          return hdop_val;
-          break;        
-        case EEPROM_VALUE_MAP_DATA_T2_ARMED:
-          uint16_t armed;
-          armed = ((mav.base_mode >> 7) & 0x0001) | 0x5554;        // set all upper bits to this pattern to recognize armed/disarmed in lua                 
-          return armed;
-          break;
-      }
+      return mav.gps_speed * 10;
       break;
       
-      
+   case TELEM_DATA_ALT:
+      switch(EEPROM.read(EEPROM_ADDR_MAP_TELEM_DATA_ALT)) {
+        case EEPROM_VALUE_MAP_DATA_ALT_BARO:
+          return mav.bar_altitude;
+          break;
+        case EEPROM_VALUE_MAP_DATA_ALT_RANGEFINDER:
+          return mav.rangefinder_distance;
+          break;
+      }
+      break;     
   }     
 }
 
 char telem_text_message_data_buffer[TELEM_NUM_BUFFERS][TELEM_TEXT_MESSAGE_MAX];
 uint8_t telem_text_message_index = 0;
-uint32_t telem_message_expiry = 0L;
 uint16_t message_packet_sequence = 0;
-uint16_t current_message_number = 0;
-uint16_t next_message_number = 1;
+uint16_t reading_message_number = 0;
+uint16_t writing_message_number = 0;
 
 void frsky_send_text_message(char *msg) {
   uint8_t c;
-  uint16_t dst_index = 0;
+  uint16_t dst_index = 0;       
   for(int i=0; i<strlen(msg); i++) {
     c = msg[i];
     if(c >= 32 && c <= 126) {
-      telem_text_message_data_buffer[next_message_number % TELEM_NUM_BUFFERS][dst_index++] = c;
+      telem_text_message_data_buffer[writing_message_number % TELEM_NUM_BUFFERS][dst_index++] = c;
     }
   }
-  telem_text_message_data_buffer[next_message_number % TELEM_NUM_BUFFERS][dst_index++] = 0;
-  next_message_number++;
+  telem_text_message_data_buffer[writing_message_number % TELEM_NUM_BUFFERS][dst_index++] = 0;
+  writing_message_number++;
 }
 
-void telem_load_next_buffer() {
-  if(millis() > telem_message_expiry) {
-    if((current_message_number + 1) < next_message_number) {
-      telem_message_expiry = millis() + 2000;
-      current_message_number++;
-    } else {           
-      telem_text_message_data_buffer[current_message_number % TELEM_NUM_BUFFERS][0] = '\0';
-      telem_message_expiry = millis();                                                              // No reason to keep blank up for a set time
+uint8_t message_available() {
+    return reading_message_number != writing_message_number;
+}
+
+uint8_t to_six_bit(uint8_t c) {
+    c = toupper(c);
+    if (c >= 'A' && c <= 'Z') {
+        return c - 'A' + 1;
+    } else if (c >= '0' && c <= '9') {
+        return c - '0' + 27;  
+    } else if (c >= ' ') {
+        return 37;
+    } else if (c >= '.') {
+        return 38; 
+    } else if (c >= ',') {
+        return 39; 
+    } else if (c >= '=') {
+        return 40; 
+    } else if (c >= ':') {
+        return 41; 
+    } else if (c >= '!') {
+        return 42; 
+    } else if (c >= '-') {
+        return 43; 
+    } else if (c >= '+') {
+        return 44; 
+    } else {
+        return 63;
     }
-  }
-  telem_text_message_index = 0;  
 }
 
-void telem_load_next_bufferNEWWWWWWWWWWWWWWWWWWWWWW() {
-  if((current_message_number + 1) < next_message_number) {
-    
-    current_message_number++;
-  } else {           
-    telem_text_message_data_buffer[current_message_number % TELEM_NUM_BUFFERS][0] = '\0';
-  }
-  telem_text_message_index = 0;  
-}
-
-char frsky_get_next_message_byte() {
-  if(current_message_number == next_message_number) {
-    return '\0';
-  } else if(telem_text_message_index >= strlen(telem_text_message_data_buffer[current_message_number % TELEM_NUM_BUFFERS])) {
-    return '\0';
+uint8_t get_next_text_byte() {
+  if(reading_message_number == writing_message_number) {
+    return 0;
+  } else if(telem_text_message_index >= strlen(telem_text_message_data_buffer[reading_message_number % TELEM_NUM_BUFFERS])) {
+    reading_message_number++;
+    telem_text_message_index = 0;
+    return 0;
   } else {
-    return telem_text_message_data_buffer[current_message_number % TELEM_NUM_BUFFERS][telem_text_message_index++] & 0x7f;
+    char c = telem_text_message_data_buffer[reading_message_number % TELEM_NUM_BUFFERS][telem_text_message_index++] & 0x7f;
+    return to_six_bit(c);
   }
 }
 
-uint16_t telem_text_get_word() {                                                      // LSB is lost so use upper 15 bits
-    uint16_t data_word;
-    char ch, cl;
-    ch = frsky_get_next_message_byte();
-    data_word = ch << 8;
-    cl = frsky_get_next_message_byte();
-    data_word |= cl << 1;
-    data_word |= (message_packet_sequence++ & 1) << 15;                                // MSB will change on each telemetry packet so rx knows to update message   
-    if(ch == '\0' || cl == '\0') {           
-      telem_load_next_buffer();
-    }               
-    return data_word;    
+uint16_t telem_next_extension_word() { 
+    uint16_t result;
+    static uint8_t last_was_text = 0;
+    static uint8_t extension_index = 1;
+
+    if(last_was_text == 0 && message_available()) { 
+        result = get_next_extension_word(0);
+        last_was_text = 1;
+    } else {
+        result = get_next_extension_word(extension_index++);       
+        if(extension_index > 12) { 
+            extension_index = 1;  
+            message_packet_sequence++;                                         
+        }
+        last_was_text = 0;
+    }
+    return result;
 }
 
+uint16_t get_next_extension_word(uint8_t extension_command) {                                                     
+    uint16_t extension_data;
+    uint8_t high_byte;
+    uint8_t low_byte;
+    switch(extension_command) {
+        case 0:
+            high_byte = get_next_text_byte();
+            if(high_byte == 0) {
+                extension_data = (high_byte << 6);
+            } else {
+                low_byte = get_next_text_byte();
+                extension_data = (high_byte << 6) | low_byte;              
+            }     
+            break;        
+        case 1:
+            extension_data = message_packet_sequence % 4096;
+            break;
+        case 2:
+            extension_data = mav.roll_angle+180;
+            break;         
+        case 3:
+            extension_data = mav.pitch_angle+180;
+            break;         
+        case 4:
+            extension_data = mav.gps_hdop / 10;
+            break;               
+        case 5:
+            extension_data = mav.gps_fixtype;
+            break;            
+        case 6:
+            extension_data = mav.gps_satellites_visible;        
+            break;  
+        case 7:
+            extension_data = mav.base_mode;
+            break;  
+        case 8:
+            extension_data = mav.custom_mode;
+            break;         
+        case 9:
+            extension_data = mav.bar_altitude;
+            break;  
+        case 10:
+            extension_data = mav.rangefinder_distance;
+            break;    
+        case 11:
+            extension_data = mav.battery_remaining;
+            break;
+        case 12:
+            extension_data = mav.current_consumed;
+            break;                
+    }
+    if(extension_data > 4095) {
+      extension_data = 4095;
+    }
+    return (extension_command << 12) | extension_data; 
+}
