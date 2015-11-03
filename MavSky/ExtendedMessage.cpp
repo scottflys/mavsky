@@ -73,7 +73,7 @@ uint16_t ExtendedMessage::telem_next_extension_word() {
         last_was_text = 1;
     } else {
         result = get_next_extension_word(extension_index++);       
-        if(extension_index > 12) { 
+        if(extension_index > 14) { 
             extension_index = 1;  
             message_packet_sequence++;                                         
         }
@@ -132,6 +132,12 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
         case 12:
             extension_data = mav->current_consumed;
             break;                
+        case 13:
+            extension_data = mav->armed_distance;       // in m
+            break;
+        case 14:
+            extension_data = mav->calc_mah_consumed();  // in mah
+            break;                              
     }
     if(extension_data > 4095) {
       extension_data = 4095;

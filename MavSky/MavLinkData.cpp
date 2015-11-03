@@ -17,6 +17,7 @@ extern MavConsole *console;
 #define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER 1200
 
 #define STATUS_TEXT_MAX 128
+
 char status_text_buffer[STATUS_TEXT_MAX];
 
 MavLinkData::MavLinkData() {
@@ -108,6 +109,41 @@ int MavLinkData::mavlink_rangefinder_data_valid() {
   }
 }
 
+uint16_t MavLinkData::calc_mah_consumed() {
+  return tenth_amp_per_millisecond_consumed / 36000L;
+}
+
+void MavLinkData::process_100_millisecond() {
+  uint32_t current_milli = millis();
+  uint32_t delta = current_milli - last_process_100_millisecond_time;
+  if(last_process_100_millisecond_time != 0) {
+    tenth_amp_per_millisecond_consumed += (average_battery_current * delta); 
+  }
+  last_process_100_millisecond_time = current_milli;
+}
+    
+double MavLinkData::degrees_to_radians(double degrees) {
+  return degrees * (double)3.14159265358979323846 / (double)180.0;
+}
+
+double MavLinkData::get_distance_from_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
+    double theta1 = degrees_to_radians(lat1);              
+    double theta2 = degrees_to_radians(lat2);
+    double delta_theta = degrees_to_radians(lat2 - lat1);
+    double delta_lambda = degrees_to_radians(lon2 - lon1);
+    double a = sin(delta_theta / 2.0) * sin(delta_theta / 2.0) + cos(theta1) * cos(theta2) * sin(delta_lambda / 2.0) * sin(delta_lambda / 2.0);
+    double c = 2.0 * atan2(sqrt(a), sqrt((double)1.0 - a));
+    double d = 6371000.0 * c;
+    return d;
+}
+
+double MavLinkData::get_distance_from_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
+    if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
+        return 0;
+    }
+    return get_distance_from_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+}
+
 void MavLinkData::process_mavlink_packets() { 
   mavlink_message_t msg;
   mavlink_status_t status;
@@ -169,6 +205,21 @@ void MavLinkData::process_mavlink_packets() {
             gps_longitude = mavlink_msg_gps_raw_int_get_lon(&msg);
             gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
             gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
+
+            uint8_t armed_bit = (base_mode >> 7) & 1;
+            if(armed_bit) {
+              if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm
+                armed_latitude = gps_latitude;
+                armed_longitude = gps_longitude;                
+              }
+            } else {
+              if(armed_latitude != 0 || armed_longitude != 0) {                                   // clear when disarmed
+                  armed_latitude = 0;
+                  armed_longitude = 0;  
+              }
+            }
+            double d = get_distance_from_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude);
+            armed_distance = round(d);
           } else {
             gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
             gps_hdop = 9999;

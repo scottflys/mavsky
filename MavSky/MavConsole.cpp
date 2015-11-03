@@ -75,6 +75,7 @@ void MavConsole::do_dump() {
   console_print("RangeFinder Altitude:      %d\r\n", mav->rangefinder_distance);      
   console_print("Temperature:               %d\r\n", mav->temperature);
   console_print("Mavlink imu:               x:%-4d y:%-4d z:%-4d\r\n", mav->imu_xacc, mav->imu_yacc, mav->imu_zacc);
+  console_print("Summed mah consumed:       %d\r\n", mav->calc_mah_consumed());
 }
 
 void MavConsole::do_times() {

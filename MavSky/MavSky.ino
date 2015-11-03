@@ -52,8 +52,6 @@ void setup()  {
 
   pinMode(LEDPIN, OUTPUT);
   console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
-
-  //telem_data_init();  
 }
 
 void check_for_faults() {
@@ -98,6 +96,7 @@ void loop()  {
   if(current_milli >= next_100_loop) {
     next_100_loop = current_milli + 100;
     check_for_faults();
+    mav->process_100_millisecond();
   }
 }
 

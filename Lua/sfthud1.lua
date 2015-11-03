@@ -46,15 +46,6 @@ local messageLatestTimestamp = 0
 extensionValue = {}
 gpsData = {}
 
---local function getTelemetryId(name)
---  field = getFieldInfo(name)
---  if field then
---    return field.id
---  else
---    return -1
---  end
---end
-
 function initialize()
     local i  
     for i=1, 17 do
@@ -191,6 +182,10 @@ function checkForExtensionMessage()
            extensionValue["batt_remain"] = extensionData 
         elseif extensionCommand == 12 then
            extensionValue["cur_consumed"] = extensionData 
+        elseif extensionCommand == 13 then
+           extensionValue["armed_distance"] = extensionData 
+       elseif extensionCommand == 14 then
+           extensionValue["calc_consumed"] = extensionData 
         end           
         previousMessageWord = messageWord     
     end
@@ -208,20 +203,6 @@ function getArmedValue()
     end
 end
 
-function getDistanceFromCoordinates(lat1, lon1, lat2, lon2)
-    if lat1 == nil or lon1 == nil or lat2 == nil or lon2 == nil then
-        return nil
-    end
-    local dlat = math.rad(lat2-lat1)
-    local dlon = math.rad(lon2-lon1)
-    local sinDlat = math.sin(dlat/2)
-    local sinDlon = math.sin(dlon/2)
-    local a = sinDlat * sinDlat + math.cos(math.rad(lat1)) * math.cos(math.rad(lat2)) * sinDlon * sinDlon
-    local c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    local d = 6378000 * c
-    return d
-end
-
 function loadGpsData()
     local gpsLatLon = getValue(gpsName)
     if (type(gpsLatLon) == "table") then
@@ -237,8 +218,7 @@ function loadGpsData()
                 gpsData["armed_lat"] = nil
                 gpsData["armed_lon"] = nil 
             end
-        end
-        gpsData["horiz-distance"] = getDistanceFromCoordinates(gpsData["lat"], gpsData["lon"], gpsData["armed_lat"], gpsData["armed_lon"])     
+        end    
     end
 end
 
@@ -262,7 +242,11 @@ local function drawCurrent(x,y)
 end
 
 local function drawTotalCurrent(x,y)
-	local totalCurrent = getValue(consumptionName)
+--	local totalCurrent = getValue(consumptionName)
+    local totalCurrent = extensionValue["calc_consumed"]
+    if totalCurrent == nil then
+        totalCurrent = 0
+    end
     lcd.drawNumber(x, y, totalCurrent, MIDSIZE)
     lcd.drawText(lcd.getLastPos(), y+5, "mAh", SMLSIZE)
 end
@@ -301,7 +285,7 @@ local function drawAltitude(x, y)
 end
 
 local function drawDistance(x, y)
-	local distance = gpsData["horiz-distance"]
+    local distance = extensionValue["armed_distance"]    
     if distance == nil then
         distance = 0
     end

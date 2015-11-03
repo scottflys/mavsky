@@ -62,8 +62,7 @@ local function run(event)
 	printGpsData(1, 2, "lat", "lat")
 	printGpsData(1, 3, "lon", "lon")
 	printGpsData(1, 4, "armed-lat", "armed-lat")	    	    
-	printGpsData(1, 5, "armed-lon", "armed-lon")	    
-	printGpsData(1, 6, "horiz-distance", "horiz-distance")	    
+	printGpsData(1, 5, "armed-lon", "armed-lon")	        
 end
 
 return {run=run}

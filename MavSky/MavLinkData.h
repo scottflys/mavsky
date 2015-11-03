@@ -16,8 +16,15 @@ class MavLinkData {
     int16_t    battery_voltage_buffer[MAV_HISTORY_BUFFER_SIZE];
     int16_t    battery_voltage_buffer_start = 0;
     int16_t    battery_voltage_buffer_length = 0;
-     
+
+    uint32_t   last_process_100_millisecond_time = 0;
+    
+    double degrees_to_radians(double degrees);
+    double get_distance_from_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2);
+    double get_distance_from_coordinates_double(double lat1, double lon1, double lat2, double lon2) ;
+       
   public:
+    const double COORD_DEGREE_TO_INT_MULTIPLIER = 10000000.0;
     //  MAVLINK_MSG_ID_HEARTBEAT 
 
     uint8_t    heartbeat_type;
@@ -28,9 +35,9 @@ class MavLinkData {
     uint8_t    mavlink_version;        
     
     // MAVLINK_MSG_ID_SYS_STATUS 
-    uint16_t   battery_voltage;            // 1000 = 1V
-    int16_t    battery_current;            // 10 = 1A
-    int8_t     battery_remaining;          // Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
+    uint16_t   battery_voltage = 0;       // 1000 = 1V
+    int16_t    battery_current = 0;       // 10 = 1A
+    int8_t     battery_remaining = 0;     // Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
     
     // MAVLINK_MSG_ID_GPS_RAW_INT 
     uint8_t    gps_fixtype;                // 0= No GPS, 1 = No Fix, 2 = 2D Fix, 3 = 3D Fix
@@ -79,9 +86,14 @@ class MavLinkData {
     uint16_t  energy_consumed;    
   
     // Calculated
-    uint16_t   average_battery_voltage;          
-    int16_t    average_battery_current;        
-
+    uint16_t   average_battery_voltage = 0;          
+    int16_t    average_battery_current = 0;       
+    int32_t    armed_latitude = 0;               
+    int32_t    armed_longitude = 0;
+    uint32_t   armed_distance = 0;              // in m
+    
+    uint32_t   tenth_amp_per_millisecond_consumed = 0;  
+    
     MavLinkData();
     ~MavLinkData();
     void mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length);
@@ -93,7 +105,9 @@ class MavLinkData {
     int mavlink_imu_data_valid();
     int mavlink_attitude_data_valid();
     int mavlink_rangefinder_data_valid();
-    void process_mavlink_packets();    
+    void process_mavlink_packets();  
+    void process_100_millisecond(); 
+    uint16_t calc_mah_consumed(); 
 };
 
 

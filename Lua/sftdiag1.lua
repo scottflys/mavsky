@@ -71,6 +71,8 @@ local function run(event)
 	printExtensionData(2, 2, "ranger_dist", "ranger_dist")
 	printExtensionData(2, 3, "batt_remain", "batt_remain")	 
 	printExtensionData(2, 4, "cur_consumed", "cur_consumed")	    
+	printExtensionData(2, 5, "armed_distance", "armed_distance")
+    printExtensionData(2, 6, "calc_consumed", "calc_consumed")	    	    
 end
 
 return {run=run}
