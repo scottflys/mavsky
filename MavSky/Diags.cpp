@@ -1,29 +1,23 @@
-#define MAX_FAULTS 10
+#include "Diags.h"
 
-uint8_t faults[MAX_FAULTS];
+Diags::Diags() {
+}
 
-uint8_t current_flash_codes[MAX_FAULTS];
-uint8_t current_flash_code_count = 0;
-uint8_t current_code_index = 0;
-uint8_t flashes_remaining = 0;
-uint8_t next_flash_state = 0;           
-
-
-void diags_set_fault_to(uint8_t fault_id, uint8_t fault_value) {
+void Diags::set_fault_to(uint8_t fault_id, uint8_t fault_value) {
   faults[fault_id] = fault_value;
 }
 
-void diags_clear_fault(uint8_t fault_id) {
+void Diags::clear_fault(uint8_t fault_id) {
   faults[fault_id] = 0;
 }
 
-void diags_clear_all_faults() {
+void Diags::clear_all_faults() {
   for(int i=0; i<MAX_FAULTS; i++) {
       faults[i] = 0;
   }
 }
 
-void load_new_faults() {
+void Diags::load_new_faults() {
   current_flash_code_count = 0;
   for(int i=0; i<MAX_FAULTS; i++) {
     if(faults[i]) {
@@ -32,7 +26,7 @@ void load_new_faults() {
   }
 }
 
-void diags_update_led() {
+void Diags::update_led() {
     switch(next_flash_state) {
       case 0:
         if(current_flash_code_count > 0) {

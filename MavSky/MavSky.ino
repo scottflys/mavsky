@@ -1,4 +1,4 @@
- //  This program is free software: you can redistribute it and/or modify
+//  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
@@ -22,78 +22,77 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <GCS_MAVLink.h>
+#include <EEPROM.h>
 #include "MavSky.h"
 #include "FrSkySPort.h"
+#include "MavConsole.h"
+#include "Diags.h"
 #include "Logger.h"
-#include "MavLink.h"
+#include "DataBroker.h"
 
-#define PRODUCT_STRING  "MAVSky Version 2.1.0"
-
-#define DEBUG_SERIAL    Serial
-#define MAVLINK_SERIAL  Serial2
 #define LEDPIN          13
                           
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void console_print(char* fmt, ...) {
-    char formatted_string[256];
-    va_list argptr;
-    va_start(argptr, fmt);
-    vsprintf(formatted_string, fmt, argptr);
-    va_end(argptr);
-    DEBUG_SERIAL.print(formatted_string);
-}
-
+Diags diags;
+Logger *logger;
+MavConsole *console;
+MavLinkData *mav;
+FrSkySPort *frsky;
+DataBroker *data_broker;
+    
 void setup()  {
-  debug_init();
+  console = new MavConsole(Serial);
+  logger = new Logger();
+  mav = new MavLinkData();
+  frsky = new FrSkySPort();
+  data_broker = new DataBroker();
+  
   delay(5000);
 
   pinMode(LEDPIN, OUTPUT);
-  console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
+  console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
 
-  telem_data_init();  
-  frsky_init();
-  mavlink_init();
+  //telem_data_init();  
 }
 
 void check_for_faults() {
   int mav_online;
-  mav_online = mavlink_online();
-  diags_set_fault_to(FAULT_MAV_OFFLINE, !mav_online);
+  mav_online = mav->mavlink_online();
+  diags.set_fault_to(FAULT_MAV_OFFLINE, !mav_online);
   if(mav_online) {                                                                  // don't set other mav faults if mav is offline
-    diags_set_fault_to(FAULT_MAV_SYS_STATUS, !mavlink_sys_status_data_valid());
-    diags_set_fault_to(FAULT_MAV_GPS, !mavlink_gps_data_valid());
-    diags_set_fault_to(FAULT_MAV_VFR_HUD, !mavlink_vfr_data_valid());
-    diags_set_fault_to(FAULT_MAV_RAW_IMU, !mavlink_imu_data_valid());
-    diags_set_fault_to(FAULT_MAV_ATTITUDE, !mavlink_attitude_data_valid());
+    diags.set_fault_to(FAULT_MAV_SYS_STATUS, !mav->mavlink_sys_status_data_valid());
+    diags.set_fault_to(FAULT_MAV_GPS, !mav->mavlink_gps_data_valid());
+    diags.set_fault_to(FAULT_MAV_VFR_HUD, !mav->mavlink_vfr_data_valid());
+    diags.set_fault_to(FAULT_MAV_RAW_IMU, !mav->mavlink_imu_data_valid());
+    diags.set_fault_to(FAULT_MAV_ATTITUDE, !mav->mavlink_attitude_data_valid());
   } else {
-    diags_clear_fault(FAULT_MAV_SYS_STATUS);
-    diags_clear_fault(FAULT_MAV_GPS);
-    diags_clear_fault(FAULT_MAV_VFR_HUD);
-    diags_clear_fault(FAULT_MAV_RAW_IMU);
-    diags_clear_fault(FAULT_MAV_ATTITUDE);
+    diags.clear_fault(FAULT_MAV_SYS_STATUS);
+    diags.clear_fault(FAULT_MAV_GPS);
+    diags.clear_fault(FAULT_MAV_VFR_HUD);
+    diags.clear_fault(FAULT_MAV_RAW_IMU);
+    diags.clear_fault(FAULT_MAV_ATTITUDE);
   }
-  diags_set_fault_to(FAULT_SPORT_OFFLINE, !frsky_online());
+  diags.set_fault_to(FAULT_SPORT_OFFLINE, !frsky->frsky_online());
 }
 
 uint32_t next_200_loop = 0L;
 uint32_t next_100_loop = 0L;
 
 void loop()  {
-  uint16_t len;
   uint32_t current_milli;
   
-  process_mavlink_packets();
+  mav->process_mavlink_packets();
 
-  frsky_process();               // Check FrSky S.Port communication
+  frsky->frsky_process();         
 
-  check_for_console_command();
+  console->check_for_console_command();
   
   current_milli = millis();
 
   if(current_milli >= next_200_loop) {
     next_200_loop = current_milli + 200;
-    diags_update_led();
+    diags.update_led();
   }
   
   if(current_milli >= next_100_loop) {
