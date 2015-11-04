@@ -13,13 +13,18 @@ DataMap::DataMap() {
   target_name[MAP_TARGET_VARIO_ALTITUDE] = (char*)"vario_altitude";
   
   for(uint8_t i=0; i<MAP_TARGET_COUNT; i++) {
-    source_for_target[i] = EEPROM.read(EEPROM_MAP_BEGIN + i*2);
-    int8_t scale_power = EEPROM.read(EEPROM_MAP_BEGIN + i*2 + 1);
+    source_for_target[i] = EEPROM.read(EEPROM_ADDR_MAP_BEGIN + i*2);
+    int8_t scale_power = EEPROM.read(EEPROM_ADDR_MAP_BEGIN + i*2 + 1);
     scale_for_target[i] = powf(10.0, scale_power);    
+  }
+  if(EEPROM.read(EEPROM_ADDR_VERSION) != EEPROM_INIT_VALUE_212) {
+    write_factory_settings();
+    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_212);
   }
 }
 
 void DataMap::write_factory_settings() {
+  EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
   add_map((char*)"bar_altitude", (char*)"vario_altitude", (char*)"100.0");  
   add_map((char*)"climb_rate", (char*)"vario_vertical_speed", (char*)"100.0");  
 }
@@ -66,10 +71,9 @@ uint8_t DataMap::add_map(char *source_name, char* target_name, char* scale_strin
     return 0;
   } else {
     source_for_target[target_index] = source_index;
-    EEPROM.write(EEPROM_MAP_BEGIN + target_index*2, source_index);  
-//    console->console_print("add_map scale_for_target:%f scale_power:%d\r\n", scale_for_target[target_index], scale_power);  
+    EEPROM.write(EEPROM_ADDR_MAP_BEGIN + target_index*2, source_index);  
     scale_for_target[target_index] = powf(10.0, scale_power); 
-    EEPROM.write(EEPROM_MAP_BEGIN + target_index*2 + 1, scale_power);
+    EEPROM.write(EEPROM_ADDR_MAP_BEGIN + target_index*2 + 1, scale_power);
     return 1;
   }
 }
