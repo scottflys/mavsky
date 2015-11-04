@@ -125,8 +125,13 @@ void MavLinkData::process_100_millisecond() {
 double MavLinkData::degrees_to_radians(double degrees) {
   return degrees * (double)3.14159265358979323846 / (double)180.0;
 }
+    
+double MavLinkData::radians_to_degrees(double radians) {
+  return radians * (double)180.0 / (double)3.14159265358979323846;
+}
 
-double MavLinkData::get_distance_from_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
+// http://www.movable-type.co.uk/scripts/latlong.html
+double MavLinkData::get_distance_between_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
     double theta1 = degrees_to_radians(lat1);              
     double theta2 = degrees_to_radians(lat2);
     double delta_theta = degrees_to_radians(lat2 - lat1);
@@ -137,11 +142,32 @@ double MavLinkData::get_distance_from_coordinates_double(double lat1, double lon
     return d;
 }
 
-double MavLinkData::get_distance_from_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
+double MavLinkData::get_distance_between_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
     if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
         return 0;
     }
-    return get_distance_from_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+    return get_distance_between_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+}
+
+double MavLinkData::get_bearing_to_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
+    double theta1 = degrees_to_radians(lat1);              
+    double theta2 = degrees_to_radians(lat2);
+    double lambda1 = degrees_to_radians(lon1);              
+    double lambda2 = degrees_to_radians(lon2);    
+    double y = sin(lambda2 - lambda1) * cos(theta2);
+    double x = cos(theta1) * sin(theta2) - sin(theta1) * cos(theta2) * cos(lambda2 - lambda1);
+    double bearing = radians_to_degrees(atan2(y, x));
+    if (bearing < 0.0) {
+      bearing += 360.0;
+    }
+    return bearing;
+}
+
+double MavLinkData::get_bearing_to_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
+    if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
+        return 0;
+    }
+    return get_bearing_to_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
 }
 
 void MavLinkData::process_mavlink_packets() { 
@@ -215,11 +241,13 @@ void MavLinkData::process_mavlink_packets() {
             } else {
               if(armed_latitude != 0 || armed_longitude != 0) {                                   // clear when disarmed
                   armed_latitude = 0;
-                  armed_longitude = 0;  
+                  armed_longitude = 0; 
+                  armed_distance = 0;
+                  armed_bearing = 0; 
               }
             }
-            double d = get_distance_from_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude);
-            armed_distance = round(d);
+            armed_distance = round(get_distance_between_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
+            armed_bearing = round(get_bearing_to_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
           } else {
             gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
             gps_hdop = 9999;

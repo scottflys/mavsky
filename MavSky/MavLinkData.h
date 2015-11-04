@@ -20,9 +20,12 @@ class MavLinkData {
     uint32_t   last_process_100_millisecond_time = 0;
     
     double degrees_to_radians(double degrees);
-    double get_distance_from_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2);
-    double get_distance_from_coordinates_double(double lat1, double lon1, double lat2, double lon2) ;
-       
+    double radians_to_degrees(double radians);
+    double get_distance_between_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2);
+    double get_distance_between_coordinates_double(double lat1, double lon1, double lat2, double lon2) ;
+    double get_bearing_to_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2);
+    double get_bearing_to_coordinates_double(double lat1, double lon1, double lat2, double lon2);
+           
   public:
     const double COORD_DEGREE_TO_INT_MULTIPLIER = 10000000.0;
     //  MAVLINK_MSG_ID_HEARTBEAT 
@@ -91,6 +94,7 @@ class MavLinkData {
     int32_t    armed_latitude = 0;               
     int32_t    armed_longitude = 0;
     uint32_t   armed_distance = 0;              // in m
+    uint16_t   armed_bearing = 0;              // in degrees (0-359)  
     
     uint32_t   tenth_amp_per_millisecond_consumed = 0;  
     

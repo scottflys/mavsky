@@ -186,6 +186,8 @@ function checkForExtensionMessage()
            extensionValue["armed_distance"] = extensionData 
        elseif extensionCommand == 14 then
            extensionValue["calc_consumed"] = extensionData 
+       elseif extensionCommand == 15 then
+           extensionValue["armed_bearing"] = extensionData           
         end           
         previousMessageWord = messageWord     
     end
@@ -357,31 +359,6 @@ local function getRelativeGroundDirection()
 	return -1
 end
 
-function getDirectionFromTo(fromLat, fromLon, toLat, toLon)
-    if fromLat == nil or fromLon == nil or toLat == nil or toLon == nil then
-        return -1
-    end
-    if(fromLat == toLat and fromLon == toLon) then
-        return -1
-    end
-    local z1 = math.sin(math.rad(toLon) - math.rad(fromLon)) * math.cos(math.rad(toLat))
-    local z2 = math.cos(math.rad(fromLat)) * math.sin(math.rad(toLat)) - math.sin(math.rad(fromLat)) * math.cos(math.rad(toLat)) * math.cos(math.rad(toLon) - math.rad(fromLon))
-    local directionTo = math.deg(math.atan2(z1, z2))
-    if directionTo < 0 then
-        directionTo=directionTo+360
-    end
-    return directionTo
-end
-
-function getDirectionToVehicle()
-    local directionToVehicle = -1
-   
-    if gpsData["lat"] ~= nil and gpsData["lon"] ~= nil and gpsData["armed_lat"] ~= nil and gpsData["armed_lon"] ~= 0 then 
-        directionToVehicle = getDirectionFromTo(gpsData["armed_lat"], gpsData["armed_lon"], gpsData["lat"], gpsData["lon"])
-    end
-	return directionToVehicle
-end  
-
 function getXYAtAngle(x, y, angle, length)
 	if angle < 0 then
 		angle = angle + 360
@@ -401,21 +378,23 @@ local function drawHeadingHud(x, y)
     local headingHudOuterRadius = 15
 
     local vehicleHeading = getValue(headingName)
-    local headingToVehicle = getDirectionToVehicle()
-    if headingToVehicle >= 0 then
-        local relativeHeading = vehicleHeading - headingToVehicle
-        if(relativeHeading < 0) then
-            relativeHeading = relativeHeading + 360	
-		end			
-		local xTail, yTail = getXYAtAngle(x, y, relativeHeading - 180, arrowTail)	
-		local xLeft, yLeft = getXYAtAngle(xTail, yTail, relativeHeading-arrowSideAngle, arrowSide)
-		local xRight, yRight = getXYAtAngle(xTail, yTail, relativeHeading+arrowSideAngle, arrowSide)
-		local xNose, yNose = getXYAtAngle(xTail, yTail, relativeHeading, arrowLength)
-		lcd.drawLine(xTail, yTail, xLeft, yLeft, SOLID, FORCE)
-		lcd.drawLine(xLeft, yLeft, xNose, yNose, SOLID, FORCE)
-		lcd.drawLine(xTail, yTail, xRight, yRight, SOLID, FORCE)
-		lcd.drawLine(xRight, yRight, xNose, yNose, SOLID, FORCE)
-	end
+    local headingToVehicle = extensionValue["armed_bearing"]
+    if headingToVehicle == nil then
+        return
+    end
+    local relativeHeading = vehicleHeading - headingToVehicle
+    if(relativeHeading < 0) then
+        relativeHeading = relativeHeading + 360	
+    end			
+    local xTail, yTail = getXYAtAngle(x, y, relativeHeading - 180, arrowTail)	
+    local xLeft, yLeft = getXYAtAngle(xTail, yTail, relativeHeading-arrowSideAngle, arrowSide)
+    local xRight, yRight = getXYAtAngle(xTail, yTail, relativeHeading+arrowSideAngle, arrowSide)
+    local xNose, yNose = getXYAtAngle(xTail, yTail, relativeHeading, arrowLength)
+    lcd.drawLine(xTail, yTail, xLeft, yLeft, SOLID, FORCE)
+    lcd.drawLine(xLeft, yLeft, xNose, yNose, SOLID, FORCE)
+    lcd.drawLine(xTail, yTail, xRight, yRight, SOLID, FORCE)
+    lcd.drawLine(xRight, yRight, xNose, yNose, SOLID, FORCE)
+--	end
 end
 
 local function drawTopPanel()
