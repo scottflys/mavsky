@@ -59,7 +59,7 @@ void FrSkySPort::set_fas_request_callback(void (*callback)(uint32_t *p1, uint32_
   fas_data_request_function = callback;
 }
 
-void FrSkySPort::set_gps_request_callback(void (*callback)(uint32_t *p1, uint32_t *p2, uint32_t *p3, uint32_t *p4, uint32_t *p5)) {
+void FrSkySPort::set_gps_request_callback(void (*callback)(uint32_t *p1, uint32_t *p2, int32_t *p3, uint32_t *p4, uint32_t *p5)) {
   gps_data_request_function = callback;
 }
 

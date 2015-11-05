@@ -68,14 +68,14 @@ class FrSkySPort {
     uint32_t fas_current = 0;
     uint32_t gps_longitude = 0;
     uint32_t gps_latitude = 0;
-    uint32_t gps_altitude = 0; 
+    int32_t gps_altitude = 0; 
     uint32_t gps_speed = 0; 
     uint32_t gps_heading = 0;  
     uint32_t rpm = 0;    
     uint32_t sp2uh_fuel = 0;
     void (*vario_data_request_function)(int32_t *altitude, int32_t *vertical_speed);
     void (*fas_data_request_function)(uint32_t *voltage, uint32_t *current);
-    void (*gps_data_request_function)(uint32_t *lon, uint32_t *lat, uint32_t *alt, uint32_t *speed, uint32_t *heading);  
+    void (*gps_data_request_function)(uint32_t *lon, uint32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading);  
     void (*rpm_data_request_function)(uint32_t *rpm);  
     void (*sp2uh_data_request_function)(uint32_t *fuel); 
       
@@ -91,7 +91,7 @@ class FrSkySPort {
     void frsky_send_package(uint16_t id, uint32_t value);
     void set_vario_request_callback(void (*callback)(int32_t *altitude, int32_t *vertical_speed));
     void set_fas_request_callback(void (*callback)(uint32_t *voltage, uint32_t *current));
-    void set_gps_request_callback(void (*callback)(uint32_t *lon, uint32_t *lat, uint32_t *alt, uint32_t *speed, uint32_t *heading));
+    void set_gps_request_callback(void (*callback)(uint32_t *lon, uint32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading));
     void set_rpm_request_callback(void (*callback)(uint32_t *rpm));
     void set_sp2uh_request_callback(void (*callback)(uint32_t *fuel));
 };

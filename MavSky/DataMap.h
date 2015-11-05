@@ -26,7 +26,7 @@ class DataMap {
     uint16_t source_for_target[MAP_TARGET_COUNT];
     float scale_for_target[MAP_TARGET_COUNT];    
     int8_t get_source_index(char* name);
-    uint32_t get_raw_source_value(uint16_t index);
+    int32_t get_raw_source_value(uint16_t index);
     int8_t get_target_index(char* name);
     int8_t get_scale_power(char* scale_string);
     uint8_t add_map(char *source_name, char* target_name, char* scale_string);

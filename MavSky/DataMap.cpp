@@ -111,7 +111,7 @@ int8_t DataMap::get_scale_power(char* scale_string) {
   return power_int;
 }
 
-uint32_t DataMap::get_raw_source_value(uint16_t index) {
+int32_t DataMap::get_raw_source_value(uint16_t index) {
   switch(index) {
     case MAP_SOURCE_RANGEFINDER_DISTANCE:
       return mav->rangefinder_distance;
