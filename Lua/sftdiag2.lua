@@ -1,5 +1,5 @@
 --
---  Copyright (c) Scott Simpson
+--  Author: Scott Simpson
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -60,9 +60,7 @@ local function run(event)
     loadGpsData()
     
 	printGpsData(1, 2, "lat", "lat")
-	printGpsData(1, 3, "lon", "lon")
-	printGpsData(1, 4, "armed-lat", "armed-lat")	    	    
-	printGpsData(1, 5, "armed-lon", "armed-lon")	        
+	printGpsData(1, 3, "lon", "lon")        
 end
 
 return {run=run}

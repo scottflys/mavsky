@@ -3,7 +3,7 @@
 
 
 
-#define PRODUCT_STRING  "MAVSky Version 2.1.2"
+#define PRODUCT_STRING  "MAVSky Version 2.1.3"
 
 #define FAULT_MAV_OFFLINE    1
 #define FAULT_SPORT_OFFLINE  2

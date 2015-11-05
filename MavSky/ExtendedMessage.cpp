@@ -1,7 +1,9 @@
 #include "ExtendedMessage.h"
 #include "MavLinkData.h"
+#include "MavConsole.h"
 
 extern MavLinkData *mav;
+extern MavConsole *console;
 
 ExtendedMessage::ExtendedMessage() {
 }
@@ -82,6 +84,24 @@ uint16_t ExtendedMessage::telem_next_extension_word() {
     return result;
 }
 
+uint16_t ExtendedMessage::encode_100(float source) {
+  uint8_t power;
+  if(source >= 10000.0) {                                         // 12,300 -> 123 * 10^2
+    source = source / 100.0;
+    power = 2;
+  } else if(source >= 1000.0) {                                   // 1,230 -> 123 * 10^1
+    source = source / 10.0;
+    power = 1;
+  } else if (source >= 100.0) {                                   // 123 -> 123 * 10^0
+    source = source;
+    power = 0;
+  } else {                                                        // 123.0 (or less)  -> 123 * 10^-1
+    source = source * 10.0;
+    power = 3;
+  }
+  return (round(source) & 0x3ff) + (power << 10);
+}
+
 uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {                                                     
     uint16_t extension_data = 0;
     uint8_t high_byte;
@@ -130,13 +150,13 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
             extension_data = mav->battery_remaining;
             break;
         case 12:
-            extension_data = mav->current_consumed;
+            extension_data = encode_100((float)mav->current_consumed);
             break;                
         case 13:
             extension_data = mav->armed_distance;       // in m
             break;
         case 14:
-            extension_data = mav->calc_mah_consumed();  // in mah
+            extension_data = encode_100((float)mav->calc_mah_consumed());
             break;   
         case 15:
             extension_data = mav->armed_bearing;        // 0-359

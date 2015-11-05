@@ -1,5 +1,5 @@
 --
---  Copyright (c) Scott Simpson
+--  Author: Scott Simpson
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ local altitudeName = "Alt"
 local speedName = "GSpd"
 local headingName = "Hdg"            
 local rssiName = "RSSI"            
-local consumptionName = "CTot"         -- Need to add this in telemetry configuration screen
 
 local FlightMode = {}
 local AsciiMap={}
@@ -129,6 +128,16 @@ function char6(c)
     end
 end
 
+function decode100(encodedValue)
+    local power = bit32.rshift(encodedValue, 10)
+    if(power == 3) then
+        power = -1;
+    end
+    local base = bit32.band(encodedValue, 1023)
+    local result = base * math.pow(10, power)
+    return result
+end
+
 function checkForExtensionMessage()
     local messageWord = getValue(rpmName)
 
@@ -181,13 +190,13 @@ function checkForExtensionMessage()
         elseif extensionCommand == 11 then
            extensionValue["batt_remain"] = extensionData 
         elseif extensionCommand == 12 then
-           extensionValue["cur_consumed"] = extensionData 
+           extensionValue["mav_consumed"] = decode100(extensionData);        -- this value is encoded using an exponential encoding to get a higer range of values and 3 digit precision   
         elseif extensionCommand == 13 then
            extensionValue["armed_distance"] = extensionData 
        elseif extensionCommand == 14 then
-           extensionValue["calc_consumed"] = extensionData 
+           extensionValue["calc_consumed"] = decode100(extensionData);       -- this value is encoded using an exponential encoding to get a higer range of values and 3 digit precision         
        elseif extensionCommand == 15 then
-           extensionValue["armed_bearing"] = extensionData           
+           extensionValue["armed_bearing"] = extensionData
         end           
         previousMessageWord = messageWord     
     end
@@ -244,7 +253,6 @@ local function drawCurrent(x,y)
 end
 
 local function drawTotalCurrent(x,y)
---	local totalCurrent = getValue(consumptionName)
     local totalCurrent = extensionValue["calc_consumed"]
     if totalCurrent == nil then
         totalCurrent = 0
@@ -394,7 +402,6 @@ local function drawHeadingHud(x, y)
     lcd.drawLine(xLeft, yLeft, xNose, yNose, SOLID, FORCE)
     lcd.drawLine(xTail, yTail, xRight, yRight, SOLID, FORCE)
     lcd.drawLine(xRight, yRight, xNose, yNose, SOLID, FORCE)
---	end
 end
 
 local function drawTopPanel()

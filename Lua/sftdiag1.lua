@@ -1,5 +1,5 @@
 --
---  Copyright (c) Scott Simpson
+--  Author: Scott Simpson
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -72,8 +72,10 @@ local function run(event)
 	printExtensionData(2, 3, "batt_remain", "batt_remain")	 
 	printExtensionData(2, 4, "cur_consumed", "cur_consumed")	    
 	printExtensionData(2, 5, "armed_distance", "armed_distance")
-    printExtensionData(2, 6, "calc_consumed", "calc_consumed")
-    printExtensionData(2, 7, "armed_bearing", "armed_bearing")	       
+    printExtensionData(2, 6, "mav_consumed", "mav_consumed")
+    printExtensionData(2, 7, "calc_consumed", "calc_consumed")
+    printExtensionData(2, 8, "armed_bearing", "armed_bearing")	       
+
 end
 
 return {run=run}

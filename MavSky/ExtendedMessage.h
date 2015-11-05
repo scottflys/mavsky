@@ -13,7 +13,8 @@ class ExtendedMessage {
   uint16_t message_packet_sequence = 0;
   uint16_t reading_message_number = 0;
   uint16_t writing_message_number = 0; 
-   
+  uint16_t encode_100(float source);
+  
   public:
     ExtendedMessage();
     void frsky_send_text_message(char *msg);
