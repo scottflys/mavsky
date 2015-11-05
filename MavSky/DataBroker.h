@@ -10,7 +10,7 @@ class DataBroker {
     
   public:
     DataBroker();
-    static void get_vario_data(uint32_t*, uint32_t*);
+    static void get_vario_data(int32_t*, int32_t*);
     static void get_fas_data(uint32_t *p1, uint32_t *p2);
     static void get_gps_data(uint32_t *lon, uint32_t *lat, uint32_t *alt, uint32_t *speed, uint32_t *heading);
     static void get_rpm_data(uint32_t *rpm);

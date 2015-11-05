@@ -87,6 +87,9 @@ uint16_t ExtendedMessage::telem_next_extension_word() {
 uint16_t ExtendedMessage::encode_100(float source) {
   uint8_t power;
   if(source >= 10000.0) {                                         // 12,300 -> 123 * 10^2
+    if(source > 102300.0) {                                         // largest number is 102,300
+      source = 102300.0;
+    }
     source = source / 100.0;
     power = 2;
   } else if(source >= 1000.0) {                                   // 1,230 -> 123 * 10^1

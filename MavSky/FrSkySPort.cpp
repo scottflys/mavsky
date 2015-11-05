@@ -51,7 +51,7 @@ void FrSkySPort::frsky_process(void) {
   }
 }
 
-void FrSkySPort::set_vario_request_callback(void (*callback)(uint32_t *p1, uint32_t *p2)) {
+void FrSkySPort::set_vario_request_callback(void (*callback)(int32_t *p1, int32_t *p2)) {
   vario_data_request_function = callback;
 }
 
@@ -82,7 +82,7 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
       }
       switch(next_vario) {
         case 0:
-//          console->console_print("vario_alt = %ld\r\n]", vario_altitude);
+          //console->console_print("vario_alt = %ld\r\n]", vario_altitude);
           frsky_send_package(FR_ID_ALTITUDE, vario_altitude);   
           break;
         case 1: 

@@ -116,7 +116,6 @@ uint32_t DataMap::get_raw_source_value(uint16_t index) {
     case MAP_SOURCE_RANGEFINDER_DISTANCE:
       return mav->rangefinder_distance;
     case MAP_SOURCE_BAR_ALTITUDE:
-//    return 6000;
       return mav->bar_altitude;     
     default:
       break;

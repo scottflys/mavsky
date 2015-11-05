@@ -306,7 +306,7 @@ void MavLinkData::process_mavlink_packets() {
           groundspeed = mavlink_msg_vfr_hud_get_groundspeed(&msg);         
           heading = mavlink_msg_vfr_hud_get_heading(&msg);                 
           throttle = mavlink_msg_vfr_hud_get_throttle(&msg);           
-          bar_altitude = mavlink_msg_vfr_hud_get_alt(&msg);         
+          bar_altitude = mavlink_msg_vfr_hud_get_alt(&msg); 
           climb_rate = mavlink_msg_vfr_hud_get_climb(&msg);           
           break; 
   

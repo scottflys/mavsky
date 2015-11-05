@@ -193,9 +193,9 @@ function checkForExtensionMessage()
            extensionValue["mav_consumed"] = decode100(extensionData);        -- this value is encoded using an exponential encoding to get a higer range of values and 3 digit precision   
         elseif extensionCommand == 13 then
            extensionValue["armed_distance"] = extensionData 
-       elseif extensionCommand == 14 then
+        elseif extensionCommand == 14 then
            extensionValue["calc_consumed"] = decode100(extensionData);       -- this value is encoded using an exponential encoding to get a higer range of values and 3 digit precision         
-       elseif extensionCommand == 15 then
+        elseif extensionCommand == 15 then
            extensionValue["armed_bearing"] = extensionData
         end           
         previousMessageWord = messageWord     
