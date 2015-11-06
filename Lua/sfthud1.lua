@@ -33,14 +33,15 @@ local rssiName = "RSSI"
 local FlightMode = {}
 local AsciiMap={}
 
-local MESSAGEBUFFERSIZE = 5
 local messageBuffer = ""
 local messageBufferSize = 0
 local previousMessageWord = 0
-local messageArray = {}
-local messageFirst = 0
-local messageNext = 0
 local messageLatestTimestamp = 0
+
+MESSAGEBUFFERSIZE = 5
+messageArray = {}
+messageFirst = 0
+messageNext = 0
 
 extensionValue = {}
 gpsData = {}
@@ -404,7 +405,7 @@ local function drawHeadingHud(x, y)
     lcd.drawLine(xRight, yRight, xNose, yNose, SOLID, FORCE)
 end
 
-local function drawTopPanel()
+function drawTopPanel()
     lcd.drawFilledRectangle(0, 0, 212, 9, 0)
     
     local flightModeNumber = extensionValue["custom_mode"]
