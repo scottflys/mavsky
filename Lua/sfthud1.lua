@@ -171,9 +171,13 @@ function checkForExtensionMessage()
         elseif extensionCommand == 1 then
             extensionValue["sequence"] = extensionData     
         elseif extensionCommand == 2 then
-            extensionValue["roll_angle"] = extensionData                
-        elseif extensionCommand == 3 then
-           extensionValue["pitch_angle"] = extensionData        
+            if extensionData <= 360 then
+                extensionValue["cog"] = extensionData 
+            else
+                extensionValue["cog"] = nil 
+            end
+--        elseif extensionCommand == 3 then
+--        extensionValue["pitch_angle"] = THIS IS UNUSED  
         elseif extensionCommand == 4 then
            extensionValue["hdop"] = extensionData        
         elseif extensionCommand == 5 then
@@ -353,21 +357,6 @@ local function drawSats(x, y)
     end
 end
 
-local function getRelativeGroundDirection()
-    local vehicleHeading = getValue(headingName)
-    if vehicleHeading ~= nil then 
-        local headingToVehicle = getDirectionToVehicle()
-        if headingToVehicle >= 0 then
-            local relativeHeading = vehicleHeading - headingToVehicle
-            if(relativeHeading < 0) then
-                relativeHeading = relativeHeading + 360
-            end   
-			return relativeHeading
-		end
-	end
-	return -1
-end
-
 function getXYAtAngle(x, y, angle, length)
 	if angle < 0 then
 		angle = angle + 360
@@ -403,6 +392,18 @@ local function drawHeadingHud(x, y)
     lcd.drawLine(xLeft, yLeft, xNose, yNose, SOLID, FORCE)
     lcd.drawLine(xTail, yTail, xRight, yRight, SOLID, FORCE)
     lcd.drawLine(xRight, yRight, xNose, yNose, SOLID, FORCE)
+    
+    local courseOverGround = extensionValue["cog"]
+    if courseOverGround ~= nil then
+        local speed = getValue(speedName)
+        if speed > 1 then		
+            local relativeCourseOverGround = courseOverGround - headingToVehicle
+            if relativeCourseOverGround < 0 then
+                relativeCourseOverGround = relativeCourseOverGround + 360
+            end   
+            drawLineAtAngle(x, y, 0, headingHudOuterRadius, relativeCourseOverGround)                 
+        end    
+    end
 end
 
 function drawTopPanel()

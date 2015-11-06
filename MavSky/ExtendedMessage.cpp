@@ -123,10 +123,10 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
             extension_data = message_packet_sequence % 4096;
             break;
         case 2:
-            extension_data = mav->roll_angle+180;
+            extension_data = mav->gps_course_over_ground;
             break;         
         case 3:
-            extension_data = mav->pitch_angle+180;
+            extension_data = 0;                                // unused
             break;         
         case 4:
             extension_data = mav->gps_hdop / 10;

@@ -231,7 +231,7 @@ void MavLinkData::process_mavlink_packets() {
             gps_longitude = mavlink_msg_gps_raw_int_get_lon(&msg);
             gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
             gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
-
+            gps_course_over_ground = mavlink_msg_gps_raw_int_get_cog(&msg);
             uint8_t armed_bit = (base_mode >> 7) & 1;
             if(armed_bit) {
               if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm
