@@ -176,51 +176,6 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
       break;  
     case SENSOR_ID_FLVSS:
       break;           
-    case 0x71:
-      break;
-    case 0xf2:
-      break;
-    case 0x53:
-      break;
-    case 0x34:
-      break;
-    case 0x95:
-      break;
-    case 0x16:
-      break;
-    case 0xb7:
-      break;
-    case 0x98:
-      break;
-    case 0x39:
-      break;
-    case 0xba:
-      break;
-    case 0x1b:
-      break;      
-    case 0x67:
-      break;
-    case 0x48:
-      break;
-    case 0xe9:
-      break;
-    case 0x6a:
-      break;
-    case 0xcb:
-      break;
-    case 0xac:
-      break;
-    case 0x0d:
-      break;
-    case 0x8e:
-      break;
-    case 0x2f:
-      break;
-    case 0xd0:
-      break;
-    default:
-      console->console_print("other %02x\r\n", sensorId);
- 
   }
 }
 

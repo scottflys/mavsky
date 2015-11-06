@@ -16,7 +16,9 @@ extern MavConsole *console;
 #define EXPIRY_MILLIS_MAVLINK_MSG_ID_ATTITUDE    1200
 #define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER 1200
 
-#define STATUS_TEXT_MAX 128
+#define STATUS_TEXT_MAX             128
+#define START_MAVLINK_PACKETS       1
+#define MAVLINK_PACKET_RATE         10                // 10 per second
 
 char status_text_buffer[STATUS_TEXT_MAX];
 
@@ -132,47 +134,70 @@ double MavLinkData::radians_to_degrees(double radians) {
 
 // http://www.movable-type.co.uk/scripts/latlong.html
 double MavLinkData::get_distance_between_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
-    double theta1 = degrees_to_radians(lat1);              
-    double theta2 = degrees_to_radians(lat2);
-    double delta_theta = degrees_to_radians(lat2 - lat1);
-    double delta_lambda = degrees_to_radians(lon2 - lon1);
-    double a = sin(delta_theta / 2.0) * sin(delta_theta / 2.0) + cos(theta1) * cos(theta2) * sin(delta_lambda / 2.0) * sin(delta_lambda / 2.0);
-    double c = 2.0 * atan2(sqrt(a), sqrt((double)1.0 - a));
-    double d = 6371000.0 * c;
-    return d;
+  double theta1 = degrees_to_radians(lat1);              
+  double theta2 = degrees_to_radians(lat2);
+  double delta_theta = degrees_to_radians(lat2 - lat1);
+  double delta_lambda = degrees_to_radians(lon2 - lon1);
+  double a = sin(delta_theta / 2.0) * sin(delta_theta / 2.0) + cos(theta1) * cos(theta2) * sin(delta_lambda / 2.0) * sin(delta_lambda / 2.0);
+  double c = 2.0 * atan2(sqrt(a), sqrt((double)1.0 - a));
+  double d = 6371000.0 * c;
+  return d;
 }
 
 double MavLinkData::get_distance_between_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
-    if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
-        return 0;
-    }
-    return get_distance_between_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+  if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
+      return 0;
+  }
+  return get_distance_between_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
 }
 
 double MavLinkData::get_bearing_to_coordinates_double(double lat1, double lon1, double lat2, double lon2) {
-    double theta1 = degrees_to_radians(lat1);              
-    double theta2 = degrees_to_radians(lat2);
-    double lambda1 = degrees_to_radians(lon1);              
-    double lambda2 = degrees_to_radians(lon2);    
-    double y = sin(lambda2 - lambda1) * cos(theta2);
-    double x = cos(theta1) * sin(theta2) - sin(theta1) * cos(theta2) * cos(lambda2 - lambda1);
-    double bearing = radians_to_degrees(atan2(y, x));
-    if (bearing < 0.0) {
-      bearing += 360.0;
-    }
-    return bearing;
+  double theta1 = degrees_to_radians(lat1);              
+  double theta2 = degrees_to_radians(lat2);
+  double lambda1 = degrees_to_radians(lon1);              
+  double lambda2 = degrees_to_radians(lon2);    
+  double y = sin(lambda2 - lambda1) * cos(theta2);
+  double x = cos(theta1) * sin(theta2) - sin(theta1) * cos(theta2) * cos(lambda2 - lambda1);
+  double bearing = radians_to_degrees(atan2(y, x));
+  if (bearing < 0.0) {
+    bearing += 360.0;
+  }
+  return bearing;
 }
 
 double MavLinkData::get_bearing_to_coordinates_int(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2) {
-    if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
-        return 0;
-    }
-    return get_bearing_to_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+  if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
+      return 0;
+  }
+  return get_bearing_to_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
+}
+
+void MavLinkData::start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id) {
+  uint16_t byte_length;
+
+  mavlink_msg_request_data_stream_pack(0xFF, 0xBE, msg_ptr, 1, 1, stream_id, MAVLINK_PACKET_RATE, START_MAVLINK_PACKETS);
+  byte_length = mavlink_msg_to_send_buffer(mavlink_buffer, msg_ptr);
+  MAVLINK_SERIAL.write(mavlink_buffer, byte_length);
+  delay(10);
+}
+
+void MavLinkData::request_mavlink_data(mavlink_message_t* msg_ptr) {
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3);
 }
 
 void MavLinkData::process_mavlink_packets() { 
   mavlink_message_t msg;
   mavlink_status_t status;
+
+  if(!mavlink_online()) {
+    request_mavlink_data(&msg);
+  }
 
   while(MAVLINK_SERIAL.available()) { 
     uint8_t c = MAVLINK_SERIAL.read();

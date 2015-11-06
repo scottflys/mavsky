@@ -6,7 +6,6 @@ extern Logger *logger;
 extern MavConsole *console;
 
 Logger::Logger() {
-//  DEBUG_SERIAL.begin(57600);
   int i;
   for(i=0; i<MAX_TIMESTAMPS; i++) {
     previous_time[i] = -9999999L;      // made very negative but leave some room in the long for comparing to current time

@@ -34,7 +34,7 @@ class DataMap {
                 
   public:
     DataMap();
-    uint32_t get_mapped_data(uint8_t target_index);
+    int32_t get_mapped_data(uint8_t target_index);
     const uint16_t VARIO_ALTITUDE = MAP_TARGET_VARIO_ALTITUDE;
     void write_factory_settings();
     void console_map(char*);

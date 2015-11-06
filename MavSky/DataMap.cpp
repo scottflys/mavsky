@@ -78,11 +78,11 @@ uint8_t DataMap::add_map(char *source_name, char* target_name, char* scale_strin
   }
 }
 
-uint32_t DataMap::get_mapped_data(uint8_t target_index) {
+int32_t DataMap::get_mapped_data(uint8_t target_index) {
   uint8_t source_index = source_for_target[target_index];
-  uint32_t raw_value = get_raw_source_value(source_index);
+  int32_t raw_value = get_raw_source_value(source_index);
   float scale_value = scale_for_target[target_index];
-  uint32_t scaled_value = (uint32_t)lroundf((float)raw_value * scale_value);
+  int32_t scaled_value = (int32_t)lroundf((float)raw_value * scale_value);
   return scaled_value; 
 }
 
