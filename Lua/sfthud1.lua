@@ -368,6 +368,12 @@ function getXYAtAngle(x, y, angle, length)
 	return x2, y2
 end
 
+local function drawLineAtAngle(x, y, r1, r2, angle)
+    local xStart, yStart = getXYAtAngle(x, y, angle, r1)			
+    local xEnd, yEnd = getXYAtAngle(x, y, angle, r2)
+    lcd.drawLine(xStart, yStart, xEnd, yEnd, SOLID, FORCE)
+end 
+
 local function drawHeadingHud(x, y)
     local arrowSide = 5
     local arrowTail = 5
@@ -381,7 +387,7 @@ local function drawHeadingHud(x, y)
         return
     end
     local relativeHeading = vehicleHeading - headingToVehicle
-    if(relativeHeading < 0) then
+    if relativeHeading < 0 then
         relativeHeading = relativeHeading + 360	
     end			
     local xTail, yTail = getXYAtAngle(x, y, relativeHeading - 180, arrowTail)	

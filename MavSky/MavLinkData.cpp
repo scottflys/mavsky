@@ -115,6 +115,12 @@ uint16_t MavLinkData::calc_mah_consumed() {
   return tenth_amp_per_millisecond_consumed / 36000L;
 }
 
+void MavLinkData::process_1000_millisecond() {
+  calced_cog = round(get_bearing_to_coordinates_int(last_process_1000_gps_latitude, last_process_1000_gps_longitude, gps_latitude, gps_longitude));  
+  last_process_1000_gps_latitude = gps_latitude;
+  last_process_1000_gps_longitude = gps_longitude;
+}
+
 void MavLinkData::process_100_millisecond() {
   uint32_t current_milli = millis();
   uint32_t delta = current_milli - last_process_100_millisecond_time;
@@ -256,7 +262,7 @@ void MavLinkData::process_mavlink_packets() {
             gps_longitude = mavlink_msg_gps_raw_int_get_lon(&msg);
             gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
             gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
-            gps_course_over_ground = mavlink_msg_gps_raw_int_get_cog(&msg);
+            mav_cog = mavlink_msg_gps_raw_int_get_cog(&msg);
             uint8_t armed_bit = (base_mode >> 7) & 1;
             if(armed_bit) {
               if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm

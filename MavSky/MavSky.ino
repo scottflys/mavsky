@@ -74,6 +74,7 @@ void check_for_faults() {
   diags.set_fault_to(FAULT_SPORT_OFFLINE, !frsky->frsky_online());
 }
 
+uint32_t next_1000_loop = 0L;
 uint32_t next_200_loop = 0L;
 uint32_t next_100_loop = 0L;
 
@@ -88,6 +89,11 @@ void loop()  {
   
   current_milli = millis();
 
+  if(current_milli >= next_1000_loop) {
+    next_1000_loop = current_milli + 1000;
+    mav->process_1000_millisecond();
+  }
+  
   if(current_milli >= next_200_loop) {
     next_200_loop = current_milli + 200;
     diags.update_led();

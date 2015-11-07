@@ -20,6 +20,8 @@ class MavLinkData {
     int16_t    battery_voltage_buffer_length = 0;
 
     uint32_t   last_process_100_millisecond_time = 0;
+    uint32_t   last_process_1000_gps_latitude = 0;
+    uint32_t   last_process_1000_gps_longitude = 0;
     
     double degrees_to_radians(double degrees);
     double radians_to_degrees(double radians);
@@ -52,7 +54,7 @@ class MavLinkData {
     int32_t   gps_altitude = 0;           // 1000 = 1m
     int32_t   gps_speed = 0;              // in cm/s
     uint16_t  gps_hdop = 0;               // GPS HDOP horizontal dilution of position in cm
-    uint16_t  gps_course_over_ground = 0; // not heading but actual course in degrees.  If unknown UINT16_MAX
+    uint16_t  mav_cog = 0;                // not heading but actual course in degrees.  If unknown UINT16_MAX
     
     // MAVLINK_MSG_ID_VFR_HUD 
     uint32_t  groundspeed = 0;            // Current ground speed in m/s
@@ -98,6 +100,7 @@ class MavLinkData {
     int32_t   armed_longitude = 0;
     uint32_t  armed_distance = 0;           // in m
     uint16_t  armed_bearing = 0;            // in degrees (0-359)  
+    uint16_t  calced_cog = 0;                 // in degrees (0-359)  
     
     uint32_t  tenth_amp_per_millisecond_consumed = 0;  
     
@@ -115,6 +118,7 @@ class MavLinkData {
     int mavlink_attitude_data_valid();
     int mavlink_rangefinder_data_valid();
     void process_mavlink_packets();  
+    void process_1000_millisecond(); 
     void process_100_millisecond(); 
     uint16_t calc_mah_consumed(); 
 };
