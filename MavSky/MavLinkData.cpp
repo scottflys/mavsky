@@ -8,17 +8,16 @@ extern void frsky_send_text_message(char *msg);
 extern Logger *logger;
 extern MavConsole *console;
 
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_HEARTBEAT   1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_SYS_STATUS  1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_GPS_RAW_INT 1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_VFR_HUD     1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RAW_IMU     1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_ATTITUDE    1200
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER 1200
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_HEARTBEAT   3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_SYS_STATUS  3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_GPS_RAW_INT 3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_VFR_HUD     3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RAW_IMU     3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_ATTITUDE    3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER 3000
 
 #define STATUS_TEXT_MAX             128
 #define START_MAVLINK_PACKETS       1
-#define MAVLINK_PACKET_RATE         10                // 10 per second
 
 char status_text_buffer[STATUS_TEXT_MAX];
 
@@ -178,23 +177,23 @@ double MavLinkData::get_bearing_to_coordinates_int(int32_t lat1, int32_t lon1, i
   return get_bearing_to_coordinates_double((double)lat1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon1 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lat2 / COORD_DEGREE_TO_INT_MULTIPLIER, (double)lon2 / COORD_DEGREE_TO_INT_MULTIPLIER);
 }
 
-void MavLinkData::start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id) {
+void MavLinkData::start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id, uint16_t rate) {
   uint16_t byte_length;
 
-  mavlink_msg_request_data_stream_pack(0xFF, 0xBE, msg_ptr, 1, 1, stream_id, MAVLINK_PACKET_RATE, START_MAVLINK_PACKETS);
+  mavlink_msg_request_data_stream_pack(0xFF, 0xBE, msg_ptr, 1, 1, stream_id, rate, START_MAVLINK_PACKETS);
   byte_length = mavlink_msg_to_send_buffer(mavlink_buffer, msg_ptr);
   MAVLINK_SERIAL.write(mavlink_buffer, byte_length);
   delay(10);
 }
 
 void MavLinkData::request_mavlink_data(mavlink_message_t* msg_ptr) {
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS, 2);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS, 3);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER, 0);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION, 3);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1, 5);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2, 2);
+  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3, 3);
 }
 
 void MavLinkData::process_mavlink_packets() { 
@@ -287,7 +286,7 @@ void MavLinkData::process_mavlink_packets() {
             gps_altitude = 0L;                       
             gps_speed = 0L;                     
           }
-          //debug_print(LOG_MAV_GPS, "MAVLINK_MSG_ID_GPS_RAW_INT: #24");
+          //debug_print(LOG_MAV_GPS, "MAVLINK_MSG_ID_GPS_RAW_INT");
           //debug_print(LOG_MAV_GPS, "time_usec: %d", mavlink_msg_gps_raw_int_get_time_usec(&msg));
           //debug_print(LOG_MAV_GPS, "eph: %d", mavlink_msg_gps_raw_int_get_eph(&msg));
           //debug_print(LOG_MAV_GPS, "epv: %d", mavlink_msg_gps_raw_int_get_epv(&msg));
@@ -341,16 +340,16 @@ void MavLinkData::process_mavlink_packets() {
           climb_rate = mavlink_msg_vfr_hud_get_climb(&msg);           
           break; 
   
-        case MAVLINK_MSG_ID_MISSION_CURRENT:                                  // 42
+        case MAVLINK_MSG_ID_MISSION_CURRENT:            
           mission_current_seq = mavlink_msg_mission_current_get_seq(&msg);
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_MISSION_CURRENT: #42");
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_MISSION_CURRENT");
           //debug_print(LOG_MAV_OTHER, "seq: %d", mav.mission_current_seq);     
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_MISSION_CURRENT);
           break;
 
-        case MAVLINK_MSG_ID_SCALED_PRESSURE:                                  // 29
+        case MAVLINK_MSG_ID_SCALED_PRESSURE:             
           temperature = mavlink_msg_scaled_pressure_get_temperature(&msg);
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_SCALED_PRESSURE: #29");
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_SCALED_PRESSURE");
           //debug_print(LOG_MAV_OTHER, "time_boot_ms: %d", mavlink_msg_scaled_pressure_get_time_boot_ms(&msg));
           //debug_print(LOG_MAV_OTHER, "press_abs: %d", mavlink_msg_scaled_pressure_get_press_abs(&msg));
           //debug_print(LOG_MAV_OTHER, "press_diff: %d", mavlink_msg_scaled_pressure_get_press_diff(&msg));
@@ -358,9 +357,9 @@ void MavLinkData::process_mavlink_packets() {
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_SCALED_PRESSURE);
           break;
 
-        case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:                            // 62
+        case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:          
           wp_dist = mavlink_msg_nav_controller_output_get_wp_dist(&msg);
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_NAV_CONTROLLER_OUTPUT: #62");
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_NAV_CONTROLLER_OUTPUT");
           //debug_print(LOG_MAV_OTHER, "nav_roll: %d", mavlink_msg_nav_controller_output_get_nav_roll(&msg));
           //debug_print(LOG_MAV_OTHER, "nav_pitch: %d", mavlink_msg_nav_controller_output_get_nav_pitch(&msg));
           //debug_print(LOG_MAV_OTHER, "nav_bearing: %d", mavlink_msg_nav_controller_output_get_nav_bearing(&msg));
@@ -372,14 +371,14 @@ void MavLinkData::process_mavlink_packets() {
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_CONTROLLER_OUTPUT);
           break;
           
-        case MAVLINK_MSG_ID_SYSTEM_TIME:                                      // 2
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_SYSTEM_TIME: #2");
+        case MAVLINK_MSG_ID_SYSTEM_TIME:       
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_SYSTEM_TIME");
           //debug_print(LOG_MAV_OTHER, "time_unix_usec: %d", mavlink_msg_system_time_get_time_unix_usec(&msg));
           //debug_print(LOG_MAV_OTHER, "time_boot_ms: %d", mavlink_msg_system_time_get_time_boot_ms(&msg));
           break;
           
-        case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:                              // 33
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_GLOBAL_POSITION_INT: #33");
+        case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:      
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_GLOBAL_POSITION_INT");
           //debug_print(LOG_MAV_OTHER, "time_boot_ms: %d", mavlink_msg_global_position_int_get_time_boot_ms(&msg));
           //debug_print(LOG_MAV_OTHER, "lat: %d", mavlink_msg_global_position_int_get_lat(&msg));
           //debug_print(LOG_MAV_OTHER, "lon: %d", mavlink_msg_global_position_int_get_lon(&msg));
@@ -391,10 +390,10 @@ void MavLinkData::process_mavlink_packets() {
           //debug_print(LOG_MAV_OTHER, "hdg: %d", mavlink_msg_global_position_int_get_hdg(&msg));
           break;
 
-        case MAVLINK_MSG_ID_BATTERY_STATUS:                                 // 147
+        case MAVLINK_MSG_ID_BATTERY_STATUS:          
           current_consumed = mavlink_msg_battery_status_get_current_consumed(&msg);    
           energy_consumed = mavlink_msg_battery_status_get_energy_consumed(&msg);    
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_BATTERY_STATUS: #147");
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_BATTERY_STATUS");
           //debug_print(LOG_MAV_OTHER, "id: %d", mavlink_msg_battery_status_get_id(&msg));
           //debug_print(LOG_MAV_OTHER, "battery_function: %d", mavlink_msg_battery_status_get_battery_function(&msg));
           //debug_print(LOG_MAV_OTHER, "type: %d", mavlink_msg_battery_status_get_type(&msg));
@@ -407,32 +406,47 @@ void MavLinkData::process_mavlink_packets() {
 
           break;
         
-        case MAVLINK_MSG_ID_SENSOR_OFFSETS:                                   // 150
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_SENSOR_OFFSETS: #150");
+        case MAVLINK_MSG_ID_SENSOR_OFFSETS:           
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_SENSOR_OFFSETS");
           break;
           
-        case MAVLINK_MSG_ID_MEMINFO:                                          // 152
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_MEMINFO: #152");
+        case MAVLINK_MSG_ID_MEMINFO: 
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_MEMINFO");
           //debug_print(LOG_MAV_OTHER, "brkval: %d", mavlink_msg_meminfo_get_brkval(&msg));
           //debug_print(LOG_MAV_OTHER, "freemem: %d", mavlink_msg_meminfo_get_freemem(&msg));
           break;
 
-        case MAVLINK_MSG_ID_AHRS:                                             // 163
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_AHRS: #163");
+        case MAVLINK_MSG_ID_AHRS:            
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_AHRS");
           break;
 
-        case MAVLINK_MSG_ID_HWSTATUS:                                         // 165
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_HWSTATUS: #165");          
+        case MAVLINK_MSG_ID_HWSTATUS:     
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_HWSTATUS");          
           break;
 
-        case MAVLINK_MSG_ID_RANGEFINDER:                                     // 173
+        case MAVLINK_MSG_ID_RANGEFINDER:                    
+          logger->debug_print(logger->LOG_MAV_RANGEFINDER, (char *)"MAVLINK_MSG_ID_RANGEFINDER");
           rangefinder_distance = mavlink_msg_rangefinder_get_distance(&msg) * 100;   //RANGEFINDER distance in cm
-          logger->debug_print(logger->LOG_MAV_RANGEFINDER, (char *)"MAVLINK_MSG_ID_RANGEFINDER: #173");
           //debug_print(LOG_MAV_RANGEFINDER, "distance: %d", mavlink_msg_rangefinder_get_distance(&msg));
           //debug_print(LOG_MAV_RANGEFINDER, "distance_CONV: %d", mav.sonarrange);
           //debug_print(LOG_MAV_RANGEFINDER, "voltage: %d", mavlink_msg_rangefinder_get_voltage(&msg));
           logger->add_timestamp(logger->TIMESTAMP_MAVLINK_MSG_ID_RANGEFINDER);
           break;
+          
+        case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_HWSTATUS");          
+          rc1 = mavlink_msg_rc_channels_get_chan1_raw(&msg);
+          rc2 = mavlink_msg_rc_channels_get_chan2_raw(&msg);
+          rc3 = mavlink_msg_rc_channels_get_chan3_raw(&msg);
+          rc4 = mavlink_msg_rc_channels_get_chan4_raw(&msg);
+          rc5 = mavlink_msg_rc_channels_get_chan5_raw(&msg);
+          rc6 = mavlink_msg_rc_channels_get_chan6_raw(&msg);
+          rc7 = mavlink_msg_rc_channels_get_chan7_raw(&msg);
+          rc8 = mavlink_msg_rc_channels_get_chan8_raw(&msg);
+          break;  
+                 
+        case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
+          break; 
           
         default:
           logger->debug_print(logger->LOG_MAV_UNKNOWN, (char *)"Unhandled MAVLINK message %d", msg.msgid);           

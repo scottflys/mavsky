@@ -23,14 +23,17 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <GCS_MAVLink.h>
 #include <EEPROM.h>
+#include <Adafruit_NeoPixel.h>
 #include "MavSky.h"
 #include "FrSkySPort.h"
 #include "MavConsole.h"
 #include "Diags.h"
 #include "Logger.h"
 #include "DataBroker.h"
+#include "Led.h"
 
 #define LEDPIN          13
+#define RGB_STRIP_0     14 
                           
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,8 +43,12 @@ MavConsole *console;
 MavLinkData *mav;
 FrSkySPort *frsky;
 DataBroker *data_broker;
-    
+
+Led* led_strip_ptr;
+
 void setup()  {
+  led_strip_ptr = new Led(RGB_STRIP_0, 8);
+  
   console = new MavConsole(Serial);
   logger = new Logger();
   mav = new MavLinkData();
@@ -97,13 +104,16 @@ void loop()  {
   if(current_milli >= next_200_loop) {
     next_200_loop = current_milli + 200;
     diags.update_led();
+    led_strip_ptr->process_200_millisecond();
   }
   
   if(current_milli >= next_100_loop) {
     next_100_loop = current_milli + 100;
     check_for_faults();
     mav->process_100_millisecond();
+
   }
+
 }
 
 

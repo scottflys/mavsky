@@ -92,6 +92,17 @@ class MavLinkData {
     // MAVLINK_MSG_ID_BATTERY_STATUS
     uint16_t  current_consumed = 0;    
     uint16_t  energy_consumed = 0;    
+
+
+    // MAVLINK_MSG_ID_RC_CHANNELS_RAW 
+    uint16_t rc1 = 0;
+    uint16_t rc2 = 0;
+    uint16_t rc3 = 0;
+    uint16_t rc4 = 0;
+    uint16_t rc5 = 0;
+    uint16_t rc6 = 0;
+    uint16_t rc7 = 0;
+    uint16_t rc8 = 0;
   
     // Calculated
     uint16_t  average_battery_voltage = 0;          
@@ -106,7 +117,7 @@ class MavLinkData {
     
     MavLinkData();
     ~MavLinkData();
-    void start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id);
+    void start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id, uint16_t rate);
     void request_mavlink_data(mavlink_message_t* msg_ptr);
     void mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length);
     int16_t mavlink_get_average(int16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length);
