@@ -4,6 +4,10 @@
 #include <WProgram.h> 
 #include <Adafruit_NeoPixel.h>
 
+#define LED_MAX_BULBS         8
+#define LED_MAX_STRIP_STATES  10
+#define LED_MAX_PATTERNS      25
+
 class LedBulbState {
   public:
     uint8_t red = 0;
@@ -15,7 +19,7 @@ class LedBulbState {
 class LedStripState {
   public:
     uint8_t bulb_count = 0;
-    LedBulbState* bulbs[8];  
+    LedBulbState* bulbs[LED_MAX_BULBS];  
     
     void add_bulb(uint8_t red_param, uint8_t green_param, uint8_t blue_param);
     void add_bulbs(uint8_t red_param, uint8_t green_param, uint8_t blue_param, uint8_t count);
@@ -29,15 +33,14 @@ class LedPattern {
   public:
     uint8_t   strip_state_count = 0;
 
-    LedStripState* led_strip_states[25];
+    LedStripState* led_strip_states[LED_MAX_STRIP_STATES];
     LedPattern(char* name_param);
     void add_strip_state(LedStripState* strip_state_param);
 };
 
 class Led {
   private:
-    Adafruit_NeoPixel strip; 
-    LedPattern* led_patterns[25];
+    Adafruit_NeoPixel* strip; 
     uint16_t led_pattern_count = 0;  
     uint8_t leds_on_strip = 0;
 
@@ -45,6 +48,7 @@ class Led {
     void show_pattern(LedPattern* pattern, uint8_t init_pattern);
 
   public:
+    LedPattern* led_patterns[LED_MAX_PATTERNS];  
     Led(uint8_t pin, uint8_t led_count);
     void process_200_millisecond();
 };

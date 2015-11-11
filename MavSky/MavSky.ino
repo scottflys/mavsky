@@ -47,8 +47,6 @@ DataBroker *data_broker;
 Led* led_strip_ptr;
 
 void setup()  {
-  led_strip_ptr = new Led(RGB_STRIP_0, 8);
-  
   console = new MavConsole(Serial);
   logger = new Logger();
   mav = new MavLinkData();
@@ -59,6 +57,9 @@ void setup()  {
 
   pinMode(LEDPIN, OUTPUT);
   console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
+
+  led_strip_ptr = new Led(RGB_STRIP_0, 8);
+  
 }
 
 void check_for_faults() {
