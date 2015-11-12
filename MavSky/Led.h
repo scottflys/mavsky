@@ -7,6 +7,7 @@
 #define LED_MAX_BULBS         8
 #define LED_MAX_STRIP_STATES  10
 #define LED_MAX_PATTERNS      25
+#define LED_DEFAULT_STATE_TIME 200
 
 class LedBulbState {
   public:
@@ -20,10 +21,12 @@ class LedStripState {
   public:
     uint8_t bulb_count = 0;
     LedBulbState* bulbs[LED_MAX_BULBS];  
+    uint16_t state_time = 0; 
     
     void add_bulb(uint8_t red_param, uint8_t green_param, uint8_t blue_param);
     void add_bulbs(uint8_t red_param, uint8_t green_param, uint8_t blue_param, uint8_t count);
     LedStripState();
+    LedStripState(uint16_t time_param);
 };
 
 class LedPattern {
@@ -45,12 +48,12 @@ class Led {
     uint8_t leds_on_strip = 0;
 
     void add_pattern(LedPattern* pattern);
-    void show_pattern(LedPattern* pattern, uint8_t init_pattern);
+    void show_pattern(uint8_t pattern_index, uint8_t reverse);
 
   public:
     LedPattern* led_patterns[LED_MAX_PATTERNS];  
     Led(uint8_t pin, uint8_t led_count);
-    void process_200_millisecond();
+    void process_100_millisecond();
 };
 
 #endif

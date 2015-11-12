@@ -197,6 +197,7 @@ void MavLinkData::request_mavlink_data(mavlink_message_t* msg_ptr) {
 }
 
 void MavLinkData::process_mavlink_packets() { 
+  uint8_t armed_bit = 0;
   mavlink_message_t msg;
   mavlink_status_t status;
 
@@ -254,43 +255,32 @@ void MavLinkData::process_mavlink_packets() {
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_GPS_RAW_INT);
           logger->debug_print(Logger::LOG_MAV_GPS, (char *)"MAVLINK_MSG_ID_GPS_RAW_INT: fixtype: %d, visiblesats: %d, gpsspeed: %f, alt: %d", mavlink_msg_gps_raw_int_get_fix_type, mavlink_msg_gps_raw_int_get_satellites_visible, mavlink_msg_gps_raw_int_get_vel(&msg), mavlink_msg_gps_raw_int_get_alt(&msg));
           gps_fixtype = mavlink_msg_gps_raw_int_get_fix_type(&msg);                              // 0 = No GPS, 1 =No Fix, 2 = 2D Fix, 3 = 3D Fix
-          if(gps_fixtype == 3) {
-            gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
-            gps_hdop = mavlink_msg_gps_raw_int_get_eph(&msg);                                    // hdop * 100
-            gps_latitude = mavlink_msg_gps_raw_int_get_lat(&msg);
-            gps_longitude = mavlink_msg_gps_raw_int_get_lon(&msg);
-            gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
-            gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
-            mav_cog = mavlink_msg_gps_raw_int_get_cog(&msg);
-            uint8_t armed_bit = (base_mode >> 7) & 1;
-            if(armed_bit) {
-              if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm
-                armed_latitude = gps_latitude;
-                armed_longitude = gps_longitude;                
-              }
-            } else {
-              if(armed_latitude != 0 || armed_longitude != 0) {                                   // clear when disarmed
-                  armed_latitude = 0;
-                  armed_longitude = 0; 
-                  armed_distance = 0;
-                  armed_bearing = 0; 
-              }
+          gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
+          gps_hdop = mavlink_msg_gps_raw_int_get_eph(&msg);                                    // hdop * 100
+          gps_latitude = mavlink_msg_gps_raw_int_get_lat(&msg);
+          gps_longitude = mavlink_msg_gps_raw_int_get_lon(&msg);
+          gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
+          gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
+          mav_cog = mavlink_msg_gps_raw_int_get_cog(&msg);
+          armed_bit = (base_mode >> 7) & 1;
+          if(armed_bit) {
+            if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm
+              armed_latitude = gps_latitude;
+              armed_longitude = gps_longitude;                
             }
-            armed_distance = round(get_distance_between_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
-            armed_bearing = round(get_bearing_to_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
           } else {
-            gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
-            gps_hdop = 9999;
-            gps_latitude = 0L;
-            gps_longitude = 0L;
-            gps_altitude = 0L;                       
-            gps_speed = 0L;                     
+            if(armed_latitude != 0 || armed_longitude != 0) {                                   // clear when disarmed
+                armed_latitude = 0;
+                armed_longitude = 0; 
+                armed_distance = 0;
+                armed_bearing = 0; 
+            }
           }
-          //debug_print(LOG_MAV_GPS, "MAVLINK_MSG_ID_GPS_RAW_INT");
+          armed_distance = round(get_distance_between_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
+          armed_bearing = round(get_bearing_to_coordinates_int(armed_latitude, armed_longitude, gps_latitude, gps_longitude));
           //debug_print(LOG_MAV_GPS, "time_usec: %d", mavlink_msg_gps_raw_int_get_time_usec(&msg));
           //debug_print(LOG_MAV_GPS, "eph: %d", mavlink_msg_gps_raw_int_get_eph(&msg));
           //debug_print(LOG_MAV_GPS, "epv: %d", mavlink_msg_gps_raw_int_get_epv(&msg));
-          //debug_print(LOG_MAV_GPS, "cog: %d", mavlink_msg_gps_raw_int_get_cog(&msg));     
           break;
   
         case MAVLINK_MSG_ID_RAW_IMU:

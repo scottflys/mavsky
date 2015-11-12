@@ -41,17 +41,14 @@ Led::Led(uint8_t pin, uint8_t led_count) {
   // 3 R-W-W-    W-W-G
   // 4 R-W-W-W-W-W-W-G
   led_pattern = new LedPattern((char*)"landing2"); 
-  strip_state = new LedStripState();
-  strip_state->add_bulbs(0, 0, 0, 8);
-  led_pattern->add_strip_state(strip_state);  
 
-  strip_state = new LedStripState();
+  strip_state = new LedStripState(1000);
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(0, 0, 0, 6);
   strip_state->add_bulb(0, 255, 0);
   led_pattern->add_strip_state(strip_state);  
 
-  strip_state = new LedStripState();
+  strip_state = new LedStripState(200);
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulb(100, 100, 100);
   strip_state->add_bulbs(0, 0, 0, 4);
@@ -59,7 +56,7 @@ Led::Led(uint8_t pin, uint8_t led_count) {
   strip_state->add_bulb(0, 255, 0);
   led_pattern->add_strip_state(strip_state);  
 
-  strip_state = new LedStripState();
+  strip_state = new LedStripState(200);
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(100, 100, 100, 2);
   strip_state->add_bulbs(0, 0, 0, 2);
@@ -67,7 +64,7 @@ Led::Led(uint8_t pin, uint8_t led_count) {
   strip_state->add_bulb(0, 255, 0);
   led_pattern->add_strip_state(strip_state);
     
-  strip_state = new LedStripState();
+  strip_state = new LedStripState(200);
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(100, 100, 100, 6);
   strip_state->add_bulb(0, 255, 0);
@@ -82,7 +79,11 @@ LedBulbState::LedBulbState(uint8_t red_param, uint8_t green_param, uint8_t blue_
 }
 
 LedStripState::LedStripState() {
-  
+    state_time = LED_DEFAULT_STATE_TIME;
+}
+
+LedStripState::LedStripState(uint16_t time_param) {
+  state_time = time_param;
 }
 
 void LedStripState::add_bulb(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
@@ -117,25 +118,47 @@ void Led::add_pattern(LedPattern* pattern) {
   }
 }
 
-void Led::show_pattern(LedPattern* pattern, uint8_t init_pattern) {
+void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
+  static int8_t previous_pattern_index = -1;
   static uint8_t current_state = 0;
-  if(init_pattern) {
-    current_state = 0;
+  static uint32_t state_expiry_time = 0L;
+  uint32_t current_milli = millis();
+  LedStripState* strip_state;
+
+  if(pattern_index >= led_pattern_count) {
+    return;
   }
-  if(init_pattern || pattern->strip_state_count > 1) {                                // no need to do anything unless there is > 1 state or init
-    LedStripState* strip_state = pattern->led_strip_states[current_state];
+  LedPattern* pattern = led_patterns[pattern_index];     
+  
+  uint8_t do_init = pattern_index != previous_pattern_index;
+  if(do_init) {
+    current_state = 0;
+    state_expiry_time = 0L;
+  }
+
+  uint8_t do_state_change = pattern->strip_state_count > 1 && current_milli > state_expiry_time;
+  if(do_init || do_state_change) {                           
+    if(reverse) {
+      strip_state = pattern->led_strip_states[pattern->strip_state_count - current_state - 1];      
+    } else {
+      strip_state = pattern->led_strip_states[current_state];       
+    }
+
     for(uint8_t i=0; i<strip_state->bulb_count; i++) {
       LedBulbState* bulb_state = strip_state->bulbs[i];
       strip->setPixelColor(i, bulb_state->red, bulb_state->green, bulb_state->blue);
     }
     strip->show();
     current_state = ((current_state + 1) % pattern->strip_state_count);
+    state_expiry_time = current_milli + pattern->led_strip_states[current_state]->state_time;
+
   }
+  previous_pattern_index = pattern_index;
 }
 
-void Led::process_200_millisecond() {
+void Led::process_100_millisecond() {
   int8_t pattern_index = 0;
-  static int8_t previous_pattern_index = -1;
+  uint8_t reverse = 0;
   
   if(mav->rc8 < 1050) {
     pattern_index = 0;
@@ -145,12 +168,11 @@ void Led::process_200_millisecond() {
     pattern_index = 2;
   } else if(mav->rc8 >= 1250) {
     pattern_index = 3;
+    if(mav->climb_rate < 0) {
+      reverse = 1;
+    }
   }
-      
-  uint8_t do_init = pattern_index != previous_pattern_index;
-  previous_pattern_index = pattern_index;
-
-  show_pattern(led_patterns[pattern_index], do_init);
+  show_pattern(pattern_index, reverse);
 }
 
 
