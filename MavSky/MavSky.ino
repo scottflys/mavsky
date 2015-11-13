@@ -10,6 +10,8 @@
 //
 //  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 //    
+//  Creator:  Scott Simpson
+//
 //
 //  For Teensy 3.1 support
 //    Connect:
