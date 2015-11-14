@@ -10,6 +10,15 @@
 //
 //  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 //  
+
+// Parameter 1 = number of pixels in strip
+// Parameter 2 = Arduino pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+
 #include <Adafruit_NeoPixel.h>
 #include "Led.h"
 #include "MavLinkData.h"
@@ -20,7 +29,7 @@ extern MavConsole *console;
 
 Led::Led(uint8_t pin, uint8_t led_count) {
   leds_on_strip = led_count;
-  strip = new Adafruit_NeoPixel(60, pin, NEO_GRB + NEO_KHZ800);
+  strip = new Adafruit_NeoPixel(led_count, pin, NEO_GRB + NEO_KHZ800);
   strip->begin();
   strip->show();                                     // all pixels off
  
@@ -184,6 +193,7 @@ void Led::process_100_millisecond() {
       reverse = 1;
     }
   }
+  
   show_pattern(pattern_index, reverse);
 }
 
