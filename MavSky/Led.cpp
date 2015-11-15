@@ -149,9 +149,11 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   if(pattern_index >= led_pattern_count) {
     return;
   }
-  LedPattern* pattern = led_patterns[pattern_index];     
-  
   uint8_t do_init = pattern_index != previous_pattern_index;
+//pattern_index = 1;        // for forced pattern
+//do_init = 1;
+  LedPattern* pattern = led_patterns[pattern_index];     
+      
   if(do_init) {
     current_state = 0;
     state_expiry_time = 0L;

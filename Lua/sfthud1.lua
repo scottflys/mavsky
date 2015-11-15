@@ -14,16 +14,23 @@
 --  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 --    
 -------------------------------------------------------------------------------------------------------------------------------------
+--
 --  imperialUnits = 0 for metric
 --  imperialUnits = 1 for imperial
 --
 local imperialUnits = 0
+--
+--  useCurrentMonitoring = 0 for no
+--  useCurrentMonitoring = 1 for yes
+--
+local useCurrentMonitoring = 1
 
 -------------------------------------------------------------------------------------------------------------------------------------    
 
 local gpsName = "GPS"  
 local rpmName = "RPM"
 local vfasName = "VFAS"
+local vspdName = "VSpd"
 local currentName = "Curr"
 local altitudeName = "Alt"
 local speedName = "GSpd"
@@ -247,14 +254,17 @@ end
   
 local function drawBatteryVoltage(x,y)
 	local batteryVoltage = getValue(vfasName)
-    lcd.drawNumber(x,y,batteryVoltage,MIDSIZE+PREC1)
-    lcd.drawText(lcd.getLastPos(),y+5,"V",SMLSIZE)
+    lcd.drawText(x, y + 5, "Bat", SMLSIZE)
+    lcd.drawNumber(x + 43, y,batteryVoltage,MIDSIZE+PREC1)
+    lcd.drawText(lcd.getLastPos(), y + 5, "V",SMLSIZE)
 end
 
-local function drawCurrent(x,y)
+local function drawCurrent(x, y)
 	local current = getValue(currentName)
-    lcd.drawNumber(x,y,current,MIDSIZE+PREC1)
-    lcd.drawText(lcd.getLastPos(),y+5,"A",SMLSIZE)
+    lcd.drawText(x, y + 5, "Cur", SMLSIZE)
+    lcd.drawNumber(x + 43, y, current, MIDSIZE+PREC1)
+    local t = lcd.getLastPos() + 1
+    lcd.drawText(t, y + 5,"A",SMLSIZE)
 end
 
 local function drawTotalCurrent(x,y)
@@ -262,11 +272,30 @@ local function drawTotalCurrent(x,y)
     if totalCurrent == nil then
         totalCurrent = 0
     end
-    lcd.drawNumber(x, y, totalCurrent, MIDSIZE)
-    lcd.drawText(lcd.getLastPos(), y+5, "mAh", SMLSIZE)
+    lcd.drawText(x, y + 5, "Tot", SMLSIZE)
+    lcd.drawNumber(x + 43, y, totalCurrent, MIDSIZE)
+    local t = lcd.getLastPos() + 1
+    lcd.drawText(t, y + 5, "mAh", SMLSIZE)
 end
 
-local function drawSpeed(x,y)
+local function drawVerticalSpeed(x, y)
+	local vspd = getValue(vspdName)
+    lcd.drawText(x, y + 5, "Vsp", SMLSIZE)
+    lcd.drawNumber(x + 43, y, vspd, MIDSIZE+PREC1)
+    local t = lcd.getLastPos() + 1
+    lcd.drawText(t, y, "m", SMLSIZE)   
+    lcd.drawText(t, y+5, "s", SMLSIZE)    
+end
+
+local function drawHeading(x, y)
+	local hdg = getValue(headingName)
+    lcd.drawText(x, y + 5, "Hdg", SMLSIZE)
+    lcd.drawNumber(x + 43, y, hdg, MIDSIZE)
+    local t = lcd.getLastPos() + 1
+    lcd.drawText(t, y, "o", SMLSIZE)     
+end
+
+local function drawSpeed(x, y)
     local speed = getValue(speedName)               -- originally in m/s * 10
     speed = speed * 3.6                             -- now in km/hr
     if imperialUnits == 1 then
@@ -301,7 +330,7 @@ end
 
 local function drawDistance(x, y)
     local distance = extensionValue["armed_distance"]    
-    if distance == nil then
+    if distance == nil or distance == 4095 then
         distance = 0
     end
     if imperialUnits == 1 then
@@ -475,9 +504,14 @@ local function run(event)
     drawTopPanel()
     drawBottomPanel()
 
-    drawBatteryVoltage(32, 12)
-    drawCurrent(32, 26)
-    drawTotalCurrent(32, 40)
+    drawBatteryVoltage(1, 12)
+    if useCurrentMonitoring == 1 then
+        drawCurrent(1, 26)
+        drawTotalCurrent(1, 40)
+    else
+        drawVerticalSpeed(1, 26)
+        drawHeading(1, 40)
+    end
 
     drawSats(72, 40)	
     drawHdop(130, 40)
