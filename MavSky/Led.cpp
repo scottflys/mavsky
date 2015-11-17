@@ -32,22 +32,21 @@ Led::Led(uint8_t pin, uint8_t led_count) {
   strip = new Adafruit_NeoPixel(led_count, pin, NEO_GRB + NEO_KHZ800);
   strip->begin();
   strip->show();                                     // all pixels off
- 
-  LedPattern* led_pattern = new LedPattern((char*)"all_off"); 
-  LedStripState* strip_state = new LedStripState();
-  strip_state->add_bulbs(0, 0, 0, 8);
-  led_pattern->add_strip_state(strip_state);
-  add_pattern(led_pattern);
   
-  led_pattern = new LedPattern((char*)"normal"); 
-  strip_state = new LedStripState();
+  LedPattern* led_pattern = new LedPattern((char*)"normal"); 
+  LedStripState* strip_state = new LedStripState();
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(0, 0, 0, 6);
   strip_state->add_bulb(0, 255, 0);
   led_pattern->add_strip_state(strip_state);
   add_pattern(led_pattern);
 
-
+  led_pattern = new LedPattern((char*)"all_off"); 
+  strip_state = new LedStripState();
+  strip_state->add_bulbs(0, 0, 0, 8);
+  led_pattern->add_strip_state(strip_state);
+  add_pattern(led_pattern);
+  
   led_pattern = new LedPattern((char*)"landing1"); 
   strip_state = new LedStripState();
   strip_state->add_bulb(255, 0, 0);
