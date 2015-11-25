@@ -1,3 +1,4 @@
+//#include <OctoWS2811.h>
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -25,17 +26,32 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <GCS_MAVLink.h>
 #include <EEPROM.h>
-#include <Adafruit_NeoPixel.h>
 #include "MavSky.h"
 #include "FrSkySPort.h"
 #include "MavConsole.h"
 #include "Diags.h"
 #include "Logger.h"
 #include "DataBroker.h"
+
 #include "Led.h"
+//
+//  Required Connections
+//  --------------------
+//    pin 2:  LED Strip #1    OctoWS2811 drives 8 LED Strips.
+//    pin 14: LED strip #2    All 8 are the same length.
+//    pin 7:  LED strip #3
+//    pin 8:  LED strip #4    A 100 ohm resistor should used
+//    pin 6:  LED strip #5    between each Teensy pin and the
+//    pin 20: LED strip #6    wire to the LED strip, to minimize
+//    pin 21: LED strip #7    high frequency ringining & noise.
+//    pin 5:  LED strip #8
+//    pin 15 & 16 - Connect together, but do not use
+//    pin 4 - Do not use
+//    pin 3 - Do not use as PWM.  Normal use is ok.
+
 
 #define LEDPIN          13
-#define RGB_STRIP_0     14 
+
                           
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -46,6 +62,9 @@ MavLinkData *mav;
 FrSkySPort *frsky;
 DataBroker *data_broker;
 
+DMAMEM int displayMemory[8*6];
+int drawingMemory[8*6];
+  
 Led* led_strip_ptr;
 
 void setup()  {
@@ -54,19 +73,18 @@ void setup()  {
   mav = new MavLinkData();
   frsky = new FrSkySPort();
   data_broker = new DataBroker();
-  
+
   delay(5000);
 
   pinMode(LEDPIN, OUTPUT);
   console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
 
-  led_strip_ptr = new Led(RGB_STRIP_0, 8);
-  
+  led_strip_ptr = new Led();  
 }
 
 void check_for_faults() {
   int mav_online;
-  mav_online = mav->mavlink_online();
+  mav_online = mav->mavlink_heartbeat_data_valid();
   diags.set_fault_to(FAULT_MAV_OFFLINE, !mav_online);
   if(mav_online) {                                                                  // don't set other mav faults if mav is offline
     diags.set_fault_to(FAULT_MAV_SYS_STATUS, !mav->mavlink_sys_status_data_valid());
@@ -87,6 +105,7 @@ void check_for_faults() {
 uint32_t next_1000_loop = 0L;
 uint32_t next_200_loop = 0L;
 uint32_t next_100_loop = 0L;
+uint32_t next_10_loop = 0L;
 
 void loop()  {
   uint32_t current_milli;
@@ -112,8 +131,12 @@ void loop()  {
   if(current_milli >= next_100_loop) {
     next_100_loop = current_milli + 100;
     check_for_faults();
-    mav->process_100_millisecond();
-    led_strip_ptr->process_100_millisecond();
+     mav->process_100_millisecond();
+  }  
+  
+  if(current_milli >= next_10_loop) {
+    next_10_loop = current_milli + 10;
+    led_strip_ptr->process_10_millisecond();
   }
 
 }

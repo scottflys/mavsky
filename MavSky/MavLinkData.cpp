@@ -66,7 +66,7 @@ int16_t MavLinkData::mavlink_get_average(int16_t* p_buffer, int16_t start, int16
   return (int16_t)((sum + round_val)/ use_samples);                     // round
 }
 
-int MavLinkData::mavlink_online() {
+int MavLinkData::mavlink_heartbeat_data_valid() {
   if(logger->get_timestamp_age(Logger::TIMESTAMP_MAVLINK_MSG_ID_HEARTBEAT) < EXPIRY_MILLIS_MAVLINK_MSG_ID_HEARTBEAT) {
     return 1;
   } else {
@@ -198,14 +198,21 @@ void MavLinkData::start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t 
   delay(10);
 }
 
-void MavLinkData::request_mavlink_data(mavlink_message_t* msg_ptr) {
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS, 2);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS, 3);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER, 0);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION, 3);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1, 5);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2, 2);
-  start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3, 3);
+void MavLinkData::start_mavlink_if_stopped(mavlink_message_t* msg_ptr) {
+  static uint32_t initializing_timeout = 0;
+
+  if(!mavlink_heartbeat_data_valid()) {
+    if(millis() > initializing_timeout) {
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS, 2);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS, 3);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER, 0);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION, 3);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1, 5);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2, 2);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3, 3);
+      initializing_timeout = millis() + 5000L;                               // wait before trying to initialize again
+    }
+  }
 }
 
 void MavLinkData::process_mavlink_packets() { 
@@ -213,9 +220,7 @@ void MavLinkData::process_mavlink_packets() {
   mavlink_message_t msg;
   mavlink_status_t status;
 
-  if(!mavlink_online()) {
-    request_mavlink_data(&msg);
-  }
+  start_mavlink_if_stopped(&msg);
 
   while(MAVLINK_SERIAL.available()) { 
     uint8_t c = MAVLINK_SERIAL.read();

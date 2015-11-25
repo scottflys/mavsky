@@ -11,27 +11,26 @@
 //  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 //  
 
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = Arduino pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-
-#include <Adafruit_NeoPixel.h>
+#include "OctoWS2811.h"
 #include "Led.h"
 #include "MavLinkData.h"
 #include "MavConsole.h"
 
 extern MavLinkData *mav;
 extern MavConsole *console;
+extern int displayMemory[];
+extern int drawingMemory[];
 
-Led::Led(uint8_t pin, uint8_t led_count) {
-  leds_on_strip = led_count;
-  strip = new Adafruit_NeoPixel(led_count, pin, NEO_GRB + NEO_KHZ800);
-  strip->begin();
-  strip->show();                                     // all pixels off
+Led::Led() {
+  leds_on_strip = 8;
+
+  leds = new OctoWS2811(8, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
+  leds->begin();
+
+  for (int i=0; i < 8*8; i++) {
+    leds->setPixel(i, 0x000000);
+  }
+  leds->show();
   
   LedPattern* led_pattern = new LedPattern((char*)"normal"); 
   LedStripState* strip_state = new LedStripState();
@@ -89,6 +88,56 @@ Led::Led(uint8_t pin, uint8_t led_count) {
   strip_state->add_bulbs(100, 100, 100, 6);
   strip_state->add_bulb(0, 255, 0);
   led_pattern->add_strip_state(strip_state);  
+  add_pattern(led_pattern);
+
+  led_pattern = new LedPattern((char*)"landing3"); 
+
+  strip_state = new LedStripState(20);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 7);
+  led_pattern->add_strip_state(strip_state);  
+
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 1);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 6);
+  led_pattern->add_strip_state(strip_state);  
+  
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 2);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 5);
+  led_pattern->add_strip_state(strip_state); 
+     
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 3);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 4);
+  led_pattern->add_strip_state(strip_state);  
+    
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 4);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 3);
+  led_pattern->add_strip_state(strip_state); 
+     
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 5);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 2);
+  led_pattern->add_strip_state(strip_state); 
+     
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 6);
+  strip_state->add_bulb(255, 0, 0);
+  strip_state->add_bulbs(0, 0, 0, 1);
+  led_pattern->add_strip_state(strip_state);
+      
+  strip_state = new LedStripState(20);
+  strip_state->add_bulbs(0, 0, 0, 7);
+  strip_state->add_bulb(255, 0, 0);
+  led_pattern->add_strip_state(strip_state);  
+
   add_pattern(led_pattern);
 }
 
@@ -148,11 +197,8 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   if(pattern_index >= led_pattern_count) {
     return;
   }
-  uint8_t do_init = pattern_index != previous_pattern_index;
-//pattern_index = 1;        // for forced pattern
-//do_init = 1;
   LedPattern* pattern = led_patterns[pattern_index];     
-      
+  uint8_t do_init = pattern_index != previous_pattern_index;      
   if(do_init) {
     current_state = 0;
     state_expiry_time = 0L;
@@ -167,18 +213,19 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
     }
 
     for(uint8_t i=0; i<strip_state->bulb_count; i++) {
-      LedBulbState* bulb_state = strip_state->bulbs[i];
-      strip->setPixelColor(i, bulb_state->red, bulb_state->green, bulb_state->blue);
+      for(uint8_t j=0; j<strip_state->bulb_count; j++) {
+        LedBulbState* bulb_state = strip_state->bulbs[j];
+        leds->setPixel(j+(i*8), bulb_state->red << 16 | bulb_state->green << 8 | bulb_state->blue);
+      }
     }
-    strip->show();
+    leds->show();
     current_state = ((current_state + 1) % pattern->strip_state_count);
     state_expiry_time = current_milli + pattern->led_strip_states[current_state]->state_time;
-
   }
   previous_pattern_index = pattern_index;
 }
 
-void Led::process_100_millisecond() {
+void Led::process_10_millisecond() {
   int8_t pattern_index = 0;
   uint8_t reverse = 0;
   
@@ -194,9 +241,10 @@ void Led::process_100_millisecond() {
       reverse = 1;
     }
   }
-  
+//pattern_index = 4;  
   show_pattern(pattern_index, reverse);
 }
+
 
 
 

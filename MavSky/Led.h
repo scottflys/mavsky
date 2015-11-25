@@ -14,7 +14,7 @@
 #define LED_H
 
 #include <WProgram.h> 
-#include <Adafruit_NeoPixel.h>
+#include "OctoWS2811.h"
 
 #define LED_MAX_BULBS         8
 #define LED_MAX_STRIP_STATES  10
@@ -55,7 +55,8 @@ class LedPattern {
 
 class Led {
   private:
-    Adafruit_NeoPixel* strip; 
+    OctoWS2811* leds;
+    
     uint16_t led_pattern_count = 0;  
     uint8_t leds_on_strip = 0;
 
@@ -64,8 +65,8 @@ class Led {
 
   public:
     LedPattern* led_patterns[LED_MAX_PATTERNS];  
-    Led(uint8_t pin, uint8_t led_count);
-    void process_100_millisecond();
+    Led();
+    void process_10_millisecond();
 };
 
 #endif

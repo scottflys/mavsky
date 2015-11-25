@@ -130,10 +130,10 @@ class MavLinkData {
     MavLinkData();
     ~MavLinkData();
     void start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id, uint16_t rate);
-    void request_mavlink_data(mavlink_message_t* msg_ptr);
+    void start_mavlink_if_stopped(mavlink_message_t* msg_ptr);
     void mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length);
     int16_t mavlink_get_average(int16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length);
-    int mavlink_online();
+    int mavlink_heartbeat_data_valid();
     int mavlink_sys_status_data_valid();
     int mavlink_gps_data_valid();
     int mavlink_vfr_data_valid();
