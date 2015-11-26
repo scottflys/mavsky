@@ -39,6 +39,7 @@ class LedStripState {
     void add_bulbs(uint8_t red_param, uint8_t green_param, uint8_t blue_param, uint8_t count);
     LedStripState();
     LedStripState(uint16_t time_param);
+    LedStripState(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
 };
 
 class LedStripPattern {
@@ -51,6 +52,7 @@ class LedStripPattern {
     LedStripState* led_strip_states[LED_MAX_STRIP_STATES];
     LedStripPattern(char* name_param);
     void add_strip_state(LedStripState* strip_state_param);
+    void add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
 };
 
 class LedController {
