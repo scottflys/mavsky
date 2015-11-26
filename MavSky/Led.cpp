@@ -23,7 +23,7 @@ extern MavConsole *console;
 extern int displayMemory[];
 extern int drawingMemory[];
 
-Led::Led() {
+LedController::LedController() {
   leds_on_strip = 8;
 
   leds = new OctoWS2811(8, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
@@ -182,14 +182,14 @@ void LedStripPattern::add_strip_state(LedStripState* strip_state_param) {
   }
 }
 
-void Led::add_pattern(LedStripPattern* pattern) {
+void LedController::add_pattern(LedStripPattern* pattern) {
   if(led_pattern_count < LED_MAX_PATTERNS) {
     led_patterns[led_pattern_count] = pattern;
     led_pattern_count++;
   }
 }
 
-void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
+void LedController::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   static int8_t previous_pattern_index = -1;
   static uint8_t current_state = 0;
   static uint32_t state_expiry_time = 0L;
@@ -227,7 +227,7 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   previous_pattern_index = pattern_index;
 }
 
-void Led::process_10_millisecond() {
+void LedController::process_10_millisecond() {
   int8_t pattern_index = 0;
   uint8_t reverse = 0;
   

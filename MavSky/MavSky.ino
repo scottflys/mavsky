@@ -66,7 +66,7 @@ DataBroker *data_broker;
 DMAMEM int displayMemory[8*6];
 int drawingMemory[8*6];
   
-Led* led_strip_ptr;
+LedController* led_strip_ptr;
 
 void setup()  {
   console = new MavConsole(Serial);
@@ -80,7 +80,7 @@ void setup()  {
   pinMode(LEDPIN, OUTPUT);
   console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
 
-  led_strip_ptr = new Led();  
+  led_strip_ptr = new LedController();  
 }
 
 void check_for_faults() {

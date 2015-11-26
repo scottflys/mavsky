@@ -53,7 +53,7 @@ class LedStripPattern {
     void add_strip_state(LedStripState* strip_state_param);
 };
 
-class Led {
+class LedController {
   private:
     OctoWS2811* leds;
     
@@ -65,7 +65,7 @@ class Led {
 
   public:
     LedStripPattern* led_patterns[LED_MAX_PATTERNS];  
-    Led();
+    LedController();
     void process_10_millisecond();
 };
 
