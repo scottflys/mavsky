@@ -32,12 +32,8 @@ class LedBulbColor {
 
 class LedStripState {
   public:
-    uint8_t bulb_count = 0;
     LedBulbColor* bulbs[LED_MAX_BULBS];  
     uint16_t state_time = 0; 
-    
-    void add_bulb(uint8_t red_param, uint8_t green_param, uint8_t blue_param);
-    void add_bulbs(uint8_t red_param, uint8_t green_param, uint8_t blue_param, uint8_t count);
     LedStripState();
     LedStripState(uint16_t time_param);
     LedStripState(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
@@ -56,9 +52,11 @@ class LedStripPattern {
     void add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
 };
 
-class LedStrip{
+class LedStrip {
   public:
-    uint16_t led_pattern_count = 0; 
+    uint8_t  current_state = 0;
+    uint32_t current_state_expiry_time = 0L;
+    LedStrip();
     LedStripPattern* led_patterns[LED_MAX_PATTERNS_PER_STRIP];  
 };
 
@@ -67,9 +65,9 @@ class LedController {
     OctoWS2811* leds;
  
     uint8_t leds_on_strip = 0;
-    void add_pattern(int strip_number, LedStripPattern* pattern);
-    void show_pattern(uint8_t pattern_index, uint8_t reverse);
-
+    void add_pattern(int pattern_number, int strip_number, LedStripPattern* pattern);
+    void change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr);
+    
   public:
     LedStrip* led_strips[LED_MAX_STRIPS];  
     LedController();
