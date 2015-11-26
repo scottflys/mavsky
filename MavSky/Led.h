@@ -16,10 +16,11 @@
 #include <WProgram.h> 
 #include "OctoWS2811.h"
 
-#define LED_MAX_BULBS         8
-#define LED_MAX_STRIP_STATES  10
-#define LED_MAX_PATTERNS      25
-#define LED_DEFAULT_STATE_TIME 200
+#define LED_MAX_STRIPS              8
+#define LED_MAX_BULBS               8
+#define LED_MAX_STRIP_STATES        10
+#define LED_MAX_PATTERNS_PER_STRIP  25
+#define LED_DEFAULT_STATE_TIME      200
 
 class LedBulbColor {
   public:
@@ -55,18 +56,22 @@ class LedStripPattern {
     void add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
 };
 
+class LedStrip{
+  public:
+    uint16_t led_pattern_count = 0; 
+    LedStripPattern* led_patterns[LED_MAX_PATTERNS_PER_STRIP];  
+};
+
 class LedController {
   private:
     OctoWS2811* leds;
-    
-    uint16_t led_pattern_count = 0;  
+ 
     uint8_t leds_on_strip = 0;
-
-    void add_pattern(LedStripPattern* pattern);
+    void add_pattern(int strip_number, LedStripPattern* pattern);
     void show_pattern(uint8_t pattern_index, uint8_t reverse);
 
   public:
-    LedStripPattern* led_patterns[LED_MAX_PATTERNS];  
+    LedStrip* led_strips[LED_MAX_STRIPS];  
     LedController();
     void process_10_millisecond();
 };

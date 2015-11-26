@@ -26,6 +26,10 @@ extern int drawingMemory[];
 LedController::LedController() {
   leds_on_strip = 8;
 
+  for (int i=0; i < 8; i++) {
+    led_strips[i] = new LedStrip();
+  }
+
   leds = new OctoWS2811(8, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
   leds->begin();
 
@@ -36,24 +40,24 @@ LedController::LedController() {
 
   LedBulbColor* red = new LedBulbColor(255, 0, 0);
   LedBulbColor* green = new LedBulbColor(0, 255, 0);
-  LedBulbColor* blue = new LedBulbColor(0, 0, 255);
-  LedBulbColor* yellow = new LedBulbColor(255, 255, 0);
-  LedBulbColor* cyan = new LedBulbColor(0, 255, 255);
-  LedBulbColor* magenta = new LedBulbColor(255, 0, 255);
+  //LedBulbColor* blue = new LedBulbColor(0, 0, 255);
+  //LedBulbColor* yellow = new LedBulbColor(255, 255, 0);
+  //LedBulbColor* cyan = new LedBulbColor(0, 255, 255);
+  //LedBulbColor* magenta = new LedBulbColor(255, 0, 255);
   LedBulbColor* off = new LedBulbColor(0, 0, 0);
   LedBulbColor* white = new LedBulbColor(255, 255, 255);
   
   LedStripPattern* led_pattern = new LedStripPattern((char*)"normal"); 
   led_pattern->add_strip_state(red, off, off, off, off, off, off, green, 0);
-  add_pattern(led_pattern);
+  add_pattern(0, led_pattern);
 
   led_pattern = new LedStripPattern((char*)"all_off"); 
   led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 0);
-  add_pattern(led_pattern);
+  add_pattern(0, led_pattern);
   
   led_pattern = new LedStripPattern((char*)"landing1"); 
   led_pattern->add_strip_state(red, white, white, white, white, white, white, green, 0);
-  add_pattern(led_pattern);
+  add_pattern(0, led_pattern);
   
   // 0 R             G    
   // 1 R-W         W-G
@@ -64,7 +68,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(red, white, off, off, off, off, white, green, 100);
   led_pattern->add_strip_state(red, white, white, off, off, white, white, green, 100);
   led_pattern->add_strip_state(red, white, white, white, white, white, white, green, 100);
-  add_pattern(led_pattern);
+  add_pattern(0, led_pattern);
 }
 
 LedBulbColor::LedBulbColor(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
@@ -123,11 +127,12 @@ void LedStripPattern::add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBul
   add_strip_state(strip_state);
 }
 
-
-void LedController::add_pattern(LedStripPattern* pattern) {
-  if(led_pattern_count < LED_MAX_PATTERNS) {
-    led_patterns[led_pattern_count] = pattern;
-    led_pattern_count++;
+void LedController::add_pattern(int strip_number, LedStripPattern* pattern) {
+  LedStrip* strip_ptr = led_strips[strip_number];
+  
+  if(strip_ptr->led_pattern_count < LED_MAX_PATTERNS_PER_STRIP) {
+    strip_ptr->led_patterns[strip_ptr->led_pattern_count] = pattern;
+    strip_ptr->led_pattern_count++;
   }
 }
 
@@ -138,10 +143,13 @@ void LedController::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   uint32_t current_milli = millis();
   LedStripState* strip_state;
 
-  if(pattern_index >= led_pattern_count) {
+  LedStrip* strip_ptr = led_strips[0];                                      // todo
+  
+  if(pattern_index >= strip_ptr->led_pattern_count) {
     return;
   }
-  LedStripPattern* pattern = led_patterns[pattern_index];     
+
+  LedStripPattern* pattern = strip_ptr->led_patterns[pattern_index];     
   uint8_t do_init = pattern_index != previous_pattern_index;      
   if(do_init) {
     current_state = 0;
