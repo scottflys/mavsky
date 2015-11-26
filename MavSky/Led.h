@@ -41,7 +41,7 @@ class LedStripState {
     LedStripState(uint16_t time_param);
 };
 
-class LedPattern {
+class LedStripPattern {
   private:
     char*     pattern_name;
 
@@ -49,7 +49,7 @@ class LedPattern {
     uint8_t   strip_state_count = 0;
 
     LedStripState* led_strip_states[LED_MAX_STRIP_STATES];
-    LedPattern(char* name_param);
+    LedStripPattern(char* name_param);
     void add_strip_state(LedStripState* strip_state_param);
 };
 
@@ -60,11 +60,11 @@ class Led {
     uint16_t led_pattern_count = 0;  
     uint8_t leds_on_strip = 0;
 
-    void add_pattern(LedPattern* pattern);
+    void add_pattern(LedStripPattern* pattern);
     void show_pattern(uint8_t pattern_index, uint8_t reverse);
 
   public:
-    LedPattern* led_patterns[LED_MAX_PATTERNS];  
+    LedStripPattern* led_patterns[LED_MAX_PATTERNS];  
     Led();
     void process_10_millisecond();
 };

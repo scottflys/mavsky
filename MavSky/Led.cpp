@@ -34,7 +34,7 @@ Led::Led() {
   }
   leds->show();
   
-  LedPattern* led_pattern = new LedPattern((char*)"normal"); 
+  LedStripPattern* led_pattern = new LedStripPattern((char*)"normal"); 
   LedStripState* strip_state = new LedStripState();
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(0, 0, 0, 6);
@@ -42,13 +42,13 @@ Led::Led() {
   led_pattern->add_strip_state(strip_state);
   add_pattern(led_pattern);
 
-  led_pattern = new LedPattern((char*)"all_off"); 
+  led_pattern = new LedStripPattern((char*)"all_off"); 
   strip_state = new LedStripState();
   strip_state->add_bulbs(0, 0, 0, 8);
   led_pattern->add_strip_state(strip_state);
   add_pattern(led_pattern);
   
-  led_pattern = new LedPattern((char*)"landing1"); 
+  led_pattern = new LedStripPattern((char*)"landing1"); 
   strip_state = new LedStripState();
   strip_state->add_bulb(255, 0, 0);
   strip_state->add_bulbs(100, 100, 100, 6);
@@ -61,7 +61,7 @@ Led::Led() {
   // 2 R-W         W-G
   // 3 R-W-W-    W-W-G
   // 4 R-W-W-W-W-W-W-G
-  led_pattern = new LedPattern((char*)"landing2"); 
+  led_pattern = new LedStripPattern((char*)"landing2"); 
 
   strip_state = new LedStripState(1000);
   strip_state->add_bulb(255, 0, 0);
@@ -92,7 +92,7 @@ Led::Led() {
   led_pattern->add_strip_state(strip_state);  
   add_pattern(led_pattern);
 
-  led_pattern = new LedPattern((char*)"landing3"); 
+  led_pattern = new LedStripPattern((char*)"landing3"); 
 
   strip_state = new LedStripState(20);
   strip_state->add_bulb(255, 0, 0);
@@ -170,19 +170,19 @@ void LedStripState::add_bulbs(uint8_t red_param, uint8_t green_param, uint8_t bl
   }
 }
 
-LedPattern::LedPattern(char* name_param) {
+LedStripPattern::LedStripPattern(char* name_param) {
   pattern_name = name_param;
   strip_state_count = 0;
 }
 
-void LedPattern::add_strip_state(LedStripState* strip_state_param) {
+void LedStripPattern::add_strip_state(LedStripState* strip_state_param) {
   if(strip_state_count < LED_MAX_STRIP_STATES) {
     led_strip_states[strip_state_count] = strip_state_param;
     strip_state_count++;  
   }
 }
 
-void Led::add_pattern(LedPattern* pattern) {
+void Led::add_pattern(LedStripPattern* pattern) {
   if(led_pattern_count < LED_MAX_PATTERNS) {
     led_patterns[led_pattern_count] = pattern;
     led_pattern_count++;
@@ -199,7 +199,7 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
   if(pattern_index >= led_pattern_count) {
     return;
   }
-  LedPattern* pattern = led_patterns[pattern_index];     
+  LedStripPattern* pattern = led_patterns[pattern_index];     
   uint8_t do_init = pattern_index != previous_pattern_index;      
   if(do_init) {
     current_state = 0;
