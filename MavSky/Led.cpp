@@ -9,6 +9,8 @@
 //  GNU General Public License for more details.
 //
 //  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
+//
+//  Creator:  Scott Simpson
 //  
 
 #include "OctoWS2811.h"
@@ -141,7 +143,7 @@ Led::Led() {
   add_pattern(led_pattern);
 }
 
-LedBulbState::LedBulbState(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
+LedBulbColor::LedBulbColor(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
   red = red_param;
   green = green_param;
   blue = blue_param;
@@ -157,7 +159,7 @@ LedStripState::LedStripState(uint16_t time_param) {
 
 void LedStripState::add_bulb(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
   if(bulb_count < LED_MAX_BULBS) {
-    bulbs[bulb_count] = new LedBulbState(red_param, green_param, blue_param);
+    bulbs[bulb_count] = new LedBulbColor(red_param, green_param, blue_param);
     bulb_count++;
   }
 }
@@ -214,7 +216,7 @@ void Led::show_pattern(uint8_t pattern_index, uint8_t reverse) {
 
     for(uint8_t i=0; i<strip_state->bulb_count; i++) {
       for(uint8_t j=0; j<strip_state->bulb_count; j++) {
-        LedBulbState* bulb_state = strip_state->bulbs[j];
+        LedBulbColor* bulb_state = strip_state->bulbs[j];
         leds->setPixel(j+(i*8), bulb_state->red << 16 | bulb_state->green << 8 | bulb_state->blue);
       }
     }

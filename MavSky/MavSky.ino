@@ -23,17 +23,6 @@
 //      Mavlink TX  -> RX2
 //      Mavlink GND -> GND
 //
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#include <GCS_MAVLink.h>
-#include <EEPROM.h>
-#include "MavSky.h"
-#include "FrSkySPort.h"
-#include "MavConsole.h"
-#include "Diags.h"
-#include "Logger.h"
-#include "DataBroker.h"
-
-#include "Led.h"
 //
 //  Required Connections
 //  --------------------
@@ -48,6 +37,18 @@
 //    pin 15 & 16 - Connect together, but do not use
 //    pin 4 - Do not use
 //    pin 3 - Do not use as PWM.  Normal use is ok.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <GCS_MAVLink.h>
+#include <EEPROM.h>
+#include "MavSky.h"
+#include "FrSkySPort.h"
+#include "MavConsole.h"
+#include "Diags.h"
+#include "Logger.h"
+#include "DataBroker.h"
+
+#include "Led.h"
 
 
 #define LEDPIN          13
