@@ -374,7 +374,7 @@ local function drawSats(x, y)
         return
     end
 
-    if fixType == 3 then
+    if fixType >= 3 then
         lcd.drawNumber(x + 6, y, satellitesVisible, MIDSIZE)
         lcd.drawText(x + 7, y + 5, "sats", SMLSIZE)                  
     elseif fixType == 2 then
