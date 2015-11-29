@@ -61,6 +61,10 @@ void Logger::debug_print(int subsystem, char* fmt, ...) {
     if(debugMavRangeFinderEnable || debugMavAllEnable) {
       print_enable = 1;
     }
+  } else if(subsystem == LOG_MAV_RCCHANNELSRAW) {   
+    if(debugMavRcChannelsRawEnable || debugMavAllEnable) {
+      print_enable = 1;
+    }
   } else if(subsystem == LOG_FRSKY_RPM) {   
     if(debugFrskyRpmEnable || debugFrskyAllEnable) {
       print_enable = 1;

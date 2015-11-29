@@ -42,7 +42,7 @@ void MavConsole::console_print(const char* fmt, ...) {
 
 void MavConsole::do_help() {
   console_print("%s\r\n", PRODUCT_STRING);
-  console_print("debug mav [all|heartbeat|gps|attitude|imu|vfr|status|text|rangefinder|other] [on|off]\r\n"); 
+  console_print("debug mav [all|heartbeat|gps|attitude|imu|vfr|status|text|rangefinder|rc|other] [on|off]\r\n"); 
   console_print("debug frsky [all|vario|fcs|rpm] [on|off]\r\n"); 
   console_print("debug temp [on|off]\r\n"); 
   console_print("dump\r\n");
@@ -102,7 +102,9 @@ void MavConsole::do_times() {
   console_print("Mavlink mission current:   %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_MISSION_CURRENT));
   console_print("Mavlink scaled pressure:   %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_SCALED_PRESSURE));
   console_print("Mavlink controller output: %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_CONTROLLER_OUTPUT));
-  console_print("Mavlink rangefinder:       %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_RANGEFINDER));        
+  console_print("Mavlink rangefinder:       %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_RANGEFINDER)); 
+  console_print("Mavlink rc raw:            %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW)); 
+
   console_print("FrSky vario:               %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_FRSKY_VARIO)); 
   console_print("FrSky fas:                 %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_FRSKY_FAS)); 
   console_print("FrSky gps:                 %d\r\n", logger->get_timestamp_delta(Logger::TIMESTAMP_FRSKY_GPS)); 
@@ -180,6 +182,9 @@ void MavConsole::do_command(char *cmd_buffer) {
         } else if (strcmp(p, "rangefinder") == 0) {
             p = strtok(NULL, " ");
             parse_debug_on_off(p, &(logger->debugMavRangeFinderEnable), (char *)"Mav RangeFinder");
+        } else if (strcmp(p, "rc") == 0) {
+            p = strtok(NULL, " ");
+            parse_debug_on_off(p, &(logger->debugMavRcChannelsRawEnable), (char *)"Mav RC");
         } else {
           console_print("Unknown parameter %s\r\n", p);
         }

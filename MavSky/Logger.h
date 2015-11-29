@@ -24,7 +24,7 @@
 #define LOG_FRSKY_SP2UR     36
 #define LOG_TEMP            40
 
-#define MAX_TIMESTAMPS      17
+#define MAX_TIMESTAMPS      20
     
 class Logger {     
   int32_t previous_time[MAX_TIMESTAMPS];
@@ -43,24 +43,26 @@ class Logger {
     static const byte TIMESTAMP_MAVLINK_MSG_ID_SCALED_PRESSURE   = 8;
     static const byte TIMESTAMP_MAVLINK_MSG_ID_CONTROLLER_OUTPUT = 9;
     static const byte TIMESTAMP_MAVLINK_MSG_ID_RANGEFINDER       = 10; 
-    static const byte TIMESTAMP_FRSKY_REQUEST                    = 11;
-    static const byte TIMESTAMP_FRSKY_VARIO                      = 12;
-    static const byte TIMESTAMP_FRSKY_FAS                        = 13;
-    static const byte TIMESTAMP_FRSKY_GPS                        = 14;
-    static const byte TIMESTAMP_FRSKY_RPM                        = 15;
-    static const byte TIMESTAMP_FRSKY_OTHER                      = 16;
+    static const byte TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW   = 11; 
+    
+    static const byte TIMESTAMP_FRSKY_REQUEST                    = 12;
+    static const byte TIMESTAMP_FRSKY_VARIO                      = 13;
+    static const byte TIMESTAMP_FRSKY_FAS                        = 14;
+    static const byte TIMESTAMP_FRSKY_GPS                        = 15;
+    static const byte TIMESTAMP_FRSKY_RPM                        = 16;
+    static const byte TIMESTAMP_FRSKY_OTHER                      = 17;
 
-    static const byte LOG_MAV_HEARTBEAT   = 1;
-    static const byte LOG_MAV_GPS         = 2;
-    static const byte LOG_MAV_ATTITUDE    = 3;
-    static const byte LOG_MAV_IMU         = 4;
-    static const byte LOG_MAV_VFR         = 5;
-    static const byte LOG_MAV_STATUS      = 6;
-    static const byte LOG_MAV_TEXT        = 7;
-    static const byte LOG_MAV_OTHER       = 8;
-    static const byte LOG_MAV_UNKNOWN     = 9;
-    static const byte LOG_MAV_RANGEFINDER = 10;
-
+    static const byte LOG_MAV_HEARTBEAT       = 1;
+    static const byte LOG_MAV_GPS             = 2;
+    static const byte LOG_MAV_ATTITUDE        = 3;
+    static const byte LOG_MAV_IMU             = 4;
+    static const byte LOG_MAV_VFR             = 5;
+    static const byte LOG_MAV_STATUS          = 6;
+    static const byte LOG_MAV_TEXT            = 7;
+    static const byte LOG_MAV_OTHER           = 8;
+    static const byte LOG_MAV_UNKNOWN         = 9;
+    static const byte LOG_MAV_RANGEFINDER     = 10;
+    static const byte LOG_MAV_RCCHANNELSRAW   = 11;
     
     int debugMavAllEnable = 0;
     int debugMavHeartbeatEnable = 0;
@@ -71,7 +73,8 @@ class Logger {
     int debugMavStatusEnable = 0;
     int debugMavTextEnable = 0;
     int debugMavOtherEnable = 0;
-    int debugMavRangeFinderEnable = 0;  
+    int debugMavRangeFinderEnable = 0;
+    int debugMavRcChannelsRawEnable = 0;  
     int debugFrskyAllEnable = 0;
     int debugFrskyRpmEnable = 0;
     int debugFrskyVarioEnable = 0; 

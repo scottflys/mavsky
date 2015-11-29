@@ -140,6 +140,8 @@ class MavLinkData {
     int mavlink_imu_data_valid();
     int mavlink_attitude_data_valid();
     int mavlink_rangefinder_data_valid();
+    int mavlink_rc_channels_raw_data_valid();
+    
     void process_mavlink_packets();  
     void process_1000_millisecond(); 
     void process_100_millisecond(); 

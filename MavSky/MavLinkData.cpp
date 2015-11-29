@@ -20,13 +20,14 @@ extern void frsky_send_text_message(char *msg);
 extern Logger *logger;
 extern MavConsole *console;
 
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_HEARTBEAT   3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_SYS_STATUS  3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_GPS_RAW_INT 3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_VFR_HUD     3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RAW_IMU     3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_ATTITUDE    3000
-#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER 3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_HEARTBEAT       3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_SYS_STATUS      3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_GPS_RAW_INT     3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_VFR_HUD         3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RAW_IMU         3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_ATTITUDE        3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RANGEFINDER     3000
+#define EXPIRY_MILLIS_MAVLINK_MSG_ID_RC_CHANNELS_RAW 3000
 
 #define STATUS_TEXT_MAX             128
 #define START_MAVLINK_PACKETS       1
@@ -122,6 +123,14 @@ int MavLinkData::mavlink_rangefinder_data_valid() {
   }
 }
 
+int MavLinkData::mavlink_rc_channels_raw_data_valid() {
+  if(logger->get_timestamp_age(Logger::TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW) < EXPIRY_MILLIS_MAVLINK_MSG_ID_RC_CHANNELS_RAW) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 uint16_t MavLinkData::calc_mah_consumed() {
   return tenth_amp_per_millisecond_consumed / 36000L;
 }
@@ -201,16 +210,19 @@ void MavLinkData::start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t 
 void MavLinkData::start_mavlink_if_stopped(mavlink_message_t* msg_ptr) {
   static uint32_t initializing_timeout = 0;
 
-  if(!mavlink_heartbeat_data_valid()) {
-    if(millis() > initializing_timeout) {
-      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS, 2);
+  if(millis() > initializing_timeout) {
+    if(!mavlink_heartbeat_data_valid()) {
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_SENSORS, 2);   
       start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTENDED_STATUS, 3);
       start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RAW_CONTROLLER, 0);
-      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION, 3);
-      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1, 5);
-      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2, 2);
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_POSITION, 3);  
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA1, 5);  
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA2, 2); 
       start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_EXTRA3, 3);
-      initializing_timeout = millis() + 5000L;                               // wait before trying to initialize again
+      initializing_timeout = millis() + 1000L;                          
+    } else if(!mavlink_rc_channels_raw_data_valid()) {     
+      start_mavlink_packet_type(msg_ptr, MAV_DATA_STREAM_RC_CHANNELS, 3); 
+      initializing_timeout = millis() + 1000L;                    
     }
   }
 }
@@ -450,6 +462,7 @@ void MavLinkData::process_mavlink_packets() {
           rc6 = mavlink_msg_rc_channels_get_chan6_raw(&msg);
           rc7 = mavlink_msg_rc_channels_get_chan7_raw(&msg);
           rc8 = mavlink_msg_rc_channels_get_chan8_raw(&msg);
+          logger->add_timestamp(logger->TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW);
           break;  
                  
         case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
