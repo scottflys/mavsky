@@ -24,6 +24,11 @@ local imperialUnits = 0
 --  useCurrentMonitoring = 1 for yes
 --
 local useCurrentMonitoring = 1
+--
+--  vehicleIsPlane = 0 for copter
+--  vehicleIsPlane = 1 for plane
+--
+local vehicleIsPlane = 0
 
 -------------------------------------------------------------------------------------------------------------------------------------    
 
@@ -60,24 +65,43 @@ function initialize()
         FlightMode[i].Name=""
     end
 
-    FlightMode[1].Name="Stabilize"
-    FlightMode[2].Name="Acro"
-    FlightMode[3].Name="Altitude Hold"
-    FlightMode[4].Name="Auto"
-    FlightMode[5].Name="Guided"
-    FlightMode[6].Name="Loiter"
-    FlightMode[7].Name="Return to launch"
-    FlightMode[8].Name="Circle"
-    FlightMode[9].Name="Invalid Mode"
-    FlightMode[10].Name="Land"
-    FlightMode[11].Name="Optical Loiter"
-    FlightMode[12].Name="Drift"
-    FlightMode[13].Name="Invalid Mode"
-    FlightMode[14].Name="Sport"
-    FlightMode[15].Name="Flip Mode"
-    FlightMode[16].Name="Auto Tune"
-    FlightMode[17].Name="Position Hold"
-    
+	if vehicleIsPlane == 0 then
+		FlightMode[1].Name="Stabilize"
+		FlightMode[2].Name="Acro"
+		FlightMode[3].Name="Altitude Hold"
+		FlightMode[4].Name="Auto"
+		FlightMode[5].Name="Guided"
+		FlightMode[6].Name="Loiter"
+		FlightMode[7].Name="Return to launch"
+		FlightMode[8].Name="Circle"
+		FlightMode[9].Name="Invalid Mode"
+		FlightMode[10].Name="Land"
+		FlightMode[11].Name="Optical Loiter"
+		FlightMode[12].Name="Drift"
+		FlightMode[13].Name="Invalid Mode"
+		FlightMode[14].Name="Sport"
+		FlightMode[15].Name="Flip Mode"
+		FlightMode[16].Name="Auto Tune"
+		FlightMode[17].Name="Position Hold"
+    else
+		FlightMode[1].Name="Manual"
+		FlightMode[2].Name="Circle"
+		FlightMode[3].Name="Stabilize"
+		FlightMode[4].Name="Training"
+		FlightMode[5].Name="Acro"
+		FlightMode[6].Name="FBWA"
+		FlightMode[7].Name="FBWB"
+		FlightMode[8].Name="Cruise"
+		FlightMode[9].Name="Autotune"
+		FlightMode[10].Name="Unused1"
+		FlightMode[11].Name="Auto"
+		FlightMode[12].Name="RTL"
+		FlightMode[13].Name="Loiter"
+		FlightMode[14].Name="Unused2"
+		FlightMode[15].Name="Unused3"
+		FlightMode[16].Name="Guided"
+	end
+	
     AsciiMap[1] ="A"
     AsciiMap[2] ="B"
     AsciiMap[3] ="C"
