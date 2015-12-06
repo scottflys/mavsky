@@ -58,9 +58,9 @@
 
 #define FR_ID_AIR_SPEED_FIRST       0x0A00  //AIR_SPEED_FIRST_ID
 
-#define FR_ID_RSSI                  0xF101  // used by the radio system
+#define FR_ID_RSSI                  0xF101  //used by the radio system
 #define FR_ID_ADC1                  0xF102  //ADC1_ID
-#define FR_ID_ADC2                  0xF103  //ADC2_ID                        // getValue(203)  (mav.hdop / 4)
+#define FR_ID_ADC2                  0xF103  //ADC2_ID                       
 #define FR_ID_BATT                  0xF104  // used by the radio system
 #define FR_ID_SWR                   0xF105  // used by the radio system
 
