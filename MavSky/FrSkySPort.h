@@ -68,12 +68,9 @@ class FrSkySPort {
   private:
     short crc;                      
     boolean waitingForSensorId = false;
-    uint8_t next_fas = 0;
-    uint8_t next_vario = 0;
-    uint8_t next_gps = 0;
-    uint8_t next_default = 0;
-    uint8_t next_sp2uh = 0;
-    
+    uint8_t fas_sensor_state = 0;
+    uint8_t vario_sensor_state = 0;
+    uint8_t gps_sensor_state = 0;   
     int32_t  vario_vertical_speed = 0;
     int32_t  vario_altitude = 0; 
     uint32_t fas_voltage = 0;
@@ -101,6 +98,7 @@ class FrSkySPort {
     void frsky_update_crc(uint8_t byte);
     void frsky_send_crc();
     void frsky_send_package(uint16_t id, uint32_t value);
+    void frsky_send_null(uint16_t id);   
     void set_vario_request_callback(void (*callback)(int32_t *altitude, int32_t *vertical_speed));
     void set_fas_request_callback(void (*callback)(uint32_t *voltage, uint32_t *current));
     void set_gps_request_callback(void (*callback)(uint32_t *lon, uint32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading));

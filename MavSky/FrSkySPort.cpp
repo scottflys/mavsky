@@ -30,6 +30,12 @@ extern MavConsole *console;    // todo probably not needed
 #define EXPIRY_MILLIS_FRSKY_RPM       1200
 #define EXPIRY_MILLIS_FRSKY_OTHER     1200
 
+#define   DELAY_VARIO_PERIOD           500
+#define   DELAY_FAS_PERIOD             500
+#define   DELAY_GPS_PERIOD             500
+#define   DELAY_RPM_PERIOD             100
+#define   DELAY_SP2UH_PERIOD           500
+
 FrSkySPort::FrSkySPort() {
   frsky_port.begin(57600);
   frsky_port_C3 = 0x10;            // TX invert
@@ -84,108 +90,163 @@ void FrSkySPort::set_sp2uh_request_callback(void (*callback)(uint32_t *fuel)) {
 };
 
 void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
+  static uint32_t delay_vario_next = 0;
+  static uint32_t delay_fas_next = 0;
+  static uint32_t delay_rpm_next = 0;
+  static uint32_t delay_gps_next = 0;
+  static uint32_t delay_sp2uh_next = 0;
+  
   uint32_t latlong = 0;
-   
+  
+  uint32_t process_timestamp = millis();
   switch(sensorId) {
     case SENSOR_ID_VARIO:
       logger->add_timestamp(Logger::TIMESTAMP_FRSKY_VARIO);
-      if(vario_data_request_function != NULL && next_vario == 0) {
-        vario_data_request_function(&vario_altitude, &vario_vertical_speed);
-      }
-      switch(next_vario) {
+      switch(vario_sensor_state) {
         case 0:
-          //console->console_print("vario_alt = %ld\r\n]", vario_altitude);
-          frsky_send_package(FR_ID_ALTITUDE, vario_altitude);   
+          if(process_timestamp > delay_vario_next) {
+            if(vario_data_request_function != NULL) {
+              vario_data_request_function(&vario_altitude, &vario_vertical_speed);
+            }
+            frsky_send_package(FR_ID_ALTITUDE, vario_altitude);   
+            delay_vario_next = process_timestamp + DELAY_VARIO_PERIOD;
+            vario_sensor_state = 1;
+          } else {
+            frsky_send_null(FR_ID_ALTITUDE);   
+          }
           break;
         case 1: 
-          frsky_send_package(FR_ID_VARIO, vario_vertical_speed);  
+          if(process_timestamp > delay_vario_next) {
+            frsky_send_package(FR_ID_VARIO, vario_vertical_speed);   
+            delay_vario_next = process_timestamp + DELAY_VARIO_PERIOD;
+            vario_sensor_state = 0;
+          } else {
+            frsky_send_null(FR_ID_VARIO);   
+          }
           break;
-      }
-      if(++next_vario > 1) {
-        next_vario = 0;
       }
       break;
       
     case SENSOR_ID_FAS:
       logger->add_timestamp(Logger::TIMESTAMP_FRSKY_FAS);
-      if(fas_data_request_function != NULL && next_fas == 0) {
-        fas_data_request_function(&fas_voltage, &fas_current);
-      }
-      switch(next_fas) {
+      switch(fas_sensor_state) {
         case 0:
-          frsky_send_package(FR_ID_VFAS, fas_voltage);     
+          if(process_timestamp > delay_fas_next) {
+            if(fas_data_request_function != NULL) {
+              fas_data_request_function(&fas_voltage, &fas_current);
+            }
+            frsky_send_package(FR_ID_VFAS, fas_voltage);     
+            delay_fas_next = process_timestamp + DELAY_FAS_PERIOD;   
+            fas_sensor_state = 1;
+          } else {
+            frsky_send_null(FR_ID_VFAS);   
+          }
           break;
         case 1:
-          frsky_send_package(FR_ID_CURRENT, fas_current);
+          if(process_timestamp > delay_fas_next) {
+            frsky_send_package(FR_ID_CURRENT, fas_current);
+            delay_fas_next = process_timestamp + DELAY_FAS_PERIOD;   
+            fas_sensor_state = 0;
+          } else {
+            frsky_send_null(FR_ID_CURRENT);   
+          }
           break;
-      }
-      if(++next_fas > 1) {
-        next_fas = 0;
       }
       break;
   
     case SENSOR_ID_GPS:
-      logger->add_timestamp(Logger::TIMESTAMP_FRSKY_GPS);
-      if(gps_data_request_function != NULL && next_gps == 0) {
-        gps_data_request_function(&gps_longitude, &gps_latitude, &gps_altitude, &gps_speed, &gps_heading);
-      }      
-      switch(next_gps)  {
-        case 0:                 // Sends the longitude value, setting bit 31 high
-          if(gps_longitude < 0) {
-            latlong=((abs(gps_longitude)/100)*6) | 0xC0000000;
+      logger->add_timestamp(Logger::TIMESTAMP_FRSKY_GPS);     
+      switch(gps_sensor_state)  {
+        case 0:                                                
+          if(process_timestamp > delay_gps_next) {
+            if(gps_data_request_function != NULL) {
+              gps_data_request_function(&gps_longitude, &gps_latitude, &gps_altitude, &gps_speed, &gps_heading);
+            }
+            if(gps_longitude < 0) {
+              latlong=((abs(gps_longitude)/100)*6) | 0xC0000000;
+            } else {
+              latlong=((abs(gps_longitude)/100)*6) | 0x80000000;
+            }
+            frsky_send_package(FR_ID_LATLONG, latlong);
+            delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;   
+            gps_sensor_state = 1;
           } else {
-            latlong=((abs(gps_longitude)/100)*6) | 0x80000000;
+            frsky_send_null(FR_ID_LATLONG);   
           }
-          frsky_send_package(FR_ID_LATLONG, latlong);
           break;
         case 1: 
-          if(gps_latitude < 0 ) {
-            latlong = ((abs(gps_latitude)/100)*6) | 0x40000000;
+          if(process_timestamp > delay_gps_next) {
+            if(gps_latitude < 0 ) {
+              latlong = ((abs(gps_latitude)/100)*6) | 0x40000000;
+            } else {
+              latlong = ((abs(gps_latitude)/100)*6);
+            }
+            frsky_send_package(FR_ID_LATLONG, latlong);
+            delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;
+            gps_sensor_state = 2;
           } else {
-            latlong = ((abs(gps_latitude)/100)*6);
+            frsky_send_null(FR_ID_LATLONG);   
           }
-          frsky_send_package(FR_ID_LATLONG, latlong);
           break;  
         case 2:
-          frsky_send_package(FR_ID_GPS_ALT, gps_altitude);                                 
+          if(process_timestamp > delay_gps_next) {
+            frsky_send_package(FR_ID_GPS_ALT, gps_altitude);                                 
+            delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;   
+            gps_sensor_state = 3;
+          } else {
+            frsky_send_null(FR_ID_GPS_ALT);   
+          }
           break;
         case 3:                 
-          frsky_send_package(FR_ID_SPEED, gps_speed);                              
+          if(process_timestamp > delay_gps_next) {
+            frsky_send_package(FR_ID_SPEED, gps_speed);                              
+            delay_gps_next += DELAY_GPS_PERIOD;
+            gps_sensor_state = 4;
+          } else {
+            frsky_send_null(FR_ID_SPEED);   
+          }
           break;
         case 4:
-          frsky_send_package(FR_ID_GPS_COURSE, gps_heading);                                      
+          if(process_timestamp > delay_gps_next) {
+            frsky_send_package(FR_ID_GPS_COURSE, gps_heading);                                      
+            delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;   
+            gps_sensor_state = 0;
+          } else {
+            frsky_send_null(FR_ID_GPS_COURSE);   
+          }
           break;
       }
-      if(++next_gps > 4) {
-        next_gps = 0;
-      }
-      break;    
-  
+      break;   
+       
     case SENSOR_ID_RPM:
       logger->add_timestamp(Logger::TIMESTAMP_FRSKY_RPM);
-      if(rpm_data_request_function != NULL) {
-        rpm_data_request_function(&rpm);
-      }           
-      frsky_send_package(FR_ID_RPM, rpm);   
+      if(process_timestamp > delay_rpm_next) {
+        if(rpm_data_request_function != NULL) {
+          rpm_data_request_function(&rpm);
+        }           
+        frsky_send_package(FR_ID_RPM, rpm);
+        delay_rpm_next = process_timestamp + DELAY_RPM_PERIOD;   
+      } else {
+        frsky_send_null(FR_ID_RPM);   
+      }
       break;
 
     case SENSOR_ID_SP2UH:
-      logger->add_timestamp(Logger::TIMESTAMP_FRSKY_OTHER);
-      if(sp2uh_data_request_function != NULL) {
-        sp2uh_data_request_function(&sp2uh_fuel);
-      }     
-      switch(next_sp2uh)  {
-        case 0:               
-          frsky_send_package(FR_ID_FUEL, sp2uh_fuel); 
-          break; 
-      }    
-      if(++next_sp2uh > 0) {
-        next_sp2uh = 0;
-      }
+      logger->add_timestamp(Logger::TIMESTAMP_FRSKY_OTHER); 
+      if(process_timestamp > delay_sp2uh_next) {
+        if(sp2uh_data_request_function != NULL) {
+          sp2uh_data_request_function(&sp2uh_fuel);
+        }    
+        frsky_send_package(FR_ID_FUEL, sp2uh_fuel); 
+        delay_sp2uh_next = process_timestamp + DELAY_SP2UH_PERIOD;   
+      } else {
+        frsky_send_null(FR_ID_FUEL);   
+      }   
       break;
 
     case SENSOR_ID_SP2UR:
       break;  
+      
     case SENSOR_ID_FLVSS:
       break;           
   }
@@ -216,7 +277,7 @@ void FrSkySPort::frsky_send_crc() {
 }
 
 void FrSkySPort::frsky_send_package(uint16_t id, uint32_t value) {
-  frsky_port_C3 |= 32;                      //  Transmit direction, to S.Port
+  frsky_port_C3 |= 32;                      //  TX
   frsky_send_byte(DATA_FRAME);
   uint8_t *bytes = (uint8_t*)&id;
   frsky_send_byte(bytes[0]);
@@ -228,5 +289,21 @@ void FrSkySPort::frsky_send_package(uint16_t id, uint32_t value) {
   frsky_send_byte(bytes[3]);
   frsky_send_crc();
   frsky_port.flush();
-  frsky_port_C3 ^= 32;                      // Transmit direction, from S.Port
+  frsky_port_C3 ^= 32;                      // RX
+}
+
+void FrSkySPort::frsky_send_null(uint16_t id)
+{
+  frsky_port_C3 |= 32;                      //  TX
+  frsky_send_byte(0x00);
+  uint8_t *b = (uint8_t*)&id;
+  frsky_send_byte(b[0]);
+  frsky_send_byte(b[1]);
+  frsky_send_byte(0x00);
+  frsky_send_byte(0x00);
+  frsky_send_byte(0x00);
+  frsky_send_byte(0x00);  
+  frsky_send_crc();
+  frsky_port.flush();
+  frsky_port_C3 ^= 32;                      // RX
 }

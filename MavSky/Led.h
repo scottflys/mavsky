@@ -66,7 +66,7 @@ class LedController {
  
     uint8_t leds_on_strip = 0;
     void add_pattern(int pattern_number, int strip_number, LedStripPattern* pattern);
-    void change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr);
+    void change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr, uint32_t current_time);
     
   public:
     LedStrip* led_strips[LED_MAX_STRIPS];  

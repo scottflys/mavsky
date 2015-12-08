@@ -281,9 +281,9 @@ void LedController::add_pattern(int pattern_number, int strip_number, LedStripPa
   }
 }
 
-void LedController::change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr) {
+void LedController::change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr, uint32_t current_time) {
   LedStripState* strip_state = pattern->led_strip_states[strip_ptr->current_state];
-  strip_ptr->current_state_expiry_time = millis() + strip_state->state_time;
+  strip_ptr->current_state_expiry_time = current_time + strip_state->state_time;
   for(uint8_t j=0; j<8; j++) {
     LedBulbColor* bulb_state = strip_state->bulbs[j];
     leds->setPixel(j+(strip_number*8), bulb_state->red << 16 | bulb_state->green << 8 | bulb_state->blue);
@@ -320,27 +320,19 @@ void LedController::process_10_millisecond() {
     }
   }
 
-//pattern_index = 3;
-//reverse = 0;
-
+  uint32_t current_time = millis();                                                 // make sure all LEDs start at the same time
   for(int i=0; i<8; i++) {
     LedStrip* strip_ptr = led_strips[i];
     LedStripPattern* pattern = strip_ptr->led_patterns[pattern_index]; 
     if(pattern != NULL) {  
-      if(previous_pattern_index != pattern_index) {
-        strip_ptr->current_state = 0;
-        change_led_state(i, pattern, strip_ptr);
-        previous_pattern_index = pattern_index;
-      } else {
-        if(millis() >= strip_ptr->current_state_expiry_time) { 
-          if(reverse)
-          {
-            strip_ptr->current_state = ((strip_ptr->current_state - 1 + pattern->strip_state_count) % pattern->strip_state_count);
-          } else {
-            strip_ptr->current_state = ((strip_ptr->current_state + 1) % pattern->strip_state_count);
-          }         
-          change_led_state(i, pattern, strip_ptr);
-        }
+      if(current_time >= strip_ptr->current_state_expiry_time) { 
+        if(reverse)
+        {
+          strip_ptr->current_state = ((strip_ptr->current_state - 1 + pattern->strip_state_count) % pattern->strip_state_count);
+        } else {
+          strip_ptr->current_state = ((strip_ptr->current_state + 1) % pattern->strip_state_count);
+        }         
+        change_led_state(i, pattern, strip_ptr, current_time);
       }
     }
   }
