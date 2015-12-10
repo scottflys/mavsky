@@ -21,44 +21,44 @@ local debugColWidth = 106
 initialize()
 
 local function printFrSkyData(col, row, label, name)
-    local val = getValue(name)
+  local val = getValue(name)
 	local x = (col - 1) * debugColWidth
-    local y = row * debugRowHeight - 6
-    lcd.drawText(x, y, label, SMLSIZE)
-    if val ~= nil then
-      lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
-    end
+  local y = row * debugRowHeight - 6
+  lcd.drawText(x, y, label, SMLSIZE)
+  if val ~= nil then
+    lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
+  end
 end
 
 local function printEncodedExtensionData(col, row, label, name)
-    local val = extensionValue[name]
-    val = decode100(val)
-	local x = (col - 1) * debugColWidth
-    local y = row * debugRowHeight - 6
-    lcd.drawText(x, y, label, SMLSIZE)
-    if val ~= nil then
-      lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
-    end
+  local val = extensionValue[name]
+  val = decode100(val)
+  local x = (col - 1) * debugColWidth
+  local y = row * debugRowHeight - 6
+  lcd.drawText(x, y, label, SMLSIZE)
+  if val ~= nil then
+    lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
+  end
 end
 
 local function printExtensionData(col, row, label, name)
-    local val = extensionValue[name]
-	local x = (col - 1) * debugColWidth
-    local y = row * debugRowHeight - 6
-    lcd.drawText(x, y, label, SMLSIZE)
-    if val ~= nil then
-      lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
-    end
+  local val = extensionValue[name]
+  local x = (col - 1) * debugColWidth
+  local y = row * debugRowHeight - 6
+  lcd.drawText(x, y, label, SMLSIZE)
+  if val ~= nil then
+    lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
+  end
 end
 
 local function printGpsData(col, row, label, name)
-    local val = gpsData[name]
-	local x = (col - 1) * debugColWidth
-    local y = row * debugRowHeight - 6
-    lcd.drawText(x, y, label, SMLSIZE)
-    if val ~= nil then
-      lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
-    end
+  local val = gpsData[name]
+  local x = (col - 1) * debugColWidth
+  local y = row * debugRowHeight - 6
+  lcd.drawText(x, y, label, SMLSIZE)
+  if val ~= nil then
+    lcd.drawText(x + debugLabelWidth - 20, y, val, SMLSIZE)
+  end
 end
 
 local function init()
