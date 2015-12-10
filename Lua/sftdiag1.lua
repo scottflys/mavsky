@@ -61,13 +61,14 @@ local function printGpsData(col, row, label, name)
     end
 end
 
+local function init()
+end
+
 local function background() 
 end
 
 local function run(event)
 	lcd.clear()
-
-    checkForExtensionMessage()
     
 	printExtensionData(1, 1, "sequence", "sequence")
 	printExtensionData(1, 2, "cog", "cog")
@@ -81,9 +82,9 @@ local function run(event)
 	printExtensionData(2, 1, "ranger_dist", "ranger_dist")
 	printExtensionData(2, 2, "batt_remain", "batt_remain")	   
 	printExtensionData(2, 3, "armed_distance", "armed_distance")
-    printExtensionData(2, 4, "armed_bearing", "armed_bearing")	  
-    printExtensionData(2, 5, "mav_consumed", "mav_consumed")
-    printExtensionData(2, 6, "calc_consumed", "calc_consumed")
+  printExtensionData(2, 4, "armed_bearing", "armed_bearing")	  
+  printExtensionData(2, 5, "mav_consumed", "mav_consumed")
+  printExtensionData(2, 6, "calc_consumed", "calc_consumed")
 end
 
-return {run=run}
+return {init=init, run=run, background=background}

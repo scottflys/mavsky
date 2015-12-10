@@ -16,9 +16,13 @@
 
 initialize()
 
+local function init()
+end
+
+local function background()
+end
+
 local function run(event)
-    checkForExtensionMessage()
- 
     lcd.clear()
     drawTopPanel()
     local i
@@ -29,4 +33,4 @@ local function run(event)
     end
 end
 
-return {run=run}
+return {init=init, run=run, background=background}
