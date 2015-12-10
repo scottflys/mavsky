@@ -23,14 +23,18 @@ local function background()
 end
 
 local function run(event)
-    lcd.clear()
-    drawTopPanel()
-    local i
-    local row = 1
+  lcd.clear()
+  drawTopPanel()
+  local i
+  local row = 1
+  if messageFirst == messageNext then
+    lcd.drawText(1, row * 10 + 2, "There are no text messages to display", 0)
+  else
     for i = messageFirst, messageNext - 1, 1 do
-        lcd.drawText(1, row * 10 + 2, messageArray[(i % MESSAGEBUFFERSIZE) + 1], 0)
-        row = row + 1
+      lcd.drawText(1, row * 10 + 2, messageArray[(i % MESSAGEBUFFERSIZE) + 1], 0)
+      row = row + 1
     end
+  end
 end
 
 return {init=init, run=run, background=background}
