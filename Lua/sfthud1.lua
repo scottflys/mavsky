@@ -12,7 +12,9 @@
 --  GNU General Public License for more details.
 --
 --  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
---    
+--      
+--  Version 2.1.13a2
+--  
 -------------------------------------------------------------------------------------------------------------------------------------
 --
 --  imperialUnits = 0 for metric
@@ -37,7 +39,7 @@ local vehicleIsPlane = 0
 --    0 - Disarmed
 --    1 - Armed
 -- 
-local gvArmed = 0
+gvArmed = 0
 --
 -------------------------------------------------------------------------------------------------------------------------------------    
 --
@@ -48,7 +50,7 @@ local gvArmed = 0
 --    2 - Altitude Hold
 --  > 2 - see mission planner full parameter list
 --
-local gvFlightMode = 1
+gvFlightMode = 1
 --
 -------------------------------------------------------------------------------------------------------------------------------------    
 --
@@ -63,7 +65,7 @@ local gvFlightMode = 1
 --    6 - info      - Normal operational messages. Useful for logging. No action is required for these messages
 --    7 - debug     - Useful non-operational messages that can assist in debugging. These should not occur during normal operation
 --
-local gvMessageSeverity = 2
+gvMessageSeverity = 2
 --
 -------------------------------------------------------------------------------------------------------------------------------------    
 --
@@ -71,7 +73,7 @@ local gvMessageSeverity = 2
 --   -1 - not available
 --    n - where n = HDOP value * 10
 --
-local gvHdop = 3
+gvHdop = 3
 --
 -------------------------------------------------------------------------------------------------------------------------------------    
 --
@@ -79,7 +81,7 @@ local gvHdop = 3
 --   -1 - not available
 --    n - where n = sequence number
 --
-local gvSequence = 4
+gvSequence = 4
 --
 -------------------------------------------------------------------------------------------------------------------------------------    
 
@@ -93,7 +95,7 @@ local speedName = "GSpd"
 local headingName = "Hdg"            
 local rssiName = "RSSI"            
 
-local FlightMode = {}
+FlightMode = {}
 local AsciiMap={}
 
 local messageBuffer = ""
@@ -111,7 +113,7 @@ messageNext = 0
 extensionValue = {}
 gpsData = {}
 
-function initialize()
+local function init()
   local i  
   for i=1, 18 do
       FlightMode[i] = {}
@@ -207,8 +209,6 @@ function initialize()
   AsciiMap[43] ="-"    
   AsciiMap[44] ="+"    
 end
-
-initialize()
       
 function char6(c) 
   if c >= 1 and c <= 44 then
@@ -593,9 +593,6 @@ local function drawBottomPanel()
       lcd.drawText(1, 55, "Disarmed", textAttributes)
     end            
   end
-end
-
-local function init()
 end
 
 local function background() 

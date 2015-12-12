@@ -13,14 +13,9 @@
 --
 --  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 --    
-
-initialize()
-
-local function init()
-end
-
-local function background()
-end
+--    
+--  Version 2.1.13a2
+-- 
 
 local function run(event)
   lcd.clear()
@@ -37,4 +32,4 @@ local function run(event)
   end
 end
 
-return {init=init, run=run, background=background}
+return {run=run}
