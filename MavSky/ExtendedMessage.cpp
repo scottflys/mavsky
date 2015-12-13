@@ -17,6 +17,9 @@
 extern MavLinkData *mav;
 extern MavConsole *console;
 
+#define EXTENDED_STREAM_BASE_MODE 7
+#define EXTENDED_STREAM_CUSTOM_MODE 8
+
 ExtendedMessage::ExtendedMessage() {
 }
 
@@ -81,8 +84,16 @@ uint16_t ExtendedMessage::telem_next_extension_word() {
     uint16_t result;
     static uint8_t last_was_text = 0;
     static uint8_t extension_index = 1;
+    static uint8_t previous_base_mode = 0;
+    static uint8_t previous_custom_mode = 0;
 
-    if(last_was_text == 0 && message_available()) { 
+    if(mav->base_mode != previous_base_mode) {                              // send mode changes immediately
+        result = get_next_extension_word(EXTENDED_STREAM_BASE_MODE); 
+        previous_base_mode = mav->base_mode;            
+    } else if(mav->custom_mode != previous_custom_mode) {
+        result = get_next_extension_word(EXTENDED_STREAM_CUSTOM_MODE);     
+        previous_custom_mode = mav->custom_mode;                  
+    } else if(last_was_text == 0 && message_available()) {                  // send text alternately if available
         result = get_next_extension_word(0);
         last_was_text = 1;
     } else {
@@ -149,10 +160,10 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
         case 6:
             extension_data = mav->gps_satellites_visible;        
             break;  
-        case 7:
+        case EXTENDED_STREAM_BASE_MODE:
             extension_data = mav->base_mode;
             break;  
-        case 8:
+        case EXTENDED_STREAM_CUSTOM_MODE:
             extension_data = mav->custom_mode;
             break;         
         case 9:
