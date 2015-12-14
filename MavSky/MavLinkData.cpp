@@ -351,12 +351,12 @@ void MavLinkData::process_mavlink_packets() {
   
         case MAVLINK_MSG_ID_VFR_HUD:                              
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_VFR_HUD);
-          logger->debug_print(Logger::LOG_MAV_VFR, (char *)"MAVLINK_MSG_ID_VFR_HUD: groundspeed: %d, heading: %d, throttle: %d, alt: %d, climbrate: %d", mavlink_msg_vfr_hud_get_groundspeed(&msg), mavlink_msg_vfr_hud_get_heading(&msg), mavlink_msg_vfr_hud_get_throttle(&msg), mavlink_msg_vfr_hud_get_alt(&msg), mavlink_msg_vfr_hud_get_climb(&msg));
+          logger->debug_print(Logger::LOG_MAV_VFR, (char *)"MAVLINK_MSG_ID_VFR_HUD: groundspeed: %f, heading: %d, throttle: %d, alt: %f, climbrate: %f", mavlink_msg_vfr_hud_get_groundspeed(&msg), mavlink_msg_vfr_hud_get_heading(&msg), mavlink_msg_vfr_hud_get_throttle(&msg), mavlink_msg_vfr_hud_get_alt(&msg), mavlink_msg_vfr_hud_get_climb(&msg));
           groundspeed = mavlink_msg_vfr_hud_get_groundspeed(&msg);         
           heading = mavlink_msg_vfr_hud_get_heading(&msg);                 
           throttle = mavlink_msg_vfr_hud_get_throttle(&msg);           
           bar_altitude = mavlink_msg_vfr_hud_get_alt(&msg); 
-          climb_rate = mavlink_msg_vfr_hud_get_climb(&msg);           
+          climb_rate = mavlink_msg_vfr_hud_get_climb(&msg);  
           break; 
   
         case MAVLINK_MSG_ID_MISSION_CURRENT:            

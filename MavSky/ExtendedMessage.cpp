@@ -167,7 +167,7 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
             extension_data = mav->custom_mode;
             break;         
         case 9:
-            extension_data = mav->bar_altitude;
+            extension_data = (int32_t)(mav->bar_altitude);
             break;  
         case 10:
             extension_data = mav->rangefinder_distance;

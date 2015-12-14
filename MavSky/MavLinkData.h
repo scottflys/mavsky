@@ -69,11 +69,11 @@ class MavLinkData {
     uint16_t  mav_cog = 0;                // not heading but actual course in degrees.  If unknown UINT16_MAX
     
     // MAVLINK_MSG_ID_VFR_HUD 
-    uint32_t  groundspeed = 0;            // Current ground speed in m/s
+    float     groundspeed = 0;            // Current ground speed in m/s
     uint32_t  heading = 0;                // Current heading in degrees, in compass units (0..360, 0=north)
     uint16_t  throttle = 0;               // Current throttle setting in integer percent, 0 to 100
-    int32_t   bar_altitude = 0;          
-    int32_t   climb_rate = 0;             
+    float     bar_altitude = 0;          
+    float     climb_rate = 0;             
     
     // MAVLINK_MSG_ID_RAW_IMU
     int16_t   imu_xacc = 0;

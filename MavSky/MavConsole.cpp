@@ -83,7 +83,7 @@ void MavConsole::do_dump() {
   console_print("HDOP:                      %.2f\r\n", mav->gps_hdop / 100.0);
   console_print("Satellites visible:        %d\r\n", mav->gps_satellites_visible);
   console_print("Temperature:               %d\r\n", mav->temperature);
-  console_print("Barometric Altitude:       %d\r\n", mav->bar_altitude);    
+  console_print("Barometric Altitude:       %f\r\n", mav->bar_altitude);    
   console_print("RangeFinder Altitude:      %d\r\n", mav->rangefinder_distance);      
   console_print("Temperature:               %d\r\n", mav->temperature);
   console_print("Mavlink imu:               x:%-4d y:%-4d z:%-4d\r\n", mav->imu_xacc, mav->imu_yacc, mav->imu_zacc);

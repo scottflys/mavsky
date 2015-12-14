@@ -302,19 +302,19 @@ void LedController::process_10_millisecond() {
     pattern_index = 2;
   } else if(mav->rc8 >= 1250 && mav->rc8 < 1350) {
     pattern_index = 3;
-    if(mav->climb_rate < 0) {
+    if(mav->climb_rate <= 0.05) {
       reverse = 1;
     }
   } else if(mav->rc8 >= 1350 && mav->rc8 < 1450) {
     pattern_index = 4;
   } else if(mav->rc8 >= 1450 && mav->rc8 < 1550) {
     pattern_index = 5;
-    if(mav->climb_rate < 0) {
+    if(mav->climb_rate <= 0.05) {
       reverse = 1;
     }
   }  else if(mav->rc8 >= 1550) {
     pattern_index = 6;
-    if(mav->climb_rate < 0) {
+    if(mav->climb_rate <= 0.05) {
       reverse = 1;
     }
   }

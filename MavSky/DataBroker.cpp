@@ -46,7 +46,7 @@ void DataBroker::console_map(char* p) {
 }
 
 void DataBroker::get_vario_data(int32_t *altitude, int32_t *vertical_speed) {
-  *vertical_speed = mav->climb_rate * 100;                                   
+  *vertical_speed = (int32_t)(mav->climb_rate * 100);                                   
   *altitude = data_map.get_mapped_data(data_map.VARIO_ALTITUDE);
 }
 
