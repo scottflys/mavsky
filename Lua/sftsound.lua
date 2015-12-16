@@ -1,5 +1,6 @@
 --
 --  Author: Scott Simpson
+--  Version 2.1.14
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -12,14 +13,14 @@
 --  GNU General Public License for more details.
 --
 --  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
---    
---  Version 2.1.13a2
+--
+-------------------------------------------------------------------------------------------------------------------------------------
 -- 
 local ArmedModeWavFile = {}
 local FlightModeWavFile = {}
 local MessageSeverityWavFile = {}
 local HdopWavFile = {}
-
+--
 -------------------------------------------------------------------------------------------------------------------------------------    
 -- Please change any wave files and thresholds in this section by adding the name of your wave file in between the quotes
 --   example: 
