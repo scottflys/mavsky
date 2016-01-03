@@ -23,6 +23,11 @@ extern MavConsole *console;
 extern int displayMemory[];
 extern int drawingMemory[];
 
+#define RIGHT_FRONT 0
+#define LEFT_REAR   1
+#define LEFT_FRONT  2
+#define RIGHT_REAR  3
+
 LedController::LedController() {
   leds_on_strip = 8;
 
@@ -46,34 +51,50 @@ LedController::LedController() {
   //LedBulbColor* magenta = new LedBulbColor(255, 0, 255);
   LedBulbColor* off = new LedBulbColor(0, 0, 0);
   LedBulbColor* white = new LedBulbColor(255, 255, 255);
-  
-  LedStripPattern* led_pattern = new LedStripPattern((char*)"normal"); 
+
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 0
+  // red on inside, green on outside LED
+  /////////////////////////////////////////////////////////////////////////
+  LedStripPattern* led_pattern = new LedStripPattern(); 
   led_pattern->add_strip_state(red, off, off, off, off, off, off, green, 0);
   add_pattern(0, 0, led_pattern);
   add_pattern(0, 1, led_pattern);
   add_pattern(0, 2, led_pattern);
   add_pattern(0, 3, led_pattern);
 
-  led_pattern = new LedStripPattern((char*)"all_off"); 
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 1
+  // all off
+  /////////////////////////////////////////////////////////////////////////
+  led_pattern = new LedStripPattern(); 
   led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 0);
   add_pattern(1, 0, led_pattern);
   add_pattern(1, 1, led_pattern);
   add_pattern(1, 2, led_pattern);
   add_pattern(1, 3, led_pattern);
   
-  led_pattern = new LedStripPattern((char*)"landing1"); 
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 2
+  // red on inside, white on center 6, green on outside
+  /////////////////////////////////////////////////////////////////////////
+  led_pattern = new LedStripPattern(); 
   led_pattern->add_strip_state(red, white, white, white, white, white, white, green, 0);
   add_pattern(2, 0, led_pattern);
   add_pattern(2, 1, led_pattern);
   add_pattern(2, 2, led_pattern);
   add_pattern(2, 3, led_pattern);
   
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 3
+  // red on inside, green on outside, expand whites in center
+  /////////////////////////////////////////////////////////////////////////
   // 0                
   // 1 R             G    
   // 2 R-W         W-G
   // 3 R-W-W-    W-W-G
   // 4 R-W-W-W-W-W-W-G
-  led_pattern = new LedStripPattern((char*)"landing2"); 
+  led_pattern = new LedStripPattern(); 
   led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 600);
   led_pattern->add_strip_state(red, off, off, off, off, off, off, green, 100);
   led_pattern->add_strip_state(red, white, off, off, off, off, white, green, 100);
@@ -84,10 +105,13 @@ LedController::LedController() {
   add_pattern(3, 2, led_pattern);
   add_pattern(3, 3, led_pattern);
 
-//  3  1   front goes out to in with red on left
-//  2  4   back goes in to out with red on left
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 4
+  //  3  1   front goes out to in with red on left
+  //  2  4   back goes in to out with red on left
+  /////////////////////////////////////////////////////////////////////////
   
-  led_pattern = new LedStripPattern((char*)"flying1");                      // right front out to in green
+  led_pattern = new LedStripPattern();                                          // right front out to in green
   led_pattern->add_strip_state(off, off, off, off, off, off, green, green, 100);
   led_pattern->add_strip_state(off, off, off, off, off, green, green, off, 100);
   led_pattern->add_strip_state(off, off, off, off, green, green, off, off, 100);
@@ -98,7 +122,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(green, off, off, off, off, off, off, green, 100);
   add_pattern(4, 0, led_pattern);  
 
-  led_pattern = new LedStripPattern((char*)"flying1");                      // left rear in to out red
+  led_pattern = new LedStripPattern();                                          // left rear in to out red
   led_pattern->add_strip_state(red, red, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, red, red, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, red, red, off, off, off, off, 100);
@@ -109,7 +133,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(red, off, off, off, off, off, off, red, 100);
   add_pattern(4, 1, led_pattern);
 
-  led_pattern = new LedStripPattern((char*)"flying1");                      // left front out to in red
+  led_pattern = new LedStripPattern();                                          // left front out to in red
   led_pattern->add_strip_state(off, off, off, off, off, off, red, red, 100);
   led_pattern->add_strip_state(off, off, off, off, off, red, red, off, 100);
   led_pattern->add_strip_state(off, off, off, off, red, red, off, off, 100);
@@ -120,7 +144,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(red, off, off, off, off, off, off, red, 100);
   add_pattern(4, 2, led_pattern);
   
-  led_pattern = new LedStripPattern((char*)"flying1");                      // right rear in to out green
+  led_pattern = new LedStripPattern();                                          // right rear in to out green
   led_pattern->add_strip_state(green, green, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, green, green, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, green, green, off, off, off, off, 100);
@@ -131,9 +155,12 @@ LedController::LedController() {
   led_pattern->add_strip_state(green, off, off, off, off, off, off, green, 100);
   add_pattern(4, 3, led_pattern);
 
-//  all go inside to out in yellow
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 5
+  //  all go inside to out in yellow
+  /////////////////////////////////////////////////////////////////////////
   
-  led_pattern = new LedStripPattern((char*)"flying2");                      
+  led_pattern = new LedStripPattern();                      
   led_pattern->add_strip_state(yellow, yellow, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, yellow, yellow, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, yellow, yellow, off, off, off, off, 100);
@@ -144,7 +171,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(yellow, off, off, off, off, off, off, yellow, 100);
   add_pattern(5, 0, led_pattern);  
 
-  led_pattern = new LedStripPattern((char*)"flying1");                      
+  led_pattern = new LedStripPattern();                      
   led_pattern->add_strip_state(yellow, yellow, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, yellow, yellow, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, yellow, yellow, off, off, off, off, 100);
@@ -155,7 +182,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(yellow, off, off, off, off, off, off, yellow, 100);
   add_pattern(5, 1, led_pattern);
 
-  led_pattern = new LedStripPattern((char*)"flying1");              
+  led_pattern = new LedStripPattern();              
   led_pattern->add_strip_state(yellow, yellow, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, yellow, yellow, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, yellow, yellow, off, off, off, off, 100);
@@ -166,7 +193,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(yellow, off, off, off, off, off, off, yellow, 100);
   add_pattern(5, 2, led_pattern);
   
-  led_pattern = new LedStripPattern((char*)"flying1");                     
+  led_pattern = new LedStripPattern();                     
   led_pattern->add_strip_state(yellow, yellow, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, yellow, yellow, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, yellow, yellow, off, off, off, off, 100);
@@ -177,9 +204,12 @@ LedController::LedController() {
   led_pattern->add_strip_state(yellow, off, off, off, off, off, off, yellow, 100);
   add_pattern(5, 3, led_pattern);  
   
-//  all go inside to out in blue
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 6
+  //  all go inside to out in blue
+  /////////////////////////////////////////////////////////////////////////
   
-  led_pattern = new LedStripPattern((char*)"flying3");               
+  led_pattern = new LedStripPattern();               
   led_pattern->add_strip_state(blue, blue, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, blue, blue, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, blue, blue, off, off, off, off, 100);
@@ -190,7 +220,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(blue, off, off, off, off, off, off, blue, 100);
   add_pattern(6, 0, led_pattern);
     
-  led_pattern = new LedStripPattern((char*)"flying3");               
+  led_pattern = new LedStripPattern();               
   led_pattern->add_strip_state(blue, blue, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, blue, blue, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, blue, blue, off, off, off, off, 100);
@@ -201,7 +231,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(blue, off, off, off, off, off, off, blue, 100);
   add_pattern(6, 1, led_pattern);  
 
-  led_pattern = new LedStripPattern((char*)"flying3");               
+  led_pattern = new LedStripPattern();               
   led_pattern->add_strip_state(blue, blue, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, blue, blue, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, blue, blue, off, off, off, off, 100);
@@ -212,7 +242,7 @@ LedController::LedController() {
   led_pattern->add_strip_state(blue, off, off, off, off, off, off, blue, 100);
   add_pattern(6, 2, led_pattern);
     
-  led_pattern = new LedStripPattern((char*)"flying3");               
+  led_pattern = new LedStripPattern();               
   led_pattern->add_strip_state(blue, blue, off, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, blue, blue, off, off, off, off, off, 100);
   led_pattern->add_strip_state(off, off, blue, blue, off, off, off, off, 100);
@@ -222,6 +252,49 @@ LedController::LedController() {
   led_pattern->add_strip_state(off, off, off, off, off, off, blue, blue, 100);
   led_pattern->add_strip_state(blue, off, off, off, off, off, off, blue, 100);
   add_pattern(6, 3, led_pattern);  
+
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 7
+  // red green alternating strobe
+  /////////////////////////////////////////////////////////////////////////
+  led_pattern = new LedStripPattern();               
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 20);
+  led_pattern->add_strip_state(green, green, green, green, green, green, green, green, 20);
+  add_pattern(7, RIGHT_FRONT, led_pattern);  
+  add_pattern(7, RIGHT_REAR, led_pattern);    
+  
+  led_pattern = new LedStripPattern();               
+  led_pattern->add_strip_state(red, red, red, red, red, red, red, red, 20);
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 20);
+  add_pattern(7, LEFT_FRONT, led_pattern);  
+  add_pattern(7, LEFT_REAR, led_pattern);  
+
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 8
+  // red green simultaneous strobe
+  /////////////////////////////////////////////////////////////////////////
+  led_pattern = new LedStripPattern();               
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 100);
+  led_pattern->add_strip_state(green, green, green, green, green, green, green, green, 100);
+  add_pattern(8, RIGHT_FRONT, led_pattern);  
+  add_pattern(8, RIGHT_REAR, led_pattern);    
+  
+  led_pattern = new LedStripPattern();               
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 100);
+  led_pattern->add_strip_state(red, red, red, red, red, red, red, red, 100);
+  add_pattern(8, LEFT_FRONT, led_pattern);  
+  add_pattern(8, LEFT_REAR, led_pattern);  
+  
+  /////////////////////////////////////////////////////////////////////////
+  // Pattern 9
+  /////////////////////////////////////////////////////////////////////////
+  led_pattern = new LedStripPattern();               
+  led_pattern->add_strip_state(yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, 0);
+  add_pattern(9, RIGHT_FRONT, led_pattern);  
+  add_pattern(9, RIGHT_REAR, led_pattern); 
+  add_pattern(9, LEFT_FRONT, led_pattern);  
+  add_pattern(9, LEFT_REAR, led_pattern);  
+
 }
 
 LedBulbColor::LedBulbColor(uint8_t red_param, uint8_t green_param, uint8_t blue_param) {
@@ -251,8 +324,7 @@ LedStripState::LedStripState(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c
   state_time = time_param;
 }
 
-LedStripPattern::LedStripPattern(char* name_param) {
-  pattern_name = name_param;
+LedStripPattern::LedStripPattern() {
   strip_state_count = 0;
 }
 
@@ -312,10 +384,40 @@ void LedController::process_10_millisecond() {
     if(mav->climb_rate <= 0.05) {
       reverse = 1;
     }
-  }  else if(mav->rc8 >= 1550) {
+  }  else if(mav->rc8 >= 1550 && mav->rc8 < 1650) {
     pattern_index = 6;
     if(mav->climb_rate <= 0.05) {
       reverse = 1;
+    }  
+  }  else if(mav->rc8 >= 1650 && mav->rc8 < 1750) {
+    pattern_index = 7;
+  }  else if(mav->rc8 >= 1750 && mav->rc8 < 1850) {
+    pattern_index = 8;
+  }  else if(mav->rc8 >= 1850 && mav->rc8 < 1950) {
+    pattern_index = 9;  
+  }  else if(mav->rc8 >= 1950) {
+    switch(mav->custom_mode) {
+      case 0:                           // stabilize
+        pattern_index = 4;
+        break;
+      case 2:                           // alt hold
+        pattern_index = 7;
+        break;
+      case 16:                           // pos hold
+        pattern_index = 8;
+        break;
+      case 3:                           // auto
+        pattern_index = 9;
+        break;
+      case 6:                           // rtl
+        pattern_index = 6;
+        break;
+      case 7:                           // circle
+        pattern_index = 5;
+        break;
+      default:
+        pattern_index = 0;
+        break;
     }
   }
 

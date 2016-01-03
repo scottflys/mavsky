@@ -129,8 +129,10 @@ void loop()  {
   
   if(current_milli >= next_100_loop) {
     next_100_loop = current_milli + 100;
-    check_for_faults();
-     mav->process_100_millisecond();
+    if(current_milli > 10000) {
+      check_for_faults();
+    }
+    mav->process_100_millisecond();
   }  
   
   if(current_milli >= next_10_loop) {

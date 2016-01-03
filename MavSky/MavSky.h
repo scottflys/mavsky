@@ -13,7 +13,7 @@
 #ifndef MAVSKY_H
 #define MAVSKY_H
 
-#define PRODUCT_STRING  "MAVSky Version 2.1.14"
+#define PRODUCT_STRING  "MAVSky Version 2.1.14a2"
 
 #define FAULT_MAV_OFFLINE    1
 #define FAULT_SPORT_OFFLINE  2

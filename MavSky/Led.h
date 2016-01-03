@@ -41,13 +41,12 @@ class LedStripState {
 
 class LedStripPattern {
   private:
-    char*     pattern_name;
 
   public:
     uint8_t   strip_state_count = 0;
 
     LedStripState* led_strip_states[LED_MAX_STRIP_STATES];
-    LedStripPattern(char* name_param);
+    LedStripPattern();
     void add_strip_state(LedStripState* strip_state_param);
     void add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
 };
