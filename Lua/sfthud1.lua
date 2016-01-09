@@ -356,14 +356,14 @@ end
 local function drawBatteryVoltage(x,y)
 	local batteryVoltage = getValue(vfasName)
   lcd.drawText(x, y + 5, "Bat", SMLSIZE)
-  lcd.drawNumber(x + 43, y,batteryVoltage,MIDSIZE+PREC1)
+  lcd.drawNumber(x + 43, y,batteryVoltage*10,MIDSIZE+PREC1)
   lcd.drawText(lcd.getLastPos(), y + 5, "V",SMLSIZE)
 end
 
 local function drawCurrent(x, y)
 	local current = getValue(currentName)
   lcd.drawText(x, y + 5, "Cur", SMLSIZE)
-  lcd.drawNumber(x + 43, y, current, MIDSIZE+PREC1)
+  lcd.drawNumber(x + 43, y, current*10, MIDSIZE+PREC1)
   local t = lcd.getLastPos() + 1
   lcd.drawText(t, y + 5,"A",SMLSIZE)
 end
