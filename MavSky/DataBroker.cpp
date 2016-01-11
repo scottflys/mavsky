@@ -55,7 +55,7 @@ void DataBroker::get_fas_data(uint32_t *voltage, uint32_t *current) {
   *current = mav->average_battery_current;
 }
   
-void DataBroker::get_gps_data(uint32_t *lon, uint32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading) {
+void DataBroker::get_gps_data(int32_t *lon, int32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading) {
   *lon = mav->gps_longitude;
   *lat = mav->gps_latitude;
   *alt = mav->gps_altitude / 10;

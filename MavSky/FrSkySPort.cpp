@@ -77,7 +77,7 @@ void FrSkySPort::set_fas_request_callback(void (*callback)(uint32_t *p1, uint32_
   fas_data_request_function = callback;
 }
 
-void FrSkySPort::set_gps_request_callback(void (*callback)(uint32_t *p1, uint32_t *p2, int32_t *p3, uint32_t *p4, uint32_t *p5)) {
+void FrSkySPort::set_gps_request_callback(void (*callback)(int32_t *p1, int32_t *p2, int32_t *p3, uint32_t *p4, uint32_t *p5)) {
   gps_data_request_function = callback;
 }
 
@@ -161,11 +161,11 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
           if(process_timestamp > delay_gps_next) {
             if(gps_data_request_function != NULL) {
               gps_data_request_function(&gps_longitude, &gps_latitude, &gps_altitude, &gps_speed, &gps_heading);
-            }
+            }        
             if(gps_longitude < 0) {
-              latlong=((abs(gps_longitude)/100)*6) | 0xC0000000;
+              latlong = (((0L - gps_longitude) / 100) * 6) | 0xC0000000;  // set msb to indicate lon, 2nd msb to indicate negative
             } else {
-              latlong=((abs(gps_longitude)/100)*6) | 0x80000000;
+              latlong = ((gps_longitude / 100) * 6) | 0x80000000;         // set msb to indicate lon
             }
             frsky_send_package(FR_ID_LATLONG, latlong);
             delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;   
@@ -174,12 +174,13 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
             frsky_send_null(FR_ID_LATLONG);   
           }
           break;
+          
         case 1: 
           if(process_timestamp > delay_gps_next) {
-            if(gps_latitude < 0 ) {
-              latlong = ((abs(gps_latitude)/100)*6) | 0x40000000;
+            if(gps_latitude < 0L) {
+              latlong = (((0L - gps_latitude) / 100) * 6) | 0x40000000;   // set 2nd msb to indicate negative
             } else {
-              latlong = ((abs(gps_latitude)/100)*6);
+              latlong = ((gps_latitude / 100) * 6);
             }
             frsky_send_package(FR_ID_LATLONG, latlong);
             delay_gps_next = process_timestamp + DELAY_GPS_PERIOD;
@@ -187,7 +188,8 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
           } else {
             frsky_send_null(FR_ID_LATLONG);   
           }
-          break;  
+          break;
+            
         case 2:
           if(process_timestamp > delay_gps_next) {
             frsky_send_package(FR_ID_GPS_ALT, gps_altitude);                                 
@@ -197,6 +199,7 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
             frsky_send_null(FR_ID_GPS_ALT);   
           }
           break;
+          
         case 3:                 
           if(process_timestamp > delay_gps_next) {
             frsky_send_package(FR_ID_SPEED, gps_speed);                              
@@ -206,6 +209,7 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
             frsky_send_null(FR_ID_SPEED);   
           }
           break;
+          
         case 4:
           if(process_timestamp > delay_gps_next) {
             frsky_send_package(FR_ID_GPS_COURSE, gps_heading);                                      
