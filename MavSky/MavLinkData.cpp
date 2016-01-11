@@ -282,7 +282,6 @@ void MavLinkData::process_mavlink_packets() {
   
         case MAVLINK_MSG_ID_GPS_RAW_INT:     
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_GPS_RAW_INT);
-          logger->debug_print(Logger::LOG_MAV_GPS, (char *)"MAVLINK_MSG_ID_GPS_RAW_INT: fixtype: %d, visiblesats: %d, gpsspeed: %f, alt: %d", mavlink_msg_gps_raw_int_get_fix_type, mavlink_msg_gps_raw_int_get_satellites_visible, mavlink_msg_gps_raw_int_get_vel(&msg), mavlink_msg_gps_raw_int_get_alt(&msg));
           gps_fixtype = mavlink_msg_gps_raw_int_get_fix_type(&msg);                              // 0 = No GPS, 1 =No Fix, 2 = 2D Fix, 3 = 3D Fix
           gps_satellites_visible =  mavlink_msg_gps_raw_int_get_satellites_visible(&msg);      
           gps_hdop = mavlink_msg_gps_raw_int_get_eph(&msg);                                    // hdop * 100
@@ -291,6 +290,7 @@ void MavLinkData::process_mavlink_packets() {
           gps_altitude = mavlink_msg_gps_raw_int_get_alt(&msg);                                // 1m =1000
           gps_speed = mavlink_msg_gps_raw_int_get_vel(&msg);                                   // 100 = 1m/s
           mav_cog = mavlink_msg_gps_raw_int_get_cog(&msg);
+          logger->debug_print(Logger::LOG_MAV_GPS, (char *)"MAVLINK_MSG_ID_GPS_RAW_INT: fixtype: %d, sats: %d, hdop: %d, speed: %ld, alt: %ld lat: %ld lon: %ld", gps_fixtype, gps_satellites_visible, gps_hdop, gps_speed, gps_altitude, gps_latitude, gps_longitude);
           armed_bit = (base_mode >> 7) & 1;
           if(armed_bit) {
             if(armed_latitude == 0 || armed_longitude == 0) {                                   // set first gps after arm
