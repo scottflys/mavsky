@@ -258,14 +258,14 @@ LedController::LedController() {
   // red green alternating strobe
   /////////////////////////////////////////////////////////////////////////
   led_pattern = new LedStripPattern();               
-  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 20);
-  led_pattern->add_strip_state(green, green, green, green, green, green, green, green, 20);
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 100);
+  led_pattern->add_strip_state(green, green, green, green, green, green, green, green, 100);
   add_pattern(7, RIGHT_FRONT, led_pattern);  
   add_pattern(7, RIGHT_REAR, led_pattern);    
   
   led_pattern = new LedStripPattern();               
-  led_pattern->add_strip_state(red, red, red, red, red, red, red, red, 20);
-  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 20);
+  led_pattern->add_strip_state(red, red, red, red, red, red, red, red, 100);
+  led_pattern->add_strip_state(off, off, off, off, off, off, off, off, 100);
   add_pattern(7, LEFT_FRONT, led_pattern);  
   add_pattern(7, LEFT_REAR, led_pattern);  
 
@@ -438,5 +438,54 @@ void LedController::process_10_millisecond() {
     }
   }
   leds->show();
+}
+
+
+uint8_t LedController::hex2dec_char(char hex_char) {
+  if(hex_char >= '0' && hex_char <= '9') {
+    return hex_char - '0';
+  } else if(hex_char >= 'a' && hex_char <= 'f') {
+    return hex_char - 'a' + 10;
+  } else if(hex_char >= 'A' && hex_char <= 'F') {
+    return hex_char - 'A' + 10;
+  }
+  return 0;
+}
+
+uint32_t LedController::hex2dec_string(char *hex_string, uint8_t len) {
+  uint32_t val = 0;
+
+  if(strlen(hex_string) < len) {
+    len = strlen(hex_string);
+  }
+  for(int i=0; i<len; i++) {
+    val = val * 16 + hex2dec_char(hex_string[i]);
+  }
+  return val;
+}
+  
+void LedController::process_led_data_line(char *cmd_buffer) {   
+  static uint8_t  current_pattern_number = 0;
+  static uint16_t current_state_duration = 0;
+  static uint8_t  current_arm_number = 0;
+  static uint8_t  current_led_index = 0;
+
+  if(cmd_buffer[0] == 'p') {
+    current_pattern_number = hex2dec_string(cmd_buffer+1, 2);
+  } else if(cmd_buffer[0] == 's') {
+    current_state_duration = hex2dec_string(cmd_buffer+1, 2);
+  } else if(cmd_buffer[0] == 'a') {
+    current_arm_number = hex2dec_string(cmd_buffer+1, 2);
+    cmd_buffer += 3;
+    while(strlen(cmd_buffer) >= 6) {
+      uint8_t red = hex2dec_string(cmd_buffer, 2);
+      cmd_buffer += 2;
+      uint8_t green = hex2dec_string(cmd_buffer, 2);
+      cmd_buffer += 2;
+      uint8_t blue = hex2dec_string(cmd_buffer, 2);
+      cmd_buffer += 2;
+ //     console_print("%d %d %d\n", red, green, blue);
+    }
+  }
 }
 

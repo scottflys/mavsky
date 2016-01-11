@@ -18,10 +18,12 @@
 #include "MavSky.h"
 #include "Logger.h"
 #include "DataBroker.h"       // todo needed for eeprom constants for now
+#include "Led.h"
 
 extern Logger *logger;
 extern MavLinkData *mav;
 extern DataBroker data_broker;
+extern LedController* led_strip_ptr;
 
 MavConsole::MavConsole(usb_serial_class port) {
   serial = port;
@@ -225,56 +227,6 @@ void MavConsole::do_command(char *cmd_buffer) {
   }
 }
 
-uint8_t MavConsole::hex2dec_char(char hex_char) {
-  if(hex_char >= '0' && hex_char <= '9') {
-    return hex_char - '0';
-  } else if(hex_char >= 'a' && hex_char <= 'f') {
-    return hex_char - 'a' + 10;
-  } else if(hex_char >= 'A' && hex_char <= 'F') {
-    return hex_char - 'A' + 10;
-  }
-  return 0;
-}
-
-uint32_t MavConsole::hex2dec_string(char *hex_string, uint8_t len) {
-  uint32_t val = 0;
-
-  if(strlen(hex_string) < len) {
-    len = strlen(hex_string);
-  }
-  for(int i=0; i<len; i++) {
-    val = val * 16 + hex2dec_char(hex_string[i]);
-  }
-  return val;
-}
-  
-void MavConsole::process_led_data_line(char *cmd_buffer) {
-  static uint8_t  current_pattern_number = 0;
-  static uint16_t current_state_duration = 0;
-  static uint8_t  current_arm_number = 0;
-  static uint8_t  current_led_index = 0;
-
-  console_print("-%s-\n", cmd_buffer);
-  if(cmd_buffer[0] == 'p') {
-    current_pattern_number = hex2dec_string(cmd_buffer+1, 2);
-  } else if(cmd_buffer[0] == 's') {
-    current_state_duration = hex2dec_string(cmd_buffer+1, 2);
-  } else if(cmd_buffer[0] == 'a') {
-    current_arm_number = hex2dec_string(cmd_buffer+1, 2);
-    cmd_buffer += 3;
-    while(strlen(cmd_buffer) >= 6) {
-      console_print("flag3\n");
-      uint8_t red = hex2dec_string(cmd_buffer, 2);
-      cmd_buffer += 2;
-      uint8_t green = hex2dec_string(cmd_buffer, 2);
-      cmd_buffer += 2;
-      uint8_t blue = hex2dec_string(cmd_buffer, 2);
-      cmd_buffer += 2;
-      console_print("%d %d %d\n", red, green, blue);
-    }
-  }
-}
-
 void MavConsole::check_for_console_command() {
   while(serial.available()) { 
     uint8_t c = serial.read();
@@ -288,7 +240,7 @@ void MavConsole::check_for_console_command() {
       } else if(strcmp(cmd_buffer, "leddatastop") == 0) {
         led_data_mode = 0;
       } else if(led_data_mode) {
-        process_led_data_line(cmd_buffer);
+        led_strip_ptr->process_led_data_line(cmd_buffer);
       } else {
         do_command(cmd_buffer);
         serial.write("]");

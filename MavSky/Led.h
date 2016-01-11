@@ -66,11 +66,14 @@ class LedController {
     uint8_t leds_on_strip = 0;
     void add_pattern(int pattern_number, int strip_number, LedStripPattern* pattern);
     void change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr, uint32_t current_time);
-    
+    uint8_t hex2dec_char(char hex_char);
+    uint32_t hex2dec_string(char *hex_string, uint8_t len);
+        
   public:
     LedStrip* led_strips[LED_MAX_STRIPS];  
     LedController();
     void process_10_millisecond();
+    void process_led_data_line(char *cmd_buffer);   
 };
 
 #endif
