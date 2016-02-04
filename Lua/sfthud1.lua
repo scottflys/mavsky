@@ -382,7 +382,7 @@ end
 local function drawVerticalSpeed(x, y)
 	local vspd = getValue(vspdName)
   lcd.drawText(x, y + 5, "Vsp", SMLSIZE)
-  lcd.drawNumber(x + 43, y, vspd, MIDSIZE+PREC1)
+  lcd.drawNumber(x + 43, y, vspd*10, MIDSIZE+PREC1)
   local t = lcd.getLastPos() + 1
   lcd.drawText(t, y, "m", SMLSIZE)   
   lcd.drawText(t, y+5, "s", SMLSIZE)    
@@ -455,9 +455,9 @@ local function drawHdop(x,y)
   hdop = hdop / 10
   if hdop >= 99 then
     lcd.drawText(x-22, y+3, ">", SMLSIZE)  
-    lcd.drawNumber (x, y, 99, MIDSIZE)
+    lcd.drawNumber(x, y, 99, MIDSIZE)
   else
-    lcd.drawNumber (x, y, hdop, PREC1 + MIDSIZE)
+    lcd.drawNumber(x, y, hdop*10, PREC1 + MIDSIZE)
   end
 
   local t = lcd.getLastPos() + 1
@@ -557,7 +557,7 @@ function drawTopPanel()
   lcd.drawTimer(lcd.getLastPos() + 5, 1, model.getTimer(0).value, INVERS)
 
   lcd.drawText(lcd.getLastPos() + 5, 1, "TX:", INVERS)
-  lcd.drawNumber(lcd.getLastPos() + 16, 1, getValue("tx-voltage"), PREC1 + INVERS)
+  lcd.drawNumber(lcd.getLastPos() + 16, 1, getValue("tx-voltage")*10, PREC1 + INVERS)
 
   lcd.drawText(lcd.getLastPos(), 1, "v", INVERS)
 
