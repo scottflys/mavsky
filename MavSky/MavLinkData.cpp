@@ -136,7 +136,16 @@ uint16_t MavLinkData::calc_mah_consumed() {
 }
 
 void MavLinkData::process_1000_millisecond() {
-  calced_cog = round(get_bearing_to_coordinates_int(last_process_1000_gps_latitude, last_process_1000_gps_longitude, gps_latitude, gps_longitude));  
+  uint8_t armed_bit;
+  
+
+  armed_bit = (base_mode >> 7) & 1;
+  if(armed_bit) {
+    if(gps_speed > 50) {
+      calced_cog = round(get_bearing_to_coordinates_int(last_process_1000_gps_latitude, last_process_1000_gps_longitude, gps_latitude, gps_longitude)); 
+    }
+    calced_distance_travelled += gps_speed;  
+  }         
   last_process_1000_gps_latitude = gps_latitude;
   last_process_1000_gps_longitude = gps_longitude;
 }

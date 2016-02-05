@@ -81,30 +81,40 @@ uint8_t ExtendedMessage::get_next_text_byte() {
 }
 
 uint16_t ExtendedMessage::telem_next_extension_word() { 
-    uint16_t result;
+    uint16_t result = 0;
     static uint8_t last_was_text = 0;
     static uint8_t extension_index = 1;
     static uint8_t previous_base_mode = 0;
     static uint8_t previous_custom_mode = 0;
+    static uint8_t previous_extension_word_values_initialized = 0;
+    static uint16_t previous_extension_word_values[16];
+    static uint16_t latest_extension_word_output_sequence[16];
 
-    if(mav->base_mode != previous_base_mode) {                              // send mode changes immediately
-        result = get_next_extension_word(EXTENDED_STREAM_BASE_MODE); 
-        previous_base_mode = mav->base_mode;            
-    } else if(mav->custom_mode != previous_custom_mode) {
-        result = get_next_extension_word(EXTENDED_STREAM_CUSTOM_MODE);     
-        previous_custom_mode = mav->custom_mode;                  
-    } else if(last_was_text == 0 && message_available()) {                  // send text alternately if available
+    if(last_was_text == 0 && message_available()) {                  // send text alternately if available
         result = get_next_extension_word(0);
         last_was_text = 1;
     } else {
-        result = get_next_extension_word(extension_index++);       
-        if(extension_index > 15) { 
-            extension_index = 1;  
-            message_packet_sequence++;                                         
+        for(int i=1; i<16; i++) {   
+          result = get_next_extension_word(extension_index);
+          if((previous_extension_word_values_initialized == 0) || (result != previous_extension_word_values[extension_index]) || ((latest_extension_word_output_sequence[extension_index]+random(20,40)) < message_packet_sequence)) {    // last or will randomize synchronization so all don't occur at once
+            previous_extension_word_values[extension_index] = result;
+            latest_extension_word_output_sequence[extension_index] = message_packet_sequence;
+            last_was_text = 0;
+            if(++extension_index > 15) { 
+                extension_index = 1;  
+                message_packet_sequence++;   
+                previous_extension_word_values_initialized = 1;                                      
+            }     
+            break;
+          } 
+          if(++extension_index > 15) { 
+              extension_index = 1;  
+              message_packet_sequence++;   
+              previous_extension_word_values_initialized = 1;                                      
+          }     
         }
-        last_was_text = 0;
     }
-    return result;
+    return result;  
 }
 
 uint16_t ExtendedMessage::encode_100(float source) {
@@ -149,7 +159,7 @@ uint16_t ExtendedMessage::get_next_extension_word(uint8_t extension_command) {
             extension_data = mav->calced_cog;
             break;         
         case 3:
-            extension_data = 0;                                // unused
+            extension_data = mav->calced_distance_travelled / 100;
             break;         
         case 4:
             extension_data = mav->gps_hdop / 10;

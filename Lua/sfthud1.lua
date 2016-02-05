@@ -273,8 +273,8 @@ function checkForExtensionMessage()
       else
         extensionValue["cog"] = nil 
       end
---  elseif extensionCommand == 3 then
---    extensionValue["pitch_angle"] = THIS IS UNUSED  
+    elseif extensionCommand == 3 then
+      extensionValue["dist_travelled"] = extensionData 
     elseif extensionCommand == 4 then
       extensionValue["hdop"] = extensionData   
       model.setGlobalVariable(gvHdop, 0, extensionData)        

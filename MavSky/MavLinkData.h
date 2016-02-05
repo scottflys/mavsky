@@ -121,10 +121,10 @@ class MavLinkData {
     int16_t   average_battery_current = 0;       
     int32_t   armed_latitude = 0;               
     int32_t   armed_longitude = 0;
-    uint32_t  armed_distance = 0;           // in m
-    uint16_t  armed_bearing = 0;            // in degrees (0-359)  
-    uint16_t  calced_cog = 0;                 // in degrees (0-359)  
-    
+    uint32_t  armed_distance = 0;                     // in m
+    uint16_t  armed_bearing = 0;                      // in degrees (0-359)  
+    uint16_t  calced_cog = 0;                         // in degrees (0-359)  
+    uint32_t  calced_distance_travelled = 0;          // in cm
     uint32_t  tenth_amp_per_millisecond_consumed = 0;  
     
     MavLinkData();
