@@ -1,6 +1,6 @@
 --
 --  Author: Scott Simpson
---  Version 2.1.15
+--  Version 2.1.16a
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -21,16 +21,35 @@
 --
 local imperialUnits = 0
 --
---  useCurrentMonitoring = 0 for no
---  useCurrentMonitoring = 1 for yes
---
-local useCurrentMonitoring = 1
 --
 --  vehicleIsPlane = 0 for copter
 --  vehicleIsPlane = 1 for plane
 --
 local vehicleIsPlane = 0
 --
+--
+-- Set Slot value to position the field on the screen
+-- Slot = 0 to disable
+-- Slot = 1 for top left
+-- Slot = 2 for middle left
+-- Slot = 3 for bottom left
+-- Slot = 4 for top right
+-- Slot = 5 for middle right
+-- Slot = 6 for bottom right
+--
+local Slot = {}
+--
+Slot["BatteryVoltage"] = 1
+Slot["Current"] = 2
+Slot["TotalCurrent"] = 3
+Slot["Speed"] = 4
+Slot["Altitude"] = 5
+Slot["Distance"] = 6
+
+Slot["VerticalSpeed"] = 0
+Slot["Heading"] = 0
+Slot["DistanceTravelled"] = 0
+  
 -------------------------------------------------------------------------------------------------------------------------------------    
 --
 --  GV to use for armed status (default 0 = GV1)
@@ -96,6 +115,7 @@ local rssiName = "RSSI"
 
 FlightMode = {}
 local AsciiMap={}
+local Position = {}
 
 local messageBuffer = ""
 local messageBufferSeverity = 0
@@ -142,7 +162,7 @@ local function init()
 		FlightMode[16].Name="Auto Tune"
 		FlightMode[17].Name="Position Hold"
 		FlightMode[18].Name="Unknown"
-    else
+  else
 		FlightMode[1].Name="Manual"
 		FlightMode[2].Name="Circle"
 		FlightMode[3].Name="Stabilize"
@@ -206,7 +226,26 @@ local function init()
   AsciiMap[41] =":"
   AsciiMap[42] ="!"    
   AsciiMap[43] ="-"    
-  AsciiMap[44] ="+"    
+  AsciiMap[44] ="+" 
+
+  Position[1] = {}
+  Position[1].x = 1
+  Position[1].y = 12
+  Position[2] = {}
+  Position[2].x = 1
+  Position[2].y = 26
+  Position[3] = {}
+  Position[3].x = 1
+  Position[3].y = 40
+  Position[4] = {}
+  Position[4].x = 152
+  Position[4].y = 12
+  Position[5] = {}
+  Position[5].x = 152
+  Position[5].y = 26
+  Position[6] = {}
+  Position[6].x = 152
+  Position[6].y = 40  
 end
       
 function char6(c) 
@@ -403,7 +442,7 @@ local function drawSpeed(x, y)
     speed = speed * 0.621                       -- to mi/hr
   end
   lcd.drawText(x, y + 5, "Spd", SMLSIZE)
-  lcd.drawNumber(x + 37, y, speed, MIDSIZE)
+  lcd.drawNumber(x + 43, y, speed, MIDSIZE)
   local t = lcd.getLastPos() + 1
 
   if imperialUnits == 1 then
@@ -420,7 +459,7 @@ local function drawAltitude(x, y)
     altitude = altitude * 3.28
   end
   lcd.drawText(x, y + 5, "Alt", SMLSIZE)
-  lcd.drawNumber(x + 36, y, altitude, MIDSIZE)
+  lcd.drawNumber(x + 43, y, altitude, MIDSIZE)
   local t = lcd.getLastPos() + 1
   if imperialUnits == 1 then
     lcd.drawText(t, y + 5, "ft", SMLSIZE)
@@ -438,7 +477,25 @@ local function drawDistance(x, y)
     distance = distance * 3.28
   end    
   lcd.drawText(x, y + 5, "Dst", SMLSIZE)
-  lcd.drawNumber(x + 36, y, distance, MIDSIZE)
+  lcd.drawNumber(x + 43, y, distance, MIDSIZE)
+  local t = lcd.getLastPos() + 1
+  if imperialUnits == 1 then
+    lcd.drawText(t, y + 5, "ft", SMLSIZE)
+  else
+    lcd.drawText(t, y + 5, "m", SMLSIZE)
+  end    
+end
+
+local function drawDistanceTravelled(x, y)
+  local distance = extensionValue["dist_travelled"]    
+  if distance == nil or distance == 4095 then
+    distance = 0
+  end
+  if imperialUnits == 1 then
+    distance = distance * 3.28
+  end    
+  lcd.drawText(x, y + 5, "Trv", SMLSIZE)
+  lcd.drawNumber(x + 43, y, distance, MIDSIZE)
   local t = lcd.getLastPos() + 1
   if imperialUnits == 1 then
     lcd.drawText(t, y + 5, "ft", SMLSIZE)
@@ -605,24 +662,41 @@ local function run(event)
 
   drawTopPanel()
   drawBottomPanel()
-
-  drawBatteryVoltage(1, 12)
-  if useCurrentMonitoring == 1 then
-      drawCurrent(1, 26)
-      drawTotalCurrent(1, 40)
-  else
-      drawVerticalSpeed(1, 26)
-      drawHeading(1, 40)
+  
+  if Slot["BatteryVoltage"] > 0 then
+    drawBatteryVoltage(Position[Slot["BatteryVoltage"]].x, Position[Slot["BatteryVoltage"]].y)
   end
-
+  
+  if Slot["Current"] > 0 then
+    drawCurrent(Position[Slot["Current"]].x, Position[Slot["Current"]].y)
+  end  
+  if Slot["TotalCurrent"] > 0 then
+    drawTotalCurrent(Position[Slot["TotalCurrent"]].x, Position[Slot["TotalCurrent"]].y)
+  end   
+  if Slot["VerticalSpeed"] > 0 then
+    drawVerticalSpeed(Position[Slot["VerticalSpeed"]].x, Position[Slot["VerticalSpeed"]].y)
+  end
+  if Slot["Heading"] > 0 then
+    drawVerticalSpeed(Position[Slot["Heading"]].x, Position[Slot["Heading"]].y)
+  end
+  
   drawSats(72, 40)	
-  drawHdop(130, 40)
-  
+  drawHdop(130, 40) 
   drawHeadingHud(107, 26)
+ 
+  if Slot["Speed"] > 0 then
+    drawSpeed(Position[Slot["Speed"]].x, Position[Slot["Speed"]].y)
+  end   
+  if Slot["Altitude"] > 0 then
+    drawAltitude(Position[Slot["Altitude"]].x, Position[Slot["Altitude"]].y)
+  end     
+  if Slot["Distance"] > 0 then
+    drawDistance(Position[Slot["Distance"]].x, Position[Slot["Distance"]].y)
+  end 
+  if Slot["DistanceTravelled"] > 0 then
+    drawDistanceTravelled(Position[Slot["DistanceTravelled"]].x, Position[Slot["DistanceTravelled"]].y)
+  end 
   
-  drawSpeed(159, 12)
-  drawAltitude(160, 26)
-  drawDistance(160, 40)	
 end
 
 return {init=init, run=run, background=background}
