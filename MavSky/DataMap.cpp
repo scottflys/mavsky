@@ -11,12 +11,36 @@
 //  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
 //  
 #include <EEPROM.h>
+#include "MavSky.h"
 #include "DataMap.h"
 #include "MavLinkData.h"
 #include "MavConsole.h"
 
 extern MavLinkData *mav;
 extern MavConsole *console;
+
+uint8_t   default_program[] = {
+  4,
+
+  32, 0, 0, 0, 0, 0, 0,   
+  32, 1, 0, 1, 1, 0, 1,   
+  32, 2, 0, 2, 2, 0, 2,   
+  32, 3, 0, 3, 3, 0, 3,   
+  32, 4, 0, 4, 4, 0, 4,   
+  32, 5, 0, 5, 5, 0, 5,   
+  32, 6, 0, 6, 6, 0, 6,   
+  32, 7, 0, 7, 7, 0, 7,   
+
+  1, 0, 0, 0x20, 0, 0,   
+  48, 0, 0, 
+  48, 1, 0, 
+  48, 2, 0, 
+  48, 3, 0, 
+  48, 4, 0, 
+  48, 5, 0, 
+  48, 6, 0, 
+  48, 7, 0
+};
 
 DataMap::DataMap() {
   source_name[MAP_SOURCE_RANGEFINDER_DISTANCE] = (char*)"rangefinder_distance";
@@ -39,6 +63,12 @@ void DataMap::write_factory_settings() {
   EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
   add_map((char*)"bar_altitude", (char*)"vario_altitude", (char*)"100.0");  
   add_map((char*)"climb_rate", (char*)"vario_vertical_speed", (char*)"100.0");  
+
+  EEPROM.write(EEPROM_LED_CODE_SIZE, (sizeof(default_program) << 8) & 0xff);
+  EEPROM.write(EEPROM_LED_CODE_SIZE + 1, sizeof(default_program) & 0xff);
+  for(uint16_t i=0; i<sizeof(default_program); i++) {
+    EEPROM.write(EEPROM_LED_CODE_BASE + i, default_program[i]);
+  }  
 }
 
 void DataMap::console_map(char* p) {        // todo - don't need this param

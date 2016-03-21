@@ -20,10 +20,6 @@
 #define EEPROM_INIT_VALUE_210                            0x58    //2015-10-22
 #define EEPROM_INIT_VALUE_212                            0x59   
 
-#define EEPROM_ADDR_VERSION             0
-#define EEPROM_ADDR_FRSKY_VFAS_ENABLE   1
-#define EEPROM_ADDR_MAP_BEGIN          32         // EEPROM address for start of map
-
 #define MAP_SOURCE_RANGEFINDER_DISTANCE 0
 #define MAP_SOURCE_BAR_ALTITUDE         1
 #define MAP_SOURCE_COUNT                2

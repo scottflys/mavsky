@@ -14,66 +14,54 @@
 #define LED_H
 
 #include <WProgram.h> 
-#include "OctoWS2811.h"
+#include "OctoWS2811.h" 
 
-#define LED_MAX_STRIPS              8
-#define LED_MAX_BULBS               8
-#define LED_MAX_STRIP_STATES        10
-#define LED_MAX_PATTERNS_PER_STRIP  25
-#define LED_DEFAULT_STATE_TIME      200
-
-class LedBulbColor {
-  public:
-    uint8_t red = 0;
-    uint8_t green = 0;
-    uint8_t blue = 0;
-    LedBulbColor(uint8_t red_param, uint8_t green_param, uint8_t blue_param);
-};
-
-class LedStripState {
-  public:
-    LedBulbColor* bulbs[LED_MAX_BULBS];  
-    uint16_t state_time = 0; 
-    LedStripState();
-    LedStripState(uint16_t time_param);
-    LedStripState(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
-};
-
-class LedStripPattern {
-  private:
-
-  public:
-    uint8_t   strip_state_count = 0;
-
-    LedStripState* led_strip_states[LED_MAX_STRIP_STATES];
-    LedStripPattern();
-    void add_strip_state(LedStripState* strip_state_param);
-    void add_strip_state(LedBulbColor* c1, LedBulbColor* c2, LedBulbColor* c3, LedBulbColor* c4, LedBulbColor* c5, LedBulbColor* c6, LedBulbColor* c7, LedBulbColor* c8, uint16_t time_param);
-};
-
-class LedStrip {
-  public:
-    uint8_t  current_state = 0;
-    uint32_t current_state_expiry_time = 0L;
-    LedStrip();
-    LedStripPattern* led_patterns[LED_MAX_PATTERNS_PER_STRIP];  
-};
+#define GROUP_MODE_DISABLED 0
+#define GROUP_MODE_SOLID    1
+#define GROUP_MODE_FLASH    2
+#define GROUP_MODE_WAVE     3
+#define GROUP_MODE_RANDOM   4
+#define GROUP_MODE_BAR      5
+#define GROUP_MODE_BOUNCE   6
 
 class LedController {
   private:
+    uint16_t  pc = 0;
     OctoWS2811* leds;
- 
-    uint8_t leds_on_strip = 0;
-    void add_pattern(int pattern_number, int strip_number, LedStripPattern* pattern);
-    void change_led_state(int strip_number, LedStripPattern* pattern, LedStrip* strip_ptr, uint32_t current_time);
-    uint8_t hex2dec_char(char hex_char);
-    uint32_t hex2dec_string(char *hex_string, uint8_t len);
-        
+    int32_t pausing_time_left = 0; 
+    uint32_t get_variable(uint16_t input);
+    uint32_t registers[MAX_REGISTERS];
+    uint32_t stack[MAX_STACK_SIZE];
+    uint8_t stack_size = 0;
+    void cmd_group_set();
+    void cmd_group_clear();
+    void cmd_clear_groups();
+    void cmd_load_reg_const();
+    void cmd_load_reg_mav();
+    void cmd_pause();
+    void cmd_yield();
+    void cmd_jump_abbsolute();
+    void cmd_cond_jump_absolute();
+    void cmd_cond_jump_relative();    
+    void cmd_move_register();
+    void cmd_set_color();
+    void cmd_set_flash();
+    void cmd_set_wave();
+    void cmd_set_bounce();
+    void cmd_set_random();
+    void cmd_set_bar();
+    void cmd_0lt1();
+    void cmd_0ge1();
+    void cmd_and();
+    void cmd_or();
+    void cmd_push();
+    void cmd_pop();
+    void cmd_load_reg_8(uint8_t);
+    
   public:
-    LedStrip* led_strips[LED_MAX_STRIPS];  
     LedController();
     void process_10_millisecond();
-    void process_led_data_line(char *cmd_buffer);   
+    void process_command();
 };
 
 #endif

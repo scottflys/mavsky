@@ -84,8 +84,6 @@ uint16_t ExtendedMessage::telem_next_extension_word() {
     uint16_t result = 0;
     static uint8_t last_was_text = 0;
     static uint8_t extension_index = 1;
-    static uint8_t previous_base_mode = 0;
-    static uint8_t previous_custom_mode = 0;
     static uint8_t previous_extension_word_values_initialized = 0;
     static uint16_t previous_extension_word_values[16];
     static uint16_t latest_extension_word_output_sequence[16];

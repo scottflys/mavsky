@@ -25,6 +25,21 @@ extern MavLinkData *mav;
 extern DataBroker data_broker;
 extern LedController* led_strip_ptr;
 
+uint8_t led_code_buffer[EEPROM_LED_CODE_MAX_SIZE];
+uint16_t led_code_size = 0;
+ 
+uint16_t get_crc(uint8_t* data_p, uint16_t len){
+    unsigned char x;
+    unsigned short crc = 0xFFFF;
+
+    while (len--){
+        x = crc >> 8 ^ *data_p++;
+        x ^= x>>4;
+        crc = (crc << 8) ^ ((uint16_t)(x << 12)) ^ ((uint16_t)(x <<5)) ^ ((uint16_t)x);
+    }
+    return crc;
+}
+
 MavConsole::MavConsole(usb_serial_class port) {
   serial = port;
   serial.begin(57000);
@@ -140,6 +155,13 @@ void MavConsole::do_frsky() {
   }
 }
 
+void MavConsole::do_ldump() {
+  for(uint16_t i=0; i<16; i++) {
+    console_print("%02x ", EEPROM.read(EEPROM_LED_CODE_BASE + i));
+  }  
+  console_print("\r\n");
+}
+     
 void MavConsole::do_factory() {
   data_broker.write_factory_settings();
   console_print("Settings restored to factory values\r\n");
@@ -216,7 +238,9 @@ void MavConsole::do_command(char *cmd_buffer) {
     } else if(strcmp(p, "map") == 0) {
       do_map(p);
     } else if(strcmp(p, "frsky") == 0) {
-       do_frsky();
+       do_frsky();  
+    } else if(strcmp(p, "ldump") == 0) {
+      do_ldump();
     } else if(strcmp(p, "factory") == 0) {
       do_factory();
     } else if(strcmp(p, "help") == 0) {
@@ -227,26 +251,72 @@ void MavConsole::do_command(char *cmd_buffer) {
   }
 }
 
+uint8_t MavConsole::atoh(uint8_t c)
+{
+  uint8_t result = 0;
+
+  if (c >= '0' && c <= '9') {
+      result = (c - '0');
+  } else if (c >= 'a' && c <= 'f') {
+      result = (c - 'a') + 10;
+  } else if (c >= 'A' && c <= 'F') {
+      result = (c - 'A') + 10;
+  }
+  return result;
+}
+
 void MavConsole::check_for_console_command() {
   while(serial.available()) { 
     uint8_t c = serial.read();
 
     if(c == '\r') {
-      serial.write("\r\n");
       cmd_buffer[cmd_index++] = '\0';
       cmd_index = 0;      
-      if(strcmp(cmd_buffer, "leddatastart") == 0) {
-        led_data_mode = 1;
-      } else if(strcmp(cmd_buffer, "leddatastop") == 0) {
-        led_data_mode = 0;
-      } else if(led_data_mode) {
-        led_strip_ptr->process_led_data_line(cmd_buffer);
+      if(led_data_mode) {
+        if(strcmp(cmd_buffer, "datastop") == 0) {
+          if(led_code_size > 2) {
+            uint16_t download_crc = (led_code_buffer[led_code_size-2] << 8) + led_code_buffer[led_code_size - 1];         
+            uint16_t calculated_crc = get_crc(led_code_buffer, led_code_size - 2);
+            if(download_crc != calculated_crc) {
+              console_print("CRC error.  Calculated CRC is %04x but should have been %04x\r\n", calculated_crc, download_crc);
+            } else {   
+              for(uint16_t i=0; i<led_code_size; i++) {
+                EEPROM.write(EEPROM_LED_CODE_BASE + i, led_code_buffer[i]);
+              }  
+              console_print("Successfully written to NVRAM\r\n");
+            }
+          } else {
+            console_print("Insufficient data received\r\n");            
+          } 
+          led_data_mode = 0;
+          cmd_index = 0;
+          serial.write("]"); 
+        } else {
+          while((uint16_t)cmd_index < strlen(cmd_buffer)) {
+            uint8_t high = atoh(cmd_buffer[cmd_index++]);
+            uint8_t low = atoh(cmd_buffer[cmd_index++]);
+            uint16_t data = (high << 4) + low;
+            if(led_code_size < EEPROM_LED_CODE_MAX_SIZE) {
+              led_code_buffer[led_code_size++] = data;
+            }
+          }       
+          cmd_index = 0;
+        }
       } else {
-        do_command(cmd_buffer);
-        serial.write("]");
+        serial.write("\r\n");       
+        if(strcmp(cmd_buffer, "datastart") == 0) {
+          led_data_mode = 1;
+          led_code_size = 0;
+          cmd_index = 0;         
+        } else {
+          do_command(cmd_buffer);
+          serial.write("]");
+        }
       }
     } else {
-      serial.write(c);
+      if(!led_data_mode) {
+        serial.write(c);
+      }
       cmd_buffer[cmd_index++] = tolower(c);
     }
   }
