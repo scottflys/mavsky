@@ -19,6 +19,7 @@
 #define EEPROM_INIT_VALUE_120                            0x57    //2015-08-23
 #define EEPROM_INIT_VALUE_210                            0x58    //2015-10-22
 #define EEPROM_INIT_VALUE_212                            0x59   
+#define EEPROM_INIT_VALUE_213                            0x60   
 
 #define MAP_SOURCE_RANGEFINDER_DISTANCE 0
 #define MAP_SOURCE_BAR_ALTITUDE         1

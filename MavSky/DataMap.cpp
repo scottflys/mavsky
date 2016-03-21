@@ -53,9 +53,9 @@ DataMap::DataMap() {
     int8_t scale_power = EEPROM.read(EEPROM_ADDR_MAP_BEGIN + i*2 + 1);
     scale_for_target[i] = powf(10.0, scale_power);    
   }
-  if(EEPROM.read(EEPROM_ADDR_VERSION) != EEPROM_INIT_VALUE_212) {
+  if(EEPROM.read(EEPROM_ADDR_VERSION) != EEPROM_INIT_VALUE_213) {
     write_factory_settings();
-    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_212);
+    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_213);
   }
 }
 
