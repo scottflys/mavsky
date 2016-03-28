@@ -40,9 +40,12 @@ class LedController {
     void cmd_load_reg_mav();
     void cmd_pause();
     void cmd_yield();
-    void cmd_jump_abbsolute();
-    void cmd_cond_jump_absolute();
-    void cmd_cond_jump_relative();    
+    void cmd_jump_absolute();
+    //void cmd_cond_jump_absolute();
+    //void cmd_cond_jump_relative();  
+    void cmd_beq_relative();
+    void cmd_bne_relative();
+    
     void cmd_move_register();
     void cmd_set_color();
     void cmd_set_flash();
@@ -50,8 +53,14 @@ class LedController {
     void cmd_set_bounce();
     void cmd_set_random();
     void cmd_set_bar();
+
+    void cmd_0eq1();
+    void cmd_0ne1();
     void cmd_0lt1();
+    void cmd_0le1();
+    void cmd_0gt1();
     void cmd_0ge1();
+    
     void cmd_and();
     void cmd_or();
     void cmd_push();

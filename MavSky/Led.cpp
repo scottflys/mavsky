@@ -46,13 +46,15 @@ extern int drawingMemory[];
 #define CMD_PAUSE               3                 // rr                              rr = register with milliseconds               
 #define CMD_YIELD               4                 //                                         
 #define CMD_JUMP_ABS            5                 // aaaa                            aaaa = absolute jump
-#define CMD_COND_JUMP_ABS       6                 // aaaa                            aaaa = absolute jump
-#define CMD_COND_JUMP_REL       7                 // jjjj                            jjjj = relative jump
 #define CMD_MOVE_REG            8                 // sr tr                           sr = source register, tr = target register                                                                    // todo test
 #define CMD_PUSH                9                 // sr                              sr = source register
 #define CMD_POP                 10                // tr                              tr = target register
 #define CMD_OR                  11                // 
 #define CMD_AND                 12                // 
+
+#define CMD_BEQ_REL             13                // rrrr                            rrrr = relative jump
+#define CMD_BNE_REL             14                // rrrr                            rrrr = relative jump
+
 
 #define CMD_0EQ1                16                // 0 = 0 == 1
 #define CMD_0NE1                17                // 0 = 0 != 1
@@ -60,6 +62,8 @@ extern int drawingMemory[];
 #define CMD_0LE1                19                // 0 = 0 <= 1
 #define CMD_0GT1                20                // 0 = 0 > 1
 #define CMD_0GE1                21                // 0 = 0 >= 1
+
+
 
 #define CMD_GROUP_SET           32                // gn gs ge ln ls le               gn = group number, gs = group start, ge = group end, ln = led strip number, ls = led start, le = led end  
 #define CMD_GROUP_CLEAR         33                // gn                              gn = group number
@@ -88,9 +92,10 @@ extern int drawingMemory[];
 
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t program_size = 0;
+
 LedGroups* led_groups;
 
-uint8_t   program_default[] = {
+uint8_t   program_defaultx[] = {
   CMD_YIELD,
     
 // if mav->rc8 < 1050
@@ -98,7 +103,7 @@ uint8_t   program_default[] = {
   CMD_LOAD_REG_MAV, 0, VAR_RC8, 
   CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0x1a,             // 1050
   CMD_0GE1,
-  CMD_COND_JUMP_REL, 0, 90, 
+  CMD_BNE_REL, 0, 90, 
   
     // the following block is 90 
     CMD_CLEAR_GROUPS,
@@ -128,7 +133,7 @@ uint8_t   program_default[] = {
   CMD_LOAD_REG_MAV, 0, VAR_RC8, 
   CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0x7e,             // 1150
   CMD_0GE1,
-  CMD_COND_JUMP_REL, 0, 156,
+  CMD_BNE_REL, 0, 156,
 
   // the following block is 156
     CMD_CLEAR_GROUPS,
@@ -177,7 +182,7 @@ uint8_t   program_default[] = {
   CMD_LOAD_REG_MAV, 0, VAR_RC8, 
   CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0xe2,             // 1250
   CMD_0GE1,
-  CMD_COND_JUMP_REL, 0, 145, 
+  CMD_BNE_REL, 0, 145, 
 
   // the following block is 145
     CMD_GROUP_SET, 0, 0, 7, 0, 0, 7,   
@@ -315,6 +320,7 @@ void LedController::cmd_load_reg_mav() {
   uint8_t  mav_variable = program[pc++];
   if(register_number < MAX_REGISTERS) {
     registers[register_number] = get_variable(mav_variable);
+console->console_print("mav %d\r\n", registers[register_number]);
   }
 }
 
@@ -329,20 +335,23 @@ void LedController::cmd_yield() {
   pausing_time_left = MS_PER_TIMESLICE;
 }
 
-void LedController::cmd_jump_abbsolute() {
+void LedController::cmd_jump_absolute() {
   uint16_t next_pc = program[pc++] << 8;                             
   pc = next_pc;
 }
 
-void LedController::cmd_cond_jump_absolute() {
-  uint16_t next_pc = program[pc++] << 8;                             
-  next_pc |= program[pc++];                          
-  if(registers[0] != 0) {
-    pc = next_pc;
+void LedController::cmd_beq_relative() {
+  uint16_t pc_change = program[pc++] << 8;                               
+  pc_change |= program[pc++];                            
+console->console_print("registers[0] %d ", registers[0]);
+  if(registers[0] == 0) {
+    console->console_print("branching %d ", pc_change);
+
+    pc += (int16_t)pc_change;
   }
 }
 
-void LedController::cmd_cond_jump_relative() {
+void LedController::cmd_bne_relative() {
   uint16_t pc_change = program[pc++] << 8;                               
   pc_change |= program[pc++];                            
   if(registers[0] != 0) {
@@ -409,7 +418,7 @@ void LedController::cmd_set_random() {
     group_ptr->set_random(registers[state_time_register_number], intensity);  
   }
 }
-        // gg dr oc fc pr 
+
 void LedController::cmd_set_bar() {
   uint8_t group_number = program[pc++];
   uint8_t reverse_register_number = program[pc++];                    
@@ -422,8 +431,40 @@ void LedController::cmd_set_bar() {
   }
 }
 
+void LedController::cmd_0eq1() {
+  if(registers[0] ==  registers[1]) {
+    registers[0] = 1;
+  } else {
+    registers[0] = 0;
+  }
+}
+
+void LedController::cmd_0ne1() {
+  if(registers[0] !=  registers[1]) {
+    registers[0] = 1;
+  } else {
+    registers[0] = 0;
+  }
+}
+
 void LedController::cmd_0lt1() {
   if(registers[0] <  registers[1]) {
+    registers[0] = 1;
+  } else {
+    registers[0] = 0;
+  }
+}
+
+void LedController::cmd_0le1() {
+  if(registers[0] <=  registers[1]) {
+    registers[0] = 1;
+  } else {
+    registers[0] = 0;
+  }
+}
+
+void LedController::cmd_0gt1() {
+  if(registers[0] >  registers[1]) {
     registers[0] = 1;
   } else {
     registers[0] = 0;
@@ -474,7 +515,9 @@ void LedController::cmd_load_reg_8(uint8_t reg) {
 }
 
 void LedController::process_command() {
+console->console_print("%d ", pc);
   uint8_t cmd = program[pc++]; 
+
   switch(cmd) {
 
     case CMD_GROUP_SET:
@@ -538,15 +581,15 @@ void LedController::process_command() {
       break;
       
     case CMD_JUMP_ABS:
-      cmd_jump_abbsolute();
+      cmd_jump_absolute();
       break;
 
-    case CMD_COND_JUMP_ABS:
-      cmd_cond_jump_absolute();
+    case CMD_BEQ_REL:
+      cmd_beq_relative();
       break;
       
-    case CMD_COND_JUMP_REL:
-      cmd_cond_jump_relative();
+    case CMD_BNE_REL:
+      cmd_bne_relative();
       break;
       
     case CMD_MOVE_REG:
@@ -577,10 +620,26 @@ void LedController::process_command() {
       cmd_set_bar();
       break;
 
+    case CMD_0EQ1:
+      cmd_0eq1();
+      break;
+
+    case CMD_0NE1:
+      cmd_0ne1();
+      break;
+
     case CMD_0LT1:
       cmd_0lt1();
       break;
-
+    
+    case CMD_0LE1:
+      cmd_0le1();
+      break;
+    
+    case CMD_0GT1:
+      cmd_0gt1();
+      break;
+    
     case CMD_0GE1:
       cmd_0ge1();
       break;
@@ -600,7 +659,6 @@ void LedController::process_command() {
     case CMD_OR:
       cmd_or();
       break;
-
       
     default:
       if(console != NULL)
@@ -619,6 +677,9 @@ void LedController::process_10_millisecond() {
     if(pc >= program_size) {
       break;
     }
+//    if(pc >= sizeof(program)) {
+//      break;
+//    }
     process_command();
   }
   for(int i=0; i<led_groups->led_group_count; i++) {
