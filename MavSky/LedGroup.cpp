@@ -80,7 +80,7 @@ void LedGroup::clear() {
 }
 
 void LedGroup::set_solid(uint32_t color) {
-  if(mode != GROUP_MODE_SOLID) {
+  if(mode != GROUP_MODE_SOLID || on_color != color) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_SOLID;
@@ -92,7 +92,7 @@ void LedGroup::set_solid(uint32_t color) {
 }
 
 void LedGroup::set_flash(uint32_t on_color_param, uint32_t off_color_param, uint32_t on_time_param, uint32_t off_time_param) {
-  if(mode != GROUP_MODE_FLASH) {
+  if(mode != GROUP_MODE_FLASH || on_color != on_color_param || off_color != off_color_param || on_time != on_time_param || off_time != off_time_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_FLASH;
@@ -104,7 +104,7 @@ void LedGroup::set_flash(uint32_t on_color_param, uint32_t off_color_param, uint
 }
 
 void LedGroup::set_wave(uint8_t reverse_param, uint32_t on_color_param, uint32_t off_color_param, uint32_t state_time_param, uint32_t on_width_param) {
-  if(mode != GROUP_MODE_WAVE) {
+  if(mode != GROUP_MODE_WAVE || reverse != reverse_param || on_color != on_color_param || off_color != off_color_param || state_time != state_time_param || on_width != on_width_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_WAVE;
@@ -117,7 +117,7 @@ void LedGroup::set_wave(uint8_t reverse_param, uint32_t on_color_param, uint32_t
 }
 
 void LedGroup::set_bounce(uint8_t reverse_param, uint32_t on_color_param, uint32_t off_color_param, uint32_t state_time_param, uint32_t on_width_param) {
-  if(mode != GROUP_MODE_BOUNCE) {
+  if(mode != GROUP_MODE_BOUNCE || reverse != reverse_param || on_color != on_color_param || off_color != off_color_param || state_time != state_time_param || on_width != on_width_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_BOUNCE;
@@ -131,7 +131,7 @@ void LedGroup::set_bounce(uint8_t reverse_param, uint32_t on_color_param, uint32
 
 void LedGroup::set_random(uint32_t state_time_param, uint8_t intensity_param) {
   state_time = state_time_param;
-  if(mode != GROUP_MODE_RANDOM) {
+  if(mode != GROUP_MODE_RANDOM || intensity != intensity_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_RANDOM;
@@ -143,7 +143,7 @@ void LedGroup::set_random(uint32_t state_time_param, uint8_t intensity_param) {
 }
 
 void LedGroup::set_bar(uint8_t reverse_param, uint32_t on_color_param, uint32_t off_color_param, uint32_t percent_param) {
-  if(mode != GROUP_MODE_BAR) {
+  if(mode != GROUP_MODE_BAR || reverse != reverse_param || on_color != on_color_param || off_color != off_color_param || percent_param != percent_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_BAR;
