@@ -28,18 +28,9 @@ extern int displayMemory[];
 extern int drawingMemory[];
 
 #define MS_PER_TIMESLICE       10
+
 #define VAR_RC8                 8
 #define VAR_BATTERY_REMAINING   9
-
-#define VALUE_VARIABLE          1
-#define SCALAR_VARIABLE         2
-
-#define COND_EQUAL              1
-#define COND_NOT_EQUAL          2
-#define COND_LESS_THAN          3
-#define COND_GREATER_THAN       4
-#define COND_LESS_THAN_EQUAL    5
-#define COND_GREATER_THAN_EQUAL 6
 
 #define CMD_LOAD_REG_CONST      1                 // rr cccccccc                     rr = register number, cccccccc = constant value
 #define CMD_LOAD_REG_MAV        2                 // rr mm                           rr = register number, mm = mav value
@@ -52,9 +43,10 @@ extern int drawingMemory[];
 #define CMD_OR                  11                // 
 #define CMD_AND                 12                // 
 
-#define CMD_BEQ_REL             13                // rrrr                            rrrr = relative jump
-#define CMD_BNE_REL             14                // rrrr                            rrrr = relative jump
+#define CMD_BZ_REL              13                // rrrr                            rrrr = relative jump
+#define CMD_BNZ_REL             14                // rrrr                            rrrr = relative jump
 
+//#define CMD_LOAD_REG_CONST8     15                 // rr cc                          rr = register number, cccccccc = constant value
 
 #define CMD_0EQ1                16                // 0 = 0 == 1
 #define CMD_0NE1                17                // 0 = 0 != 1
@@ -63,18 +55,16 @@ extern int drawingMemory[];
 #define CMD_0GT1                20                // 0 = 0 > 1
 #define CMD_0GE1                21                // 0 = 0 >= 1
 
-
-
 #define CMD_GROUP_SET           32                // gn gs ge ln ls le               gn = group number, gs = group start, ge = group end, ln = led strip number, ls = led start, le = led end  
 #define CMD_GROUP_CLEAR         33                // gn                              gn = group number
 #define CMD_CLEAR_GROUPS        34                //                              
 
-#define CMD_SETCOLOR            48                // gg cr                           gg = group number, cr = color register
-#define CMD_SETFLASH            49                // gg cr nr fr                     gg = group number, oc = on color register, fc = off color register, nr = on time register, fr = off time register
-#define CMD_SETWAVE             50                // gg rr or fc tr wr               gg = group number, dr = reverse register, oc = on color register, fc = off color register, tr = state time register, wr = on width register
-#define CMD_SETRANDOM           51                // gg ct in                        gg = group number, ct = change time register, intensity
-#define CMD_SETBAR              52                // gg dr oc fc pr                  gg = group number, dr = reverse register, oc = on color register, fc = off color register, pr = percent register  
-#define CMD_SETBOUNCE           53                // gg                              gg = group number (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = state time, R4 = on width)
+#define CMD_SETCOLOR            48                // gg                              gg = group number  (implied: R0 =  color)
+#define CMD_SETFLASH            49                // gg                              gg = group number, (implied: R0 = on color, R1 = off color, R2 = state time, R3 = on width)
+#define CMD_SETWAVE             50                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = state time, R4 = on width)
+#define CMD_SETRANDOM           51                // gg                              gg = group number, (implied: R0 = change time register, R1 = intensity) 
+#define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = percent register)
+#define CMD_SETBOUNCE           53                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = state time, R4 = on width)
 
 #define CMD_LDAA8               64                // cc                              cc = short constant
 #define CMD_LDAB8               65                // cc                              cc = short constant
@@ -85,133 +75,11 @@ extern int drawingMemory[];
 #define CMD_LDAG8               70                // cc                              cc = short constant
 #define CMD_LDAH8               71                // cc                              cc = short constant
 
-#define RIGHT_FRONT 0
-#define LEFT_REAR   1
-#define LEFT_FRONT  2
-#define RIGHT_REAR  3
-
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t program_size = 0;
 
 LedGroups* led_groups;
 
-uint8_t   program_defaultx[] = {
-  CMD_YIELD,
-    
-// if mav->rc8 < 1050
-
-  CMD_LOAD_REG_MAV, 0, VAR_RC8, 
-  CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0x1a,             // 1050
-  CMD_0GE1,
-  CMD_BNE_REL, 0, 90, 
-  
-    // the following block is 90 
-    CMD_CLEAR_GROUPS,
-    CMD_GROUP_SET, 0, 0, 0, 0, 0, 0,   
-    CMD_GROUP_SET, 1, 0, 1, 1, 0, 1,   
-    CMD_GROUP_SET, 2, 0, 2, 2, 0, 2,   
-    CMD_GROUP_SET, 3, 0, 3, 3, 0, 3,   
-    CMD_GROUP_SET, 4, 0, 4, 4, 0, 4,   
-    CMD_GROUP_SET, 5, 0, 5, 5, 0, 5,   
-    CMD_GROUP_SET, 6, 0, 6, 6, 0, 6,   
-    CMD_GROUP_SET, 7, 0, 7, 7, 0, 7,   
-  
-    CMD_LOAD_REG_CONST, 0, 0, 0x20, 0, 0,   
-    CMD_SETCOLOR, 0, 0, 
-    CMD_SETCOLOR, 1, 0, 
-    CMD_SETCOLOR, 2, 0, 
-    CMD_SETCOLOR, 3, 0, 
-    CMD_SETCOLOR, 4, 0, 
-    CMD_SETCOLOR, 5, 0, 
-    CMD_SETCOLOR, 6, 0, 
-    CMD_SETCOLOR, 7, 0, 
-  
-    CMD_JUMP_ABS, 0, 0,  
-
-// if mav->rc8 < 1150
-
-  CMD_LOAD_REG_MAV, 0, VAR_RC8, 
-  CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0x7e,             // 1150
-  CMD_0GE1,
-  CMD_BNE_REL, 0, 156,
-
-  // the following block is 156
-    CMD_CLEAR_GROUPS,
-    CMD_GROUP_SET, 0, 0, 6, 2, 0, 6,  
-    CMD_GROUP_SET, 1, 0, 6, 1, 0, 6,  
-    CMD_GROUP_SET, 2, 0, 6, 5, 0, 6,  
-    CMD_GROUP_SET, 3, 0, 6, 4, 0, 6,  
-    CMD_GROUP_SET, 4, 0, 6, 0, 0, 6,  
-    CMD_GROUP_SET, 5, 0, 6, 3, 0, 6,  
-  
-    CMD_GROUP_SET, 6, 0, 0, 2, 7, 7,  
-    CMD_GROUP_SET, 7, 0, 0, 1, 7, 7,  
-    CMD_GROUP_SET, 8, 0, 0, 5, 7, 7,  
-    CMD_GROUP_SET, 9, 0, 0, 4, 7, 7,  
-    CMD_GROUP_SET, 10, 0, 0, 0, 7, 7,  
-    CMD_GROUP_SET, 11, 0, 0, 3, 7, 7,  
-  
-    CMD_GROUP_SET, 12, 0, 7, 6, 0, 7,  
-    CMD_GROUP_SET, 13, 0, 7, 7, 0, 7,  
-
-
-    CMD_LOAD_REG_CONST, 0, 0, 255, 255, 255,   
-    CMD_SETCOLOR, 0, 0, 
-    CMD_SETCOLOR, 1, 0, 
-    CMD_SETCOLOR, 2, 0, 
-    CMD_SETCOLOR, 3, 0, 
-    CMD_SETCOLOR, 4, 0, 
-    CMD_SETCOLOR, 5, 0, 
-
-    CMD_LOAD_REG_CONST, 0, 0, 255, 0, 0,   
-    CMD_SETCOLOR, 6, 0, 
-    CMD_SETCOLOR, 7, 0, 
-    CMD_SETCOLOR, 8, 0, 
-
-    CMD_LOAD_REG_CONST, 0, 0, 0, 255, 0,   
-    CMD_SETCOLOR, 9, 0, 
-    CMD_SETCOLOR, 10, 0, 
-    CMD_SETCOLOR, 11, 0, 
-
-// todo -- what about legs
-
-    CMD_JUMP_ABS, 0, 0,            
-
-// if mav->rc8 < 1250  
-
-  CMD_LOAD_REG_MAV, 0, VAR_RC8, 
-  CMD_LOAD_REG_CONST, 1, 0, 0, 4, 0xe2,             // 1250
-  CMD_0GE1,
-  CMD_BNE_REL, 0, 145, 
-
-  // the following block is 145
-    CMD_GROUP_SET, 0, 0, 7, 0, 0, 7,   
-    CMD_GROUP_SET, 1, 0, 7, 1, 0, 7,   
-    CMD_GROUP_SET, 2, 0, 7, 2, 0, 7,   
-    CMD_GROUP_SET, 3, 0, 7, 3, 0, 7,   
-    CMD_GROUP_SET, 4, 0, 7, 4, 0, 7,   
-    CMD_GROUP_SET, 5, 0, 7, 5, 0, 7,   
-    CMD_GROUP_SET, 6, 0, 7, 6, 0, 7,   
-    CMD_GROUP_SET, 7, 0, 7, 7, 0, 7,   
-
-    CMD_LOAD_REG_CONST, 0, 0, 0, 0, 0,             // reverse
-    CMD_LOAD_REG_CONST, 1, 0, 20, 0, 0,            // on color
-    CMD_LOAD_REG_CONST, 2, 0, 0, 0, 0,             // off color
-    CMD_LOAD_REG_CONST, 3, 0, 0, 0, 100,           // state time
-    CMD_LOAD_REG_CONST, 4, 0, 0, 0, 3,             // on width
-    CMD_SETWAVE, 0, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 1, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 2, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 3, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 4, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 5, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 6, 0, 1, 2, 3, 4,   
-    CMD_SETWAVE, 7, 0, 1, 2, 3, 4,   
-
-    CMD_JUMP_ABS, 0, 0,   
-
-};
-    
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 LedController::LedController() {
@@ -306,10 +174,17 @@ void LedController::cmd_clear_groups() {
 void LedController::cmd_load_reg_const() {
   uint8_t register_number = program[pc++];
   uint32_t register_value = program[pc++] << 24;
-
   register_value |= program[pc++] << 16;
   register_value |= program[pc++] << 8;
   register_value |= program[pc++];
+  if(register_number < MAX_REGISTERS) {
+    registers[register_number] = register_value;
+  }
+}
+
+void LedController::cmd_load_reg_const8() {
+  uint8_t register_number = program[pc++];
+  uint32_t register_value = program[pc++];
   if(register_number < MAX_REGISTERS) {
     registers[register_number] = register_value;
   }
@@ -320,7 +195,6 @@ void LedController::cmd_load_reg_mav() {
   uint8_t  mav_variable = program[pc++];
   if(register_number < MAX_REGISTERS) {
     registers[register_number] = get_variable(mav_variable);
-console->console_print("mav %d\r\n", registers[register_number]);
   }
 }
 
@@ -340,18 +214,15 @@ void LedController::cmd_jump_absolute() {
   pc = next_pc;
 }
 
-void LedController::cmd_beq_relative() {
+void LedController::cmd_bz_relative() {
   uint16_t pc_change = program[pc++] << 8;                               
   pc_change |= program[pc++];                            
-console->console_print("registers[0] %d ", registers[0]);
   if(registers[0] == 0) {
-    console->console_print("branching %d ", pc_change);
-
     pc += (int16_t)pc_change;
   }
 }
 
-void LedController::cmd_bne_relative() {
+void LedController::cmd_bnz_relative() {
   uint16_t pc_change = program[pc++] << 8;                               
   pc_change |= program[pc++];                            
   if(registers[0] != 0) {
@@ -368,36 +239,26 @@ void LedController::cmd_move_register() {
 }
 
 void LedController::cmd_set_color() {
-  uint8_t group_number = program[pc++];
-  uint8_t on_color_register_number = program[pc++];
-  if(on_color_register_number < MAX_REGISTERS && group_number < led_groups->led_group_count) {
+  uint8_t group_number = program[pc++];;
+  if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_solid(registers[on_color_register_number]);
+    group_ptr->set_solid(registers[0]);
   }  
 }
 
 void LedController::cmd_set_flash() {
   uint8_t group_number = program[pc++];
-  uint8_t on_color_register_number = program[pc++];
-  uint8_t  off_color_register_number = program[pc++];
-  uint8_t on_time_register_number = program[pc++];
-  uint8_t off_time_register_number = program[pc++];
-  if(on_color_register_number < MAX_REGISTERS && off_color_register_number < MAX_REGISTERS && on_time_register_number < MAX_REGISTERS && off_time_register_number < MAX_REGISTERS && group_number < led_groups->led_group_count) {
+  if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_flash(registers[on_color_register_number], registers[off_color_register_number], registers[on_time_register_number], registers[off_time_register_number]);  
+    group_ptr->set_flash(registers[0], registers[1], registers[2], registers[3]);  
   }
 }
 
 void LedController::cmd_set_wave() {
   uint8_t group_number = program[pc++];
-  uint8_t reverse_register_number = program[pc++];
-  uint8_t on_color_register_number = program[pc++];
-  uint8_t  off_color_register_number = program[pc++];
-  uint8_t state_time_register_number = program[pc++];
-  uint8_t on_width_register_number = program[pc++];
-  if(group_number < led_groups->led_group_count && reverse_register_number < MAX_REGISTERS && on_color_register_number < MAX_REGISTERS && off_color_register_number < MAX_REGISTERS && state_time_register_number < MAX_REGISTERS && on_width_register_number < MAX_REGISTERS) {
+  if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_wave((uint8_t)(registers[reverse_register_number]), registers[on_color_register_number], registers[off_color_register_number], registers[state_time_register_number], registers[on_width_register_number]);  
+    group_ptr->set_wave((uint8_t)(registers[0]), registers[1], registers[2], registers[3], registers[4]);  
   }
 }
   
@@ -411,23 +272,17 @@ void LedController::cmd_set_bounce() {
     
 void LedController::cmd_set_random() {
   uint8_t group_number = program[pc++];
-  uint8_t state_time_register_number = program[pc++];
-  uint8_t intensity = program[pc++];
-  if(state_time_register_number < MAX_REGISTERS && group_number < led_groups->led_group_count) {
+  if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_random(registers[state_time_register_number], intensity);  
+    group_ptr->set_random(registers[0], (uint8_t)registers[1]);  
   }
 }
 
 void LedController::cmd_set_bar() {
   uint8_t group_number = program[pc++];
-  uint8_t reverse_register_number = program[pc++];                    
-  uint8_t on_color_register_number = program[pc++];
-  uint8_t off_color_register_number = program[pc++];
-  uint8_t percent_register_number = program[pc++];
-  if(group_number < led_groups->led_group_count && reverse_register_number < MAX_REGISTERS && on_color_register_number < MAX_REGISTERS && off_color_register_number < MAX_REGISTERS && percent_register_number < MAX_REGISTERS) {
+  if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_bar((uint8_t)(registers[reverse_register_number]), registers[on_color_register_number], registers[off_color_register_number], registers[percent_register_number]);  
+    group_ptr->set_bar((uint8_t)(registers[0]), registers[1], registers[2], registers[3]);  
   }
 }
 
@@ -515,7 +370,6 @@ void LedController::cmd_load_reg_8(uint8_t reg) {
 }
 
 void LedController::process_command() {
-console->console_print("%d ", pc);
   uint8_t cmd = program[pc++]; 
 
   switch(cmd) {
@@ -535,6 +389,10 @@ console->console_print("%d ", pc);
     case CMD_LOAD_REG_CONST:
       cmd_load_reg_const();
       break;
+      
+//    case CMD_LOAD_REG_CONST8:
+//      cmd_load_reg_const8();
+//      break;
 
     case CMD_LDAA8:
       cmd_load_reg_8(0);
@@ -584,12 +442,12 @@ console->console_print("%d ", pc);
       cmd_jump_absolute();
       break;
 
-    case CMD_BEQ_REL:
-      cmd_beq_relative();
+    case CMD_BZ_REL:
+      cmd_bz_relative();
       break;
       
-    case CMD_BNE_REL:
-      cmd_bne_relative();
+    case CMD_BNZ_REL:
+      cmd_bnz_relative();
       break;
       
     case CMD_MOVE_REG:

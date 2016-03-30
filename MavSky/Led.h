@@ -37,14 +37,15 @@ class LedController {
     void cmd_group_clear();
     void cmd_clear_groups();
     void cmd_load_reg_const();
+    void cmd_load_reg_const8();   
     void cmd_load_reg_mav();
     void cmd_pause();
     void cmd_yield();
     void cmd_jump_absolute();
     //void cmd_cond_jump_absolute();
     //void cmd_cond_jump_relative();  
-    void cmd_beq_relative();
-    void cmd_bne_relative();
+    void cmd_bz_relative();
+    void cmd_bnz_relative();
     
     void cmd_move_register();
     void cmd_set_color();
