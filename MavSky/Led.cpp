@@ -582,7 +582,7 @@ void LedController::process_command() {
 }
 
 void LedController::process_10_millisecond() {
-  uint32_t process_start_time = millis();
+//  uint32_t process_start_time = millis();
   while(1) {
     if(pausing_time_left > (MS_PER_TIMESLICE/2)) {
       pausing_time_left -= MS_PER_TIMESLICE;

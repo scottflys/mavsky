@@ -305,12 +305,12 @@ uint8_t MavConsole::atoh(uint8_t c)
 void MavConsole::check_for_console_command() {
   while(serial.available()) { 
     uint8_t c = serial.read();
-
     if(c == '\r') {
       cmd_buffer[cmd_index++] = '\0';
       cmd_index = 0;      
       if(led_data_mode) {
         if(strcmp(cmd_buffer, "datastop") == 0) {
+          console_print("datastop\r\n");            
           if(led_code_size > 2) {
             uint16_t download_crc = (led_code_buffer[led_code_size-2] << 8) + led_code_buffer[led_code_size - 1];         
             uint16_t calculated_crc = get_crc(led_code_buffer, led_code_size - 2);
@@ -320,7 +320,7 @@ void MavConsole::check_for_console_command() {
               for(uint16_t i=0; i<led_code_size; i++) {
                 EEPROM.write(EEPROM_LED_CODE_BASE + i, led_code_buffer[i]);
               }  
-              console_print("Successfully written to NVRAM\r\n");
+              console_print("Data written to NVRAM.  Please reboot\r\n");
             }
           } else {
             console_print("Insufficient data received\r\n");            

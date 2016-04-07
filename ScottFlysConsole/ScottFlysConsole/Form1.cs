@@ -97,11 +97,18 @@ namespace ScottFlysConsole
                 string file = openFileDialog.FileName;
                 try
                 {
-                    string text = File.ReadAllText(file);
-                    serialPort.Write(text);
+                    //string text = File.ReadAllText(file);
+                    //serialPort.Write(text);
+                    string[] lines = File.ReadAllLines(file);
+                    foreach (string line in lines)
+                    {
+                        Console.WriteLine(line);
+                        serialPort.Write(line + "\r");
+                    }
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                 }
             }
         }

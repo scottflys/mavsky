@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.cmbSerialPorts = new System.Windows.Forms.ComboBox();
-            this.btnConnect = new System.Windows.Forms.Button();
-            this.txtConsole = new System.Windows.Forms.TextBox();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmbSerialPorts = new System.Windows.Forms.ComboBox();
+            this.btnConnect = new System.Windows.Forms.Button();
+            this.txtConsole = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -46,37 +46,9 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(658, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(839, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
-            // 
-            // cmbSerialPorts
-            // 
-            this.cmbSerialPorts.FormattingEnabled = true;
-            this.cmbSerialPorts.Location = new System.Drawing.Point(444, 3);
-            this.cmbSerialPorts.Name = "cmbSerialPorts";
-            this.cmbSerialPorts.Size = new System.Drawing.Size(121, 21);
-            this.cmbSerialPorts.TabIndex = 1;
-            // 
-            // btnConnect
-            // 
-            this.btnConnect.Location = new System.Drawing.Point(571, 1);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(75, 23);
-            this.btnConnect.TabIndex = 2;
-            this.btnConnect.Text = "Connect";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.connect_Click);
-            // 
-            // txtConsole
-            // 
-            this.txtConsole.Location = new System.Drawing.Point(12, 43);
-            this.txtConsole.Multiline = true;
-            this.txtConsole.Name = "txtConsole";
-            this.txtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtConsole.Size = new System.Drawing.Size(634, 269);
-            this.txtConsole.TabIndex = 4;
-            this.txtConsole.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtConsole_KeyPress);
             // 
             // fileToolStripMenuItem
             // 
@@ -89,7 +61,7 @@
             // sendToolStripMenuItem
             // 
             this.sendToolStripMenuItem.Name = "sendToolStripMenuItem";
-            this.sendToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.sendToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.sendToolStripMenuItem.Text = "Send";
             this.sendToolStripMenuItem.Click += new System.EventHandler(this.sendToolStripMenuItem_Click);
             // 
@@ -104,14 +76,42 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
+            // 
+            // cmbSerialPorts
+            // 
+            this.cmbSerialPorts.FormattingEnabled = true;
+            this.cmbSerialPorts.Location = new System.Drawing.Point(625, 3);
+            this.cmbSerialPorts.Name = "cmbSerialPorts";
+            this.cmbSerialPorts.Size = new System.Drawing.Size(121, 21);
+            this.cmbSerialPorts.TabIndex = 1;
+            // 
+            // btnConnect
+            // 
+            this.btnConnect.Location = new System.Drawing.Point(752, 3);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(75, 23);
+            this.btnConnect.TabIndex = 2;
+            this.btnConnect.Text = "Connect";
+            this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.connect_Click);
+            // 
+            // txtConsole
+            // 
+            this.txtConsole.Location = new System.Drawing.Point(12, 43);
+            this.txtConsole.Multiline = true;
+            this.txtConsole.Name = "txtConsole";
+            this.txtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtConsole.Size = new System.Drawing.Size(815, 381);
+            this.txtConsole.TabIndex = 4;
+            this.txtConsole.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtConsole_KeyPress);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(658, 324);
+            this.ClientSize = new System.Drawing.Size(839, 436);
             this.Controls.Add(this.txtConsole);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.cmbSerialPorts);
