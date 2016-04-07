@@ -24,6 +24,7 @@ extern Logger *logger;
 extern MavLinkData *mav;
 extern DataBroker data_broker;
 extern LedController* led_strip_ptr;
+extern uint8_t led_map[];
 
 uint8_t led_code_buffer[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t led_code_size = 0;
@@ -68,6 +69,7 @@ void MavConsole::do_help() {
   console_print("map [bar_altitude|rangefinder_distance] vario_altitude [scale]\r\n");                                    
   console_print("map [climb_rate] vario_vertical_speed [scale]\r\n");                                    
   console_print("frsky vfas   [enable|disable]\r\n");
+  console_print("ledmap L1 R1 L2 R2 L3 R3 L4 R4\r\n");
   console_print("factory\r\n");
 }
 
@@ -164,7 +166,40 @@ void MavConsole::do_ldump() {
      
 void MavConsole::do_factory() {
   data_broker.write_factory_settings();
-  console_print("Settings restored to factory values\r\n");
+  console_print("Settings restored to factory values.  Please reboot\r\n");
+}
+
+void MavConsole::do_led_map() {
+  char* p;
+  uint8_t temp_map[8];
+
+  for(int i=0; i<8; i++) {
+    temp_map[i] = 9;
+  }
+  for(int i=0; i<8; i++) {
+    p = strtok(NULL, " ");
+    if(strlen(p) == 0) {
+       console_print("Please specify 8 arguments to the ledmap command\r\n");
+       return;
+    }
+    uint8_t observed_led_number = (uint8_t)atoi(p);
+    if(observed_led_number < 1 || observed_led_number > 8) {
+       console_print("LED numbers must be between 1 and 8\r\n");
+       return;
+    }
+    uint8_t internal_led_number = observed_led_number - 1;
+    for(int i=0; i<8; i++) {
+      if(temp_map[i] == internal_led_number) {
+        console_print("LED number %d has been specified more than once.  Please retry\r\n", observed_led_number);
+        return;    
+      }      
+    }
+    temp_map[i] = internal_led_number;
+  }
+  for(int i=0; i<8; i++) {
+    EEPROM.write(EEPROM_LED_MAP_BASE + i, temp_map[i]);
+  }
+  console_print("Led map set.  Please reboot for led map changes to take effect\r\n");
 }
 
 void MavConsole::do_command(char *cmd_buffer) {
@@ -241,6 +276,8 @@ void MavConsole::do_command(char *cmd_buffer) {
        do_frsky();  
     } else if(strcmp(p, "ldump") == 0) {
       do_ldump();
+    } else if(strcmp(p, "ledmap") == 0) {
+      do_led_map();
     } else if(strcmp(p, "factory") == 0) {
       do_factory();
     } else if(strcmp(p, "help") == 0) {

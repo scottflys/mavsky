@@ -40,6 +40,7 @@ class MavConsole {
     void do_frsky();
     void do_ldump();
     void do_factory();
+    void do_led_map();
     void do_command(char *cmd_buffer);
     uint8_t hex2dec_char(char hex_char);
     uint32_t hex2dec_string(char *hex_string, uint8_t len);

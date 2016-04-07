@@ -46,8 +46,6 @@ extern int drawingMemory[];
 #define CMD_BZ_REL              13                // rrrr                            rrrr = relative jump
 #define CMD_BNZ_REL             14                // rrrr                            rrrr = relative jump
 
-//#define CMD_LOAD_REG_CONST8     15                 // rr cc                          rr = register number, cccccccc = constant value
-
 #define CMD_0EQ1                16                // 0 = 0 == 1
 #define CMD_0NE1                17                // 0 = 0 != 1
 #define CMD_0LT1                18                // 0 = 0 < 1
@@ -58,25 +56,31 @@ extern int drawingMemory[];
 #define CMD_GROUP_SET           32                // gn gs ge ln ls le               gn = group number, gs = group start, ge = group end, ln = led strip number, ls = led start, le = led end  
 #define CMD_GROUP_CLEAR         33                // gn                              gn = group number
 #define CMD_CLEAR_GROUPS        34                //                              
+#define CMD_DISABLE_GROUPS      35                // disables all groups                            
 
-#define CMD_SETCOLOR            48                // gg                              gg = group number  (implied: R0 =  color)
-#define CMD_SETFLASH            49                // gg                              gg = group number, (implied: R0 = on color, R1 = off color, R2 = state time, R3 = on width)
-#define CMD_SETWAVE             50                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = state time, R4 = on width)
+#define CMD_SETCOLOR            48                // gg                              gg = group number  (implied: R0 = color)
+#define CMD_SETFLASH            49                // gg                              gg = group number, (implied: R0 = on color, R1 = on time, R2 = off time)
+#define CMD_SETWAVE             50                // gg                              gg = group number, (implied: R0 = on color, R1 = state time, R2 = on width, R3 = reverse)
 #define CMD_SETRANDOM           51                // gg                              gg = group number, (implied: R0 = change time register, R1 = intensity) 
-#define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = percent register)
-#define CMD_SETBOUNCE           53                // gg                              gg = group number, (implied: R0 = reverse, R1 = on color, R2 = off color, R3 = state time, R4 = on width)
+#define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = on color, R1 = percent register, R2 = reverse)
+#define CMD_SETBOUNCE           53                // gg                              gg = group number, (R0 = on color, R1 = state time, R2 = on width)
+#define CMD_SETOFF              54                // gg                              gg = group number
+#define CMD_SETDORMANT          55                // gg                              gg = group number
 
 #define CMD_LDAA8               64                // cc                              cc = short constant
 #define CMD_LDAB8               65                // cc                              cc = short constant
 #define CMD_LDAC8               66                // cc                              cc = short constant
 #define CMD_LDAD8               67                // cc                              cc = short constant
-#define CMD_LDAE8               68                // cc                              cc = short constant
-#define CMD_LDAF8               69                // cc                              cc = short constant
-#define CMD_LDAG8               70                // cc                              cc = short constant
-#define CMD_LDAH8               71                // cc                              cc = short constant
+
+#define CMD_LDAA16              72                // cccc                              cc = short constant
+#define CMD_LDAB16              73                // cccc                              cc = short constant
+#define CMD_LDAC16              74                // cccc                              cc = short constant
+#define CMD_LDAD16              75                // cccc                              cc = short constant
+
 
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t program_size = 0;
+uint8_t led_map[8];
 
 LedGroups* led_groups;
 
@@ -85,6 +89,7 @@ LedGroups* led_groups;
 LedController::LedController() {
   if(program_size == 0) {
     uint16_t n = (EEPROM.read(EEPROM_LED_CODE_SIZE) << 8) + EEPROM.read(EEPROM_LED_CODE_SIZE+1);
+    
     if(n < EEPROM_LED_CODE_MAX_SIZE) {
       program_size = n;
       for(uint16_t i=0; i<program_size; i++) {
@@ -92,6 +97,22 @@ LedController::LedController() {
       }
     }  
   }
+
+  int sum = 0;
+  for(uint16_t i=0; i<8; i++) {
+    sum += EEPROM.read(EEPROM_LED_MAP_BASE + i);
+  }
+
+  if(sum != 28) {
+    console->console_print("Resetting led map base\r\n");
+    for(uint16_t i=0; i<8; i++) {
+      EEPROM.write(EEPROM_LED_MAP_BASE + i, i);
+    }     
+  }
+  for(int i=0; i<8; i++) {
+    led_map[i] = EEPROM.read(EEPROM_LED_MAP_BASE + i);
+  }
+
   leds = new OctoWS2811(MAX_LEDS_PER_STRIP, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
   leds->begin();
 
@@ -122,9 +143,14 @@ void LedController::cmd_group_set() {
   uint8_t  group_number = program[pc++];
   uint8_t  group_led_start = program[pc++];
   uint8_t  group_led_end = program[pc++];
-  uint8_t  strip_number = program[pc++];
+  uint8_t  virtual_strip_number = program[pc++];
   uint8_t  strip_led_start = program[pc++];
   uint8_t  strip_led_end = program[pc++];
+
+  if(virtual_strip_number > 8) {
+    return;
+  }
+  uint8_t strip_number = led_map[virtual_strip_number];
 
   if(group_number < MAX_LED_GROUPS) {                                 // todo - beef up this check
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
@@ -136,19 +162,23 @@ void LedController::cmd_group_set() {
       int strip_i = strip_led_start;
       if(group_led_end > group_led_start) {
         for(int group_i = group_led_start; group_i <= group_led_end; group_i++) {
-          group_ptr->strip_number[group_i] = strip_number;
-          group_ptr->led_position[group_i] = strip_i;      
-          if(group_i >= group_ptr->led_count) {
-            group_ptr->led_count = group_i + 1;
+          if(group_i < MAX_LEDS_PER_GROUP) {
+            group_ptr->strip_number[group_i] = strip_number;
+            group_ptr->led_position[group_i] = strip_i;      
+            if(group_i >= group_ptr->led_count) {
+              group_ptr->led_count = group_i + 1;
+            }
           }
           strip_i += strip_increment;
         }        
       } else {
         for(int group_i = group_led_start; group_i >= group_led_end; group_i--) {
-          group_ptr->strip_number[group_i] = strip_number;
-          group_ptr->led_position[group_i] = strip_i;
-          if(group_i >= group_ptr->led_count) {
-            group_ptr->led_count = group_i + 1;
+          if(group_i < MAX_LEDS_PER_GROUP) {
+            group_ptr->strip_number[group_i] = strip_number;
+            group_ptr->led_position[group_i] = strip_i;
+            if(group_i >= group_ptr->led_count) {
+              group_ptr->led_count = group_i + 1;
+            }
           }
           strip_i += strip_increment;
         }
@@ -166,6 +196,9 @@ void LedController::cmd_group_clear() {
   }
 }
 
+void LedController::cmd_disable_groups() {
+  led_groups->disable_all();
+}
 
 void LedController::cmd_clear_groups() {
   led_groups->clear_all();
@@ -177,14 +210,6 @@ void LedController::cmd_load_reg_const() {
   register_value |= program[pc++] << 16;
   register_value |= program[pc++] << 8;
   register_value |= program[pc++];
-  if(register_number < MAX_REGISTERS) {
-    registers[register_number] = register_value;
-  }
-}
-
-void LedController::cmd_load_reg_const8() {
-  uint8_t register_number = program[pc++];
-  uint32_t register_value = program[pc++];
   if(register_number < MAX_REGISTERS) {
     registers[register_number] = register_value;
   }
@@ -250,7 +275,7 @@ void LedController::cmd_set_flash() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_flash(registers[0], registers[1], registers[2], registers[3]);  
+    group_ptr->set_flash(registers[0], registers[1], registers[2]);  
   }
 }
 
@@ -258,7 +283,7 @@ void LedController::cmd_set_wave() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_wave((uint8_t)(registers[0]), registers[1], registers[2], registers[3], registers[4]);  
+    group_ptr->set_wave(registers[0], registers[1], registers[2], registers[3]);  
   }
 }
   
@@ -266,7 +291,7 @@ void LedController::cmd_set_bounce() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_bounce((uint8_t)(registers[0]), registers[1], registers[2], registers[3], registers[4]);  
+    group_ptr->set_bounce(registers[0], registers[1], registers[2]);  
   }
 }
     
@@ -282,7 +307,23 @@ void LedController::cmd_set_bar() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_bar((uint8_t)(registers[0]), registers[1], registers[2], registers[3]);  
+    group_ptr->set_bar(registers[0], registers[1], registers[2]);  
+  }
+}
+
+void LedController::cmd_set_off() {
+  uint8_t group_number = program[pc++];
+  if(group_number < led_groups->led_group_count) {
+    LedGroup* group_ptr = led_groups->get_led_group(group_number);
+    group_ptr->set_solid(0);
+  }
+}
+
+void LedController::cmd_set_dormant() {
+  uint8_t group_number = program[pc++];
+  if(group_number < led_groups->led_group_count) {
+    LedGroup* group_ptr = led_groups->get_led_group(group_number);
+    group_ptr->set_dormant();
   }
 }
 
@@ -369,6 +410,12 @@ void LedController::cmd_load_reg_8(uint8_t reg) {
   registers[reg] = value;
 }
 
+void LedController::cmd_load_reg_16(uint8_t reg) {
+  uint16_t  value = program[pc++] << 8;
+  value |= program[pc++];
+  registers[reg] = value;
+}
+
 void LedController::process_command() {
   uint8_t cmd = program[pc++]; 
 
@@ -385,14 +432,14 @@ void LedController::process_command() {
     case CMD_CLEAR_GROUPS:
       cmd_clear_groups();
       break;
+
+    case CMD_DISABLE_GROUPS:
+      cmd_disable_groups();
+      break;
           
     case CMD_LOAD_REG_CONST:
       cmd_load_reg_const();
       break;
-      
-//    case CMD_LOAD_REG_CONST8:
-//      cmd_load_reg_const8();
-//      break;
 
     case CMD_LDAA8:
       cmd_load_reg_8(0);
@@ -410,20 +457,20 @@ void LedController::process_command() {
       cmd_load_reg_8(3);
       break;
     
-    case CMD_LDAE8:
-      cmd_load_reg_8(4);
+    case CMD_LDAA16:
+      cmd_load_reg_16(0);
       break;
     
-    case CMD_LDAF8:
-      cmd_load_reg_8(5);
+    case CMD_LDAB16:
+      cmd_load_reg_16(1);
       break;
     
-    case CMD_LDAG8:
-      cmd_load_reg_8(6);
+    case CMD_LDAC16:
+      cmd_load_reg_16(2);
       break;
     
-    case CMD_LDAH8:
-      cmd_load_reg_8(7);
+    case CMD_LDAD16:
+      cmd_load_reg_16(3);
       break;
         
     case CMD_LOAD_REG_MAV:
@@ -476,6 +523,14 @@ void LedController::process_command() {
       
     case CMD_SETBAR:
       cmd_set_bar();
+      break;     
+       
+    case CMD_SETOFF:
+      cmd_set_off();
+      break;
+      
+    case CMD_SETDORMANT:
+      cmd_set_dormant();
       break;
 
     case CMD_0EQ1:
@@ -527,6 +582,7 @@ void LedController::process_command() {
 }
 
 void LedController::process_10_millisecond() {
+  uint32_t process_start_time = millis();
   while(1) {
     if(pausing_time_left > (MS_PER_TIMESLICE/2)) {
       pausing_time_left -= MS_PER_TIMESLICE;
@@ -540,11 +596,12 @@ void LedController::process_10_millisecond() {
 //    }
     process_command();
   }
-  for(int i=0; i<led_groups->led_group_count; i++) {
-    LedGroup* group_pnt = led_groups->get_led_group(i);
-    group_pnt->process_10_millisecond();
-  }
+  led_groups->process_10_milliseconds();
   leds->show();
+//  uint32_t duration = millis() - process_start_time;
+//  if(duration > 1) {
+//    console->console_print("%ld ", duration);
+//  }
 }
 
 
