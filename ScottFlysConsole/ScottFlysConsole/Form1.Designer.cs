@@ -82,14 +82,14 @@
             // cmbSerialPorts
             // 
             this.cmbSerialPorts.FormattingEnabled = true;
-            this.cmbSerialPorts.Location = new System.Drawing.Point(625, 3);
+            this.cmbSerialPorts.Location = new System.Drawing.Point(497, 5);
             this.cmbSerialPorts.Name = "cmbSerialPorts";
-            this.cmbSerialPorts.Size = new System.Drawing.Size(121, 21);
+            this.cmbSerialPorts.Size = new System.Drawing.Size(249, 21);
             this.cmbSerialPorts.TabIndex = 1;
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(752, 3);
+            this.btnConnect.Location = new System.Drawing.Point(752, 5);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 2;

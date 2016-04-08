@@ -29,8 +29,26 @@ extern int drawingMemory[];
 
 #define MS_PER_TIMESLICE       10
 
-#define VAR_RC8                 8
-#define VAR_BATTERY_REMAINING   9
+
+#define VAR_MAV_RC_CH7                  0x01      // mav.rc.ch7
+#define VAR_MAV_RC_CH8                  0x02      // mav.rc.ch8
+
+#define VAR_MAV_BATTERY_CURRENT         0x10      // mav.battery.current
+#define VAR_MAV_BATTERY_VOLTAGE         0x11      // mav.battery.voltage
+#define VAR_MAV_BATTERY_REMAINING       0x12      // mav.battery.remaining
+#define VAR_MAV_BATTERY_CONSUMED        0x13      // mav.battery.consumed
+
+#define VAR_MAV_SAT_HDOP                0x20      // mav.sat.hdop
+#define VAR_MAV_SAT_VISIBLE             0x21      // map.sat.visible
+
+#define VAR_MAV_VEHICLE_BARALTITUDE     0x30      // mav.vehicle.baraltitude
+#define VAR_MAV_VEHICLE_COG             0x31      // mav.vehicle.cog
+#define VAR_MAV_VEHICLE_HEADING         0x32      // mav.vehicle.heading
+#define VAR_MAV_VEHICLE_SPEED           0x33      // mav.vehicle.speed
+
+#define VAR_MAV_FC_ARMED                0x40      // mav.fc.armed
+#define VAR_MAV_FC_FLIGHTMODE           0x41      // mav.fc.flightmode
+
 
 #define CMD_LOAD_REG_CONST      1                 // rr cccccccc                     rr = register number, cccccccc = constant value
 #define CMD_LOAD_REG_MAV        2                 // rr mm                           rr = register number, mm = mav value
@@ -66,16 +84,19 @@ extern int drawingMemory[];
 #define CMD_SETBOUNCE           53                // gg                              gg = group number, (R0 = on color, R1 = state time, R2 = on width)
 #define CMD_SETOFF              54                // gg                              gg = group number
 #define CMD_SETDORMANT          55                // gg                              gg = group number
+#define CMD_SETBAR2             56                // gg                              gg = group number, (implied: R0 = on color, R1 = value, R2 = low, R3 = high, R4 = reverse)
 
 #define CMD_LDAA8               64                // cc                              cc = short constant
 #define CMD_LDAB8               65                // cc                              cc = short constant
 #define CMD_LDAC8               66                // cc                              cc = short constant
 #define CMD_LDAD8               67                // cc                              cc = short constant
+#define CMD_LDAE8               68                // cc                              cc = short constant
 
 #define CMD_LDAA16              72                // cccc                              cc = short constant
 #define CMD_LDAB16              73                // cccc                              cc = short constant
 #define CMD_LDAC16              74                // cccc                              cc = short constant
 #define CMD_LDAD16              75                // cccc                              cc = short constant
+#define CMD_LDAE16              76                // cccc                              cc = short constant
 
 
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
@@ -126,11 +147,61 @@ LedController::LedController() {
 
 uint32_t LedController::get_variable(uint16_t input) {
   switch(input) {
-    case VAR_RC8:
+    
+    case VAR_MAV_RC_CH7:
+      return mav->rc7;
+      break; 
+         
+    case VAR_MAV_RC_CH8:
       return mav->rc8;
       break;
-    case VAR_BATTERY_REMAINING:
+      
+    case VAR_MAV_BATTERY_CURRENT:
+      return mav->average_battery_current;
+      break;
+      
+    case VAR_MAV_BATTERY_VOLTAGE:
+      return mav->average_battery_voltage;
+      break;
+      
+    case VAR_MAV_BATTERY_REMAINING:
       return mav->battery_remaining;
+      break;
+      
+    case VAR_MAV_BATTERY_CONSUMED:
+      return mav->tenth_amp_per_millisecond_consumed;
+      break;
+
+    case VAR_MAV_SAT_HDOP:
+      return mav->gps_hdop;
+      break;
+      
+    case VAR_MAV_SAT_VISIBLE:
+      return mav->gps_satellites_visible;
+      break;
+      
+    case VAR_MAV_VEHICLE_BARALTITUDE:
+      return mav->bar_altitude;
+      break;
+      
+    case VAR_MAV_VEHICLE_COG:
+      return mav->calced_cog;
+      break;
+      
+    case VAR_MAV_VEHICLE_HEADING:
+      return mav->heading;
+      break;
+      
+    case VAR_MAV_VEHICLE_SPEED:
+      return mav->gps_speed;
+      break;
+
+    case VAR_MAV_FC_ARMED:
+      return mav->base_mode >> 7;
+      break;
+      
+    case VAR_MAV_FC_FLIGHTMODE:
+      return mav->custom_mode;
       break;
       
     default:
@@ -311,6 +382,18 @@ void LedController::cmd_set_bar() {
   }
 }
 
+void LedController::cmd_set_bar2() {
+  uint8_t group_number = program[pc++];
+  if(group_number < led_groups->led_group_count) {
+    LedGroup* group_ptr = led_groups->get_led_group(group_number);
+    uint32_t value = registers[1];
+    uint32_t low = registers[2];
+    uint32_t high = registers[3];
+    uint32_t percent = (value - low) / (high - low);
+    group_ptr->set_bar(registers[0], percent, registers[4]);  
+  }
+}
+
 void LedController::cmd_set_off() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
@@ -457,6 +540,10 @@ void LedController::process_command() {
       cmd_load_reg_8(3);
       break;
     
+    case CMD_LDAE8:
+      cmd_load_reg_8(4);
+      break;
+    
     case CMD_LDAA16:
       cmd_load_reg_16(0);
       break;
@@ -471,6 +558,10 @@ void LedController::process_command() {
     
     case CMD_LDAD16:
       cmd_load_reg_16(3);
+      break;
+        
+    case CMD_LDAE16:
+      cmd_load_reg_16(4);
       break;
         
     case CMD_LOAD_REG_MAV:
@@ -523,6 +614,10 @@ void LedController::process_command() {
       
     case CMD_SETBAR:
       cmd_set_bar();
+      break;     
+       
+    case CMD_SETBAR2:
+      cmd_set_bar2();
       break;     
        
     case CMD_SETOFF:

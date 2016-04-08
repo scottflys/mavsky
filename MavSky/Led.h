@@ -56,6 +56,7 @@ class LedController {
     void cmd_set_bounce();
     void cmd_set_random();
     void cmd_set_bar();
+    void cmd_set_bar2();
     void cmd_set_off();
     void cmd_set_dormant();
     
