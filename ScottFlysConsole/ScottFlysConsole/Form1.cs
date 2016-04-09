@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.IO;
@@ -11,9 +8,10 @@ using System.Management;
 
 namespace ScottFlysConsole
 {
-
     public partial class Form1 : Form
     {
+        const string defaultSourceExtension = "txt";
+        const string defaultCompiledExtension = "dat";
         SerialPort serialPort;
         bool connected = false;
 
@@ -111,18 +109,42 @@ namespace ScottFlysConsole
         private void sendToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            DialogResult result = openFileDialog.ShowDialog(); 
-            if (result == DialogResult.OK)
+            openFileDialog.Filter = string.Format("Compiled Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultCompiledExtension);
+            openFileDialog.FilterIndex = 1;
+            DialogResult dialogResult = openFileDialog.ShowDialog(); 
+            if (dialogResult == DialogResult.OK)
             {
-                string file = openFileDialog.FileName;
+                string sourceFilename = openFileDialog.FileName;
                 try
                 {
-                    string[] lines = File.ReadAllLines(file);
+                    string[] lines = File.ReadAllLines(sourceFilename);
                     foreach (string line in lines)
                     {
                         Console.WriteLine(line);
                         serialPort.Write(line + "\r");
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = string.Format("Source Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultSourceExtension);
+            openFileDialog.FilterIndex = 1;
+            DialogResult dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                string sourceFilename = openFileDialog.FileName;
+                string destinationFilename = Path.Combine(Path.GetDirectoryName(sourceFilename), Path.GetFileNameWithoutExtension(sourceFilename)) + "." + defaultCompiledExtension;
+                try
+                {
+                    string compileResult = await CompilationClient.Compile("http://watsys.com/compile.php", sourceFilename, destinationFilename);
+                    MessageBox.Show(this, compileResult, "Compilation Complete");
                 }
                 catch (Exception ex)
                 {
@@ -138,5 +160,7 @@ namespace ScottFlysConsole
             cmbSerialPorts.Left = this.Width - 355;
             btnConnect.Left = this.Width - 100;
         }
+
+
     }
 }
