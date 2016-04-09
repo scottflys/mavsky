@@ -77,14 +77,13 @@ extern int drawingMemory[];
 #define CMD_DISABLE_GROUPS      35                // disables all groups                            
 
 #define CMD_SETCOLOR            48                // gg                              gg = group number  (implied: R0 = color)
-#define CMD_SETFLASH            49                // gg                              gg = group number, (implied: R0 = on color, R1 = on time, R2 = off time)
+#define CMD_SETFLASH            49                // gg                              gg = group number, (implied: R0 = on color, R1 = on time, R2 = off time, R3 = offset time)
 #define CMD_SETWAVE             50                // gg                              gg = group number, (implied: R0 = on color, R1 = state time, R2 = on width, R3 = reverse)
 #define CMD_SETRANDOM           51                // gg                              gg = group number, (implied: R0 = change time register, R1 = intensity) 
-#define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = on color, R1 = percent register, R2 = reverse)
+#define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = on color, R1 = value, R2 = low, R3 = high, R4 = reverse)
 #define CMD_SETBOUNCE           53                // gg                              gg = group number, (R0 = on color, R1 = state time, R2 = on width)
 #define CMD_SETOFF              54                // gg                              gg = group number
 #define CMD_SETDORMANT          55                // gg                              gg = group number
-#define CMD_SETBAR2             56                // gg                              gg = group number, (implied: R0 = on color, R1 = value, R2 = low, R3 = high, R4 = reverse)
 
 #define CMD_LDAA8               64                // cc                              cc = short constant
 #define CMD_LDAB8               65                // cc                              cc = short constant
@@ -101,6 +100,7 @@ extern int drawingMemory[];
 
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t program_size = 0;
+
 uint8_t led_map[8];
 
 LedGroups* led_groups;
@@ -108,16 +108,26 @@ LedGroups* led_groups;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 LedController::LedController() {
-  if(program_size == 0) {
-    uint16_t n = (EEPROM.read(EEPROM_LED_CODE_SIZE) << 8) + EEPROM.read(EEPROM_LED_CODE_SIZE+1);
-    
-    if(n < EEPROM_LED_CODE_MAX_SIZE) {
-      program_size = n;
-      for(uint16_t i=0; i<program_size; i++) {
-        program[i] = EEPROM.read(EEPROM_LED_CODE_BASE + i);
-      }
-    }  
-  }
+  leds = new OctoWS2811(MAX_LEDS_PER_STRIP, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
+  leds->begin();
+
+  reload();
+  
+  leds->show();
+
+  led_groups = new LedGroups(leds);
+}
+
+void LedController::reload() {
+  pc = 0;
+  uint16_t n = (EEPROM.read(EEPROM_LED_CODE_SIZE) << 8) + EEPROM.read(EEPROM_LED_CODE_SIZE+1);
+  
+  if(n < EEPROM_LED_CODE_MAX_SIZE) {
+    program_size = n;
+    for(uint16_t i=0; i<program_size; i++) {
+      program[i] = EEPROM.read(EEPROM_LED_CODE_BASE + i);
+    }
+  }  
 
   int sum = 0;
   for(uint16_t i=0; i<8; i++) {
@@ -134,15 +144,9 @@ LedController::LedController() {
     led_map[i] = EEPROM.read(EEPROM_LED_MAP_BASE + i);
   }
 
-  leds = new OctoWS2811(MAX_LEDS_PER_STRIP, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
-  leds->begin();
-
   for (int i=0; i < MAX_LEDS_PER_STRIP*MAX_STRIPS; i++) {
     leds->setPixel(i, 0x000000);
   }
-  leds->show();
-
-  led_groups = new LedGroups(leds);
 }
 
 uint32_t LedController::get_variable(uint16_t input) {
@@ -346,7 +350,7 @@ void LedController::cmd_set_flash() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_flash(registers[0], registers[1], registers[2]);  
+    group_ptr->set_flash(registers[0], registers[1], registers[2], registers[3]);  
   }
 }
 
@@ -378,18 +382,10 @@ void LedController::cmd_set_bar() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->set_bar(registers[0], registers[1], registers[2]);  
-  }
-}
-
-void LedController::cmd_set_bar2() {
-  uint8_t group_number = program[pc++];
-  if(group_number < led_groups->led_group_count) {
-    LedGroup* group_ptr = led_groups->get_led_group(group_number);
     uint32_t value = registers[1];
     uint32_t low = registers[2];
     uint32_t high = registers[3];
-    uint32_t percent = (value - low) / (high - low);
+    uint32_t percent = ((value - low) * 100) / (high - low);
     group_ptr->set_bar(registers[0], percent, registers[4]);  
   }
 }
@@ -616,10 +612,6 @@ void LedController::process_command() {
       cmd_set_bar();
       break;     
        
-    case CMD_SETBAR2:
-      cmd_set_bar2();
-      break;     
-       
     case CMD_SETOFF:
       cmd_set_off();
       break;
@@ -677,7 +669,6 @@ void LedController::process_command() {
 }
 
 void LedController::process_10_millisecond() {
-//  uint32_t process_start_time = millis();
   while(1) {
     if(pausing_time_left > (MS_PER_TIMESLICE/2)) {
       pausing_time_left -= MS_PER_TIMESLICE;
@@ -693,10 +684,6 @@ void LedController::process_10_millisecond() {
   }
   led_groups->process_10_milliseconds();
   leds->show();
-//  uint32_t duration = millis() - process_start_time;
-//  if(duration > 1) {
-//    console->console_print("%ld ", duration);
-//  }
 }
 
 

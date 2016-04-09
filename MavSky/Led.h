@@ -16,14 +16,14 @@
 #include <WProgram.h> 
 #include "OctoWS2811.h" 
 
-#define GROUP_MODE_DISABLED 0
-#define GROUP_MODE_SOLID    1
-#define GROUP_MODE_FLASH    2
-#define GROUP_MODE_WAVE     3
-#define GROUP_MODE_RANDOM   4
-#define GROUP_MODE_BAR      5
-#define GROUP_MODE_BOUNCE   6
-#define GROUP_MODE_DORMANT  7
+#define GROUP_MODE_DISABLED    0
+#define GROUP_MODE_SOLID       1
+#define GROUP_MODE_FLASH       2
+#define GROUP_MODE_WAVE        3
+#define GROUP_MODE_RANDOM      4
+#define GROUP_MODE_BAR         5
+#define GROUP_MODE_BOUNCE      6
+#define GROUP_MODE_DORMANT     7
 
 class LedController {
   private:
@@ -44,8 +44,6 @@ class LedController {
     void cmd_pause();
     void cmd_yield();
     void cmd_jump_absolute();
-    //void cmd_cond_jump_absolute();
-    //void cmd_cond_jump_relative();  
     void cmd_bz_relative();
     void cmd_bnz_relative();
     
@@ -56,10 +54,8 @@ class LedController {
     void cmd_set_bounce();
     void cmd_set_random();
     void cmd_set_bar();
-    void cmd_set_bar2();
     void cmd_set_off();
     void cmd_set_dormant();
-    
 
     void cmd_0eq1();
     void cmd_0ne1();
@@ -77,6 +73,7 @@ class LedController {
     
   public:
     LedController();
+    void reload();
     void process_10_millisecond();
     void process_command();
 };

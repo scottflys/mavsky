@@ -21,21 +21,6 @@ namespace ScottFlysConsole
             }
             using (var client = new HttpClient())
             {
-                //client.BaseAddress = new Uri(@"http://watsys.com/");
-                //MultipartFormDataContent form = new MultipartFormDataContent();
-                //HttpContent content = new StringContent("fileToCompile");
-                //form.Add(content, "fileToCompile");
-                //content = new StreamContent(ms);
-                //content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-                //{
-                //    Name = "fileToCompile",
-                //    FileName = Path.GetFileName(sourceFilename)
-                //};
-                //form.Add(content);
-                //var response = await client.PostAsync("compile.php", form);
-                //var result = response.Content.ReadAsStringAsync().Result;
-
-                //return result;
                 using (var content = new MultipartFormDataContent("Upload----" + DateTime.Now))
                 {
                     content.Add(new StreamContent(new FileStream(sourceFilename, FileMode.Open)), "fileToCompile", Path.GetFileName(sourceFilename));
@@ -46,7 +31,7 @@ namespace ScottFlysConsole
                         if (o != null)
                         {
                             File.WriteAllText(destinationFilename, result);
-                            return "Success";
+                            return null;
                         } 
                         else
                         {

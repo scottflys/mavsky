@@ -111,6 +111,7 @@ void LedGroup::clear() {
   on_led_count = 0;                      
   intensity = 0;                         
   reverse = 0;                            
+  offset_time = 0;                            
   led_count = 0; 
 }
 
@@ -142,17 +143,18 @@ void LedGroup::set_dormant() {
   }  
 }
 
-void LedGroup::set_flash(uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param) {
+void LedGroup::set_flash(uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param) {
   push_layer();
   enabled = 1;
-  if(mode != GROUP_MODE_FLASH || on_color != on_color_param || on_time != on_time_param || off_time != off_time_param) {
+  if(mode != GROUP_MODE_FLASH || on_color != on_color_param || on_time != on_time_param || off_time != off_time_param || offset_time != offset_time_param) {
     sequence_ms = 0;
     state = 0;
     mode = GROUP_MODE_FLASH;
     on_color = on_color_param;
     on_time = on_time_param;
     off_time = off_time_param;
-  }  
+    offset_time = offset_time_param;
+  }
 }
 
 void LedGroup::set_wave(uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param, uint8_t reverse_param) {
@@ -244,17 +246,7 @@ void LedGroup::process_10_millisecond() {
             
     case GROUP_MODE_FLASH:
       {
-        if(sequence_ms < on_time) {
-          state = 1;
-          sequence_ms += 10;     
-        } else if (sequence_ms < (on_time + off_time)) {
-          state = 0;
-          sequence_ms += 10;     
-        } else {
-          state = 1;
-          sequence_ms = 0;    
-        }
-        if(state == 1) {
+        if((sequence_ms >= offset_time) && (sequence_ms < (offset_time + on_time))) {
           for(int i = 0; i<led_count; i++) {      
             uint8_t strip = strip_number[i];
             uint8_t pos = led_position[i];
@@ -262,6 +254,10 @@ void LedGroup::process_10_millisecond() {
               leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
             }
           }
+        }
+        sequence_ms += 10;   
+        if(sequence_ms > (on_time + off_time)) {
+          sequence_ms = 0;    
         }
       }
       break;

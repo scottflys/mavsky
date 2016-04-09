@@ -199,7 +199,8 @@ void MavConsole::do_led_map() {
   for(int i=0; i<8; i++) {
     EEPROM.write(EEPROM_LED_MAP_BASE + i, temp_map[i]);
   }
-  console_print("Led map set.  Please reboot for led map changes to take effect\r\n");
+  led_strip_ptr->reload();
+  console_print("The new LED map has been written to NVRAM and is now being used\r\n");
 }
 
 void MavConsole::do_command(char *cmd_buffer) {
@@ -320,7 +321,8 @@ void MavConsole::check_for_console_command() {
               for(uint16_t i=0; i<led_code_size; i++) {
                 EEPROM.write(EEPROM_LED_CODE_BASE + i, led_code_buffer[i]);
               }  
-              console_print("Data written to NVRAM.  Please reboot\r\n");
+              led_strip_ptr->reload();
+              console_print("Data successfully written to NVRAM.  LED patterns have been reloaded.\r\n");
             }
           } else {
             console_print("Insufficient data received\r\n");            

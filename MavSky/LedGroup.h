@@ -32,7 +32,6 @@ class LedGroup {
     uint8_t  state = 0;
     uint8_t  mode = 0;    
     uint32_t on_color = 0;
-//    uint32_t off_color = 0;
     uint32_t on_time = 0;                             // flash
     uint32_t off_time = 0;                            // flash
     uint32_t state_time = 0;  
@@ -40,6 +39,8 @@ class LedGroup {
     uint8_t  on_led_count = 0;                        // bar
     uint8_t  intensity = 0;                           // random
     uint8_t  reverse = 0;                             // wave, bar
+    uint32_t offset_time = 0;                             // flash2
+    
     uint8_t  led_count = 0;
     int8_t   strip_number[MAX_LEDS_PER_GROUP];
     int8_t   led_position[MAX_LEDS_PER_GROUP];
@@ -50,7 +51,7 @@ class LedGroup {
     void disable();
     void set_solid(uint32_t color);
     void set_dormant();
-    void set_flash(uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param);
+    void set_flash(uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param);
     void set_wave(uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param, uint8_t reverse_param);
     void set_bounce(uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param);
     void set_random(uint32_t state_time_param, uint8_t intensity);

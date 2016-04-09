@@ -30,9 +30,11 @@
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.compileAndUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbSerialPorts = new System.Windows.Forms.ComboBox();
@@ -56,32 +58,48 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sendToolStripMenuItem});
+            this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
-            // sendToolStripMenuItem
+            // exitToolStripMenuItem
             // 
-            this.sendToolStripMenuItem.Name = "sendToolStripMenuItem";
-            this.sendToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
-            this.sendToolStripMenuItem.Text = "Send";
-            this.sendToolStripMenuItem.Click += new System.EventHandler(this.sendToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // compileToolStripMenuItem
             // 
             this.compileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.selectFileToolStripMenuItem});
+            this.selectFileToolStripMenuItem,
+            this.uploadToolStripMenuItem,
+            this.compileAndUploadToolStripMenuItem});
             this.compileToolStripMenuItem.Name = "compileToolStripMenuItem";
-            this.compileToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
-            this.compileToolStripMenuItem.Text = "Compile";
+            this.compileToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.compileToolStripMenuItem.Text = "LEDs";
             // 
             // selectFileToolStripMenuItem
             // 
             this.selectFileToolStripMenuItem.Name = "selectFileToolStripMenuItem";
-            this.selectFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.selectFileToolStripMenuItem.Text = "Compile File";
+            this.selectFileToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.selectFileToolStripMenuItem.Text = "Compile";
             this.selectFileToolStripMenuItem.Click += new System.EventHandler(this.compileFileToolStripMenuItem_Click);
+            // 
+            // uplloadToolStripMenuItem
+            // 
+            this.uploadToolStripMenuItem.Name = "uplloadToolStripMenuItem";
+            this.uploadToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.uploadToolStripMenuItem.Text = "Upload";
+            this.uploadToolStripMenuItem.Click += new System.EventHandler(this.uploadToolStripMenuItem_Click);
+            // 
+            // compileAndUploadToolStripMenuItem
+            // 
+            this.compileAndUploadToolStripMenuItem.Name = "compileAndUploadToolStripMenuItem";
+            this.compileAndUploadToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.compileAndUploadToolStripMenuItem.Text = "Compile and Upload";
+            this.compileAndUploadToolStripMenuItem.Click += new System.EventHandler(this.compileAndUploadToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -153,11 +171,13 @@
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.TextBox txtConsole;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sendToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem compileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem uploadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem compileAndUploadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
 }
 

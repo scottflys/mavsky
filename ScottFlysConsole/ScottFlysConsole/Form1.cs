@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.IO;
 using System.Management;
+using System.Threading.Tasks;
 
 namespace ScottFlysConsole
 {
@@ -42,6 +43,8 @@ namespace ScottFlysConsole
                     }
                 }
             }
+            uploadToolStripMenuItem.Enabled = false;
+            compileAndUploadToolStripMenuItem.Enabled = false;
         }
 
         private void connect_Click(object sender, EventArgs e)
@@ -51,6 +54,8 @@ namespace ScottFlysConsole
                 connected = false;
                 serialPort.Close();
                 btnConnect.Text = "Connect";
+                uploadToolStripMenuItem.Enabled = false;
+                compileAndUploadToolStripMenuItem.Enabled = false;
             }
             else
             {
@@ -72,6 +77,9 @@ namespace ScottFlysConsole
 
                 connected = true;
                 btnConnect.Text = "Disconnect";
+                uploadToolStripMenuItem.Enabled = true;
+                compileAndUploadToolStripMenuItem.Enabled = true;
+
                 txtConsole.Focus();
 
                 serialPort.Write("\r");
@@ -106,32 +114,15 @@ namespace ScottFlysConsole
             e.Handled = true;
         }
 
-        private void sendToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Form1_Resize(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = string.Format("Compiled Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultCompiledExtension);
-            openFileDialog.FilterIndex = 1;
-            DialogResult dialogResult = openFileDialog.ShowDialog(); 
-            if (dialogResult == DialogResult.OK)
-            {
-                string sourceFilename = openFileDialog.FileName;
-                try
-                {
-                    string[] lines = File.ReadAllLines(sourceFilename);
-                    foreach (string line in lines)
-                    {
-                        Console.WriteLine(line);
-                        serialPort.Write(line + "\r");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            }
+            txtConsole.Width = this.Width - 40;
+            txtConsole.Height = this.Height - 90;
+            cmbSerialPorts.Left = this.Width - 355;
+            btnConnect.Left = this.Width - 100;
         }
 
-        private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async Task<string> doCompile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = string.Format("Source Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultSourceExtension);
@@ -143,24 +134,79 @@ namespace ScottFlysConsole
                 string destinationFilename = Path.Combine(Path.GetDirectoryName(sourceFilename), Path.GetFileNameWithoutExtension(sourceFilename)) + "." + defaultCompiledExtension;
                 try
                 {
-                    string compileResult = await CompilationClient.Compile("http://watsys.com/compile.php", sourceFilename, destinationFilename);
-                    MessageBox.Show(this, compileResult, "Compilation Complete");
+                    string compileResult = await CompilationClient.Compile("http://watsys.com/compile_raw.php", sourceFilename, destinationFilename);
+                    if (compileResult != null)
+                    {
+                        MessageBox.Show(this, compileResult, "Compilation Error");
+                        return null;
+                    }
+                    else
+                    {
+                        return destinationFilename;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
             }
+            return null;
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            txtConsole.Width = this.Width - 40;
-            txtConsole.Height = this.Height - 90;
-            cmbSerialPorts.Left = this.Width - 355;
-            btnConnect.Left = this.Width - 100;
+            string compiledFilename = await doCompile();
+            if (compiledFilename != null)
+            {
+                MessageBox.Show(this, string.Format("Successfully compiled to {0}", compiledFilename), "Status");
+            }
         }
 
+        private bool doUpload(string filename)
+        {
+            try
+            {
+                string[] lines = File.ReadAllLines(filename);
+                foreach (string line in lines)
+                {
+                    Console.WriteLine(line);
+                    serialPort.Write(line + "\r");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            return true;
+        }
+
+        private void uploadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = string.Format("Compiled Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultCompiledExtension);
+            openFileDialog.FilterIndex = 1;
+            DialogResult dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                string filename = openFileDialog.FileName;
+                doUpload(filename);
+            }
+        }
+
+        private async void compileAndUploadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string compiledFilename = await doCompile();
+            if (compiledFilename != null)
+            {
+                doUpload(compiledFilename);
+            }
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
 
     }
 }
