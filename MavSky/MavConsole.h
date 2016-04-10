@@ -16,7 +16,7 @@
 #include <WProgram.h> 
 #include <GCS_MAVLink.h>
 
-#include "MavlinkData.h"
+#include "MavLinkData.h"
 
 class Logger;
   

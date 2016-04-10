@@ -14,7 +14,7 @@
 
 #include "../EEPROM/EEPROM.h"
 
-#include <STRING.h>
+#include <string.h>
 #include "MavSky.h"
 #include "Logger.h"
 #include "DataBroker.h"       // todo needed for eeprom constants for now
