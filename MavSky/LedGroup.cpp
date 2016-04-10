@@ -247,7 +247,7 @@ void LedGroup::process_10_millisecond() {
     case GROUP_MODE_FLASH:
       {
         if((sequence_ms >= offset_time) && (sequence_ms < (offset_time + on_time))) {
-          for(int i = 0; i<led_count; i++) {      
+          for(int i = 0; i<led_count; i++) { 
             uint8_t strip = strip_number[i];
             uint8_t pos = led_position[i];
             if(strip >= 0) {
@@ -256,7 +256,7 @@ void LedGroup::process_10_millisecond() {
           }
         }
         sequence_ms += 10;   
-        if(sequence_ms > (on_time + off_time)) {
+        if(sequence_ms >= (on_time + off_time)) {
           sequence_ms = 0;    
         }
       }

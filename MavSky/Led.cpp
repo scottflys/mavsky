@@ -30,24 +30,24 @@ extern int drawingMemory[];
 #define MS_PER_TIMESLICE       10
 
 
-#define VAR_MAV_RC_CH7                  0x01      // mav.rc.ch7
-#define VAR_MAV_RC_CH8                  0x02      // mav.rc.ch8
+#define VAR_MAV_RC_CH7                  0x01      // rc.ch7
+#define VAR_MAV_RC_CH8                  0x02      // rc.ch8
 
-#define VAR_MAV_BATTERY_CURRENT         0x10      // mav.battery.current
-#define VAR_MAV_BATTERY_VOLTAGE         0x11      // mav.battery.voltage
-#define VAR_MAV_BATTERY_REMAINING       0x12      // mav.battery.remaining
-#define VAR_MAV_BATTERY_CONSUMED        0x13      // mav.battery.consumed
+#define VAR_MAV_BATTERY_CURRENT         0x10      // bat.current
+#define VAR_MAV_BATTERY_VOLTAGE         0x11      // bat.voltage
+#define VAR_MAV_BATTERY_REMAINING       0x12      // bat.remaining
+#define VAR_MAV_BATTERY_CONSUMED        0x13      // bat.consumed
 
-#define VAR_MAV_SAT_HDOP                0x20      // mav.sat.hdop
-#define VAR_MAV_SAT_VISIBLE             0x21      // map.sat.visible
+#define VAR_MAV_SAT_HDOP                0x20      // gps.hdop
+#define VAR_MAV_SAT_VISIBLE             0x21      // gps.sats
 
-#define VAR_MAV_VEHICLE_BARALTITUDE     0x30      // mav.vehicle.baraltitude
-#define VAR_MAV_VEHICLE_COG             0x31      // mav.vehicle.cog
-#define VAR_MAV_VEHICLE_HEADING         0x32      // mav.vehicle.heading
-#define VAR_MAV_VEHICLE_SPEED           0x33      // mav.vehicle.speed
+#define VAR_MAV_VEHICLE_BARALTITUDE     0x30      // fc.baralt
+#define VAR_MAV_VEHICLE_COG             0x31      // fc.cog
+#define VAR_MAV_VEHICLE_HEADING         0x32      // fc.heading
+#define VAR_MAV_VEHICLE_SPEED           0x33      // fc.speed
 
-#define VAR_MAV_FC_ARMED                0x40      // mav.fc.armed
-#define VAR_MAV_FC_FLIGHTMODE           0x41      // mav.fc.flightmode
+#define VAR_MAV_FC_ARMED                0x40      // fc.armed
+#define VAR_MAV_FC_FLIGHTMODE           0x41      // fc.flightmode
 
 
 #define CMD_LOAD_REG_CONST      1                 // rr cccccccc                     rr = register number, cccccccc = constant value
@@ -153,7 +153,7 @@ uint32_t LedController::get_variable(uint16_t input) {
   switch(input) {
     
     case VAR_MAV_RC_CH7:
-      return mav->rc7;
+      return mav->rc7;     
       break; 
          
     case VAR_MAV_RC_CH8:
@@ -310,7 +310,8 @@ void LedController::cmd_yield() {
 }
 
 void LedController::cmd_jump_absolute() {
-  uint16_t next_pc = program[pc++] << 8;                             
+  uint16_t next_pc = program[pc++] << 8;                               
+  next_pc |= program[pc++];                          
   pc = next_pc;
 }
 
@@ -497,7 +498,6 @@ void LedController::cmd_load_reg_16(uint8_t reg) {
 
 void LedController::process_command() {
   uint8_t cmd = program[pc++]; 
-
   switch(cmd) {
 
     case CMD_GROUP_SET:
@@ -663,7 +663,7 @@ void LedController::process_command() {
     default:
       if(console != NULL)
       {
-        console->console_print("Invalid program instruction %d\r\n", cmd);
+        console->console_print("Invalid program instruction %d at pc:%d\r\n", cmd, pc);
       }    
   }
 }

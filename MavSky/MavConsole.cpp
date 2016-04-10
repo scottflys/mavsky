@@ -107,6 +107,7 @@ void MavConsole::do_dump() {
   console_print("Temperature:               %d\r\n", mav->temperature);
   console_print("Mavlink imu:               x:%-4d y:%-4d z:%-4d\r\n", mav->imu_xacc, mav->imu_yacc, mav->imu_zacc);
   console_print("Summed mah consumed:       %d\r\n", mav->calc_mah_consumed());
+  console_print("rc7:                       %d\r\n", mav->rc7);
   console_print("rc8:                       %d\r\n", mav->rc8);
 }
 
@@ -306,7 +307,7 @@ uint8_t MavConsole::atoh(uint8_t c)
 void MavConsole::check_for_console_command() {
   while(serial.available()) { 
     uint8_t c = serial.read();
-    if(c == '\r') {
+    if(c == '\r' || c == '\n') {
       cmd_buffer[cmd_index++] = '\0';
       cmd_index = 0;      
       if(led_data_mode) {
@@ -318,6 +319,8 @@ void MavConsole::check_for_console_command() {
             if(download_crc != calculated_crc) {
               console_print("CRC error.  Calculated CRC is %04x but should have been %04x\r\n", calculated_crc, download_crc);
             } else {   
+              EEPROM.write(EEPROM_LED_CODE_SIZE, (led_code_size >> 8) & 0xff);
+              EEPROM.write(EEPROM_LED_CODE_SIZE + 1, led_code_size & 0xff);              
               for(uint16_t i=0; i<led_code_size; i++) {
                 EEPROM.write(EEPROM_LED_CODE_BASE + i, led_code_buffer[i]);
               }  
