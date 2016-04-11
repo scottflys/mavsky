@@ -133,6 +133,7 @@ void loop()  {
       check_for_faults();
     }
     mav->process_100_millisecond();
+    
   }  
   
   if(current_milli >= next_10_loop) {
