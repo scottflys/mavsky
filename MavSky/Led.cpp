@@ -114,6 +114,10 @@ LedController::LedController() {
   leds->show();
 }
 
+void LedController::dump_diags() {
+  led_groups->dump_diags();
+}
+
 void LedController::reload() {
   pc = 0;
   uint16_t n = (EEPROM.read(EEPROM_LED_CODE_SIZE) << 8) + EEPROM.read(EEPROM_LED_CODE_SIZE+1);
@@ -144,8 +148,8 @@ void LedController::reload() {
     leds->setPixel(i, 0x000000);
   }
 
-  led_groups->clear_all_led_assignments();   // todo - this crashes it scs
-  
+  led_groups->clear_led_assignments();    
+  led_groups->clear_all_actions();    
 }
 
 uint32_t LedController::get_variable(uint16_t input) {
@@ -274,7 +278,7 @@ void LedController::cmd_disable_actions() {
 }
 
 void LedController::cmd_clear_groups() {
-  led_groups->clear_all_led_assignments();
+  led_groups->clear_led_assignments();
 }
 
 void LedController::cmd_load_reg_const() {
@@ -341,7 +345,7 @@ void LedController::cmd_set_color() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_solid(registers[0]);
+    group_ptr->group_actions_ptr->set_solid(current_instruction_pc, registers[0]);
   }  
 }
 
@@ -349,7 +353,7 @@ void LedController::cmd_set_flash() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_flash(registers[0], registers[1], registers[2], registers[3]); 
+    group_ptr->group_actions_ptr->set_flash(current_instruction_pc, registers[0], registers[1], registers[2], registers[3]); 
   }
 }
 
@@ -357,7 +361,7 @@ void LedController::cmd_set_wave() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_wave(registers[0], registers[1], registers[2], registers[3]);  
+    group_ptr->group_actions_ptr->set_wave(current_instruction_pc, registers[0], registers[1], registers[2], registers[3]);  
   }
 }
   
@@ -365,7 +369,7 @@ void LedController::cmd_set_bounce() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_bounce(registers[0], registers[1], registers[2]);   
+    group_ptr->group_actions_ptr->set_bounce(current_instruction_pc, registers[0], registers[1], registers[2]);   
   }
 }
     
@@ -373,7 +377,7 @@ void LedController::cmd_set_random() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_random(registers[0], (uint8_t)registers[1]);   
+    group_ptr->group_actions_ptr->set_random(current_instruction_pc, registers[0], (uint8_t)registers[1]);   
   }
 }
 
@@ -385,7 +389,7 @@ void LedController::cmd_set_bar() {
     uint32_t low = registers[2];
     uint32_t high = registers[3];
     uint32_t percent = ((value - low) * 100) / (high - low);
-    group_ptr->group_actions_ptr->set_bar(registers[0], percent, registers[4]); 
+    group_ptr->group_actions_ptr->set_bar(current_instruction_pc, registers[0], percent, registers[4]); 
   }
 }
 
@@ -393,7 +397,7 @@ void LedController::cmd_set_off() {
   uint8_t group_number = program[pc++];
   if(group_number < led_groups->led_group_count) {
     LedGroup* group_ptr = led_groups->get_led_group(group_number);
-    group_ptr->group_actions_ptr->set_solid(0);  
+    group_ptr->group_actions_ptr->set_solid(current_instruction_pc, 0);  
   }
 }
 
@@ -487,6 +491,7 @@ void LedController::cmd_load_reg_16(uint8_t reg) {
 }
 
 void LedController::process_command() {
+  current_instruction_pc = pc;
   uint8_t cmd = program[pc++]; 
   switch(cmd) {
 

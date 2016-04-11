@@ -32,8 +32,9 @@ class LedGroup {
     int8_t   led_position[MAX_LEDS_PER_GROUP];
     LedGroup(OctoWS2811* led_ptr, LedGroups*, int group_number_param);
     void clear_led_assignments();
+    void clear_all_actions();
     void push_layer(uint8_t action_number);
-
+    void dump_diags();
 };
 
 class LedGroups {
@@ -47,11 +48,12 @@ class LedGroups {
     LedGroups(OctoWS2811* led_ptr);
     void add_led_to_group(uint8_t group_number, uint8_t strip, uint8_t pos);
     LedGroup* get_led_group(uint8_t group_number);    
-    void clear_all_led_assignments();
+    void clear_led_assignments();
+    void clear_all_actions();
     void process_10_milliseconds();
     void disable_all_actions();
     void push_layer(uint8_t group_number, uint8_t action_number);
-
+    void dump_diags();
 };
 
 #endif

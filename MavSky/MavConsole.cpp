@@ -109,6 +109,8 @@ void MavConsole::do_dump() {
   console_print("Summed mah consumed:       %d\r\n", mav->calc_mah_consumed());
   console_print("rc7:                       %d\r\n", mav->rc7);
   console_print("rc8:                       %d\r\n", mav->rc8);
+
+//  led_strip_ptr->dump_diags();
 }
 
 void MavConsole::do_times() {

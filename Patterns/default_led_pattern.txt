@@ -1,0 +1,122 @@
+// range 1000 to 2000 divided into 10 parts
+//
+/////////////////////////////////////////////////////////////
+
+initialize begin
+
+	// group 1 is used for all leds - usually this group is used for background
+	append group 1 as strip 1 led 1 to 8
+	append group 1 as strip 2 led 1 to 8
+	append group 1 as strip 3 led 1 to 8
+	append group 1 as strip 4 led 1 to 8
+	append group 1 as strip 5 led 1 to 8
+	append group 1 as strip 6 led 1 to 8
+	append group 1 as strip 7 led 1 to 8
+	append group 1 as strip 8 led 1 to 8
+
+	// group 2 is used to identify the strip numbers
+	append group 2 as strip 1 led 1 to 1
+	append group 2 as strip 2 led 1 to 2
+	append group 2 as strip 3 led 1 to 3
+	append group 2 as strip 4 led 1 to 4
+	append group 2 as strip 5 led 1 to 5
+	append group 2 as strip 6 led 1 to 6
+	append group 2 as strip 7 led 1 to 7
+	append group 2 as strip 8 led 1 to 8
+
+	// 3 = front, 4 = back
+	append group 3 as strip 1 led 1 to 8
+	append group 3 as strip 2 led 1 to 8
+	append group 4 as strip 7 led 1 to 8
+	append group 4 as strip 8 led 1 to 8
+
+	// 5 = mid
+	append group 5 as strip 3 led 1 to 8
+	append group 5 as strip 4 led 1 to 8
+	append group 5 as strip 5 led 1 to 8
+	append group 5 as strip 6 led 1 to 8
+  
+  // Individual arms
+	// 6 front left, 7 = front right, 8 = rear left, 9 = rear right
+	append group 6 as strip 1 led 1 to 8
+	append group 7 as strip 2 led 1 to 8
+	append group 8 as strip 7 led 1 to 8
+	append group 9 as strip 8 led 1 to 8
+ 
+  // Left right corners
+	// 10 = left, 11 = right
+	append group 10 as strip 1 led 1 to 8         // left 
+	append group 10 as strip 7 led 1 to 8         //  
+	append group 11 as strip 2 led 1 to 8         // right 
+	append group 11 as strip 8 led 1 to 8         //  
+	  
+end
+
+if ( rc.ch8 <= 1100 ) begin 
+	random group 1 200 10					 
+	color group 2 #ff0000									 
+end
+  
+if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) begin 
+	color group 1 #000000									 
+	flash group 1 #ffff00 20 950 0							 
+	flash group 1 #ffff00 20 950	200						 
+end
+  
+if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) begin 
+	random group 1 200 10					 
+	bar group 6 #ff0000    25  0   100  1   
+  bar group 7 #00ff00    25  0   100  1     
+	bar group 8 #ff0000    25  0   100  1     
+	bar group 9 #00ff00    25  0   100  1   		
+end
+  
+if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) begin 
+	color group 1 #000000						 
+	wave group 6 #ff0000      150    3     1
+	wave group 7 #00ff00      150    3     1
+	wave group 8 #ff0000      150    3     0
+	wave group 9 #00ff00      150    3     0	
+end
+  
+if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) begin 
+	random group 1 200 10					 
+	wave group 6 #ff0000      50    2    	1
+	wave group 7 #00ff00      50    2    	1
+	wave group 8 #ff0000      50    2     0
+	wave group 9 #00ff00      50    2		  0		
+end
+
+if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) begin 
+	color group 1 #050505		
+	bounce group 6 #ff0000      100    1                   // front left
+	bounce group 7 #00ff00      100    1                   // front right
+	bounce group 8 #ff0000      100    1                   // rear left
+	bounce group 9 #00ff00      100    1   				         // rear right
+end
+  
+if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) begin 
+	color group  1 #000000						 
+	flash group 10 #ff0000 20 950   0     
+	flash group 10 #ff0000 20 950 100       
+	flash group 11 #00ff00 20 950 200        
+	flash group 11 #00ff00 20 950 300   							
+end
+  
+if ( 1700 < rc.ch8 and rc.ch8 <= 1800 ) begin         // DAN
+	color group 3 #ff0000						// Red				 
+	color group 4 #00ff00						// Green	
+	color group 5 #ffffff						// White	
+end
+  
+if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) begin 
+	color group 1 #000000						// off	
+end  
+  
+if ( 1900 < rc.ch8 ) begin 
+	color group 1 #ffffff						// White	
+	bar group 6 #ff0000    25  0   100  1   
+  bar group 7 #00ff00    25  0   100  1     
+	bar group 8 #ff0000    25  0   100  1     
+	bar group 9 #00ff00    25  0   100  1   	  
+end

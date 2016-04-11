@@ -27,6 +27,7 @@
 class LedController {
   private:
     uint16_t  pc = 0;
+    uint16_t  current_instruction_pc = 0;
     OctoWS2811* leds;
     int32_t pausing_time_left = 0; 
     uint32_t get_variable(uint16_t input);
@@ -74,6 +75,7 @@ class LedController {
     void reload();
     void process_10_millisecond();
     void process_command();
+    void dump_diags();
 };
 
 #endif

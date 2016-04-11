@@ -28,6 +28,12 @@ LedGroups::LedGroups(OctoWS2811* led_ptr) {
   }
 }
 
+void LedGroups::dump_diags() {
+  for(int i=0; i<MAX_LED_GROUPS; i++) {
+    group_ptrs[i]->dump_diags();
+  }  
+}
+
 LedGroup* LedGroups::get_led_group(uint8_t group_number) {
   if(group_number < MAX_LED_GROUPS) {
     return group_ptrs[group_number];
@@ -36,10 +42,17 @@ LedGroup* LedGroups::get_led_group(uint8_t group_number) {
   }
 }
 
-void LedGroups::clear_all_led_assignments() {
+void LedGroups::clear_led_assignments() {
   for(int i=0; i<MAX_LED_GROUPS; i++) {
     LedGroup* group_ptr = group_ptrs[i];
     group_ptr->clear_led_assignments();
+  }
+}
+
+void LedGroups::clear_all_actions() {
+  for(int i=0; i<MAX_LED_GROUPS; i++) {
+    LedGroup* group_ptr = group_ptrs[i];
+    group_ptr->clear_all_actions();
   }
 }
 
@@ -97,12 +110,20 @@ LedGroup::LedGroup(OctoWS2811* led_ptr, LedGroups* led_groups_param, int group_n
   } 
 }
 
+void LedGroup::dump_diags() {
+  group_actions_ptr->dump_diags();
+}
+
 void LedGroup::clear_led_assignments() {
   for(int i=0; i<MAX_LEDS_PER_GROUP; i++) {
     strip_number[i] = -1;
     led_position[i] = -1;
     led_count = 0;
   }  
+}
+
+void LedGroup::clear_all_actions() {
+  group_actions_ptr->clear_all_actions(); 
 }
 
 void LedGroup::push_layer(uint8_t action_number) {
