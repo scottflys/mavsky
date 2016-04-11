@@ -37,7 +37,6 @@ void LedGroupActions::push_layer(uint8_t action_index_number) {
   led_group_ptr->push_layer(action_index_number);     
 }
 
-
 void LedGroupActions::disable_all_actions() {
   for(int i=0; i<MAX_LED_ACTIONS_PER_GROUP; i++) {
     LedGroupAction* group_action_ptr = group_action_ptrs[i];

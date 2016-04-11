@@ -16,8 +16,6 @@
 #include <WProgram.h> 
 #include "OctoWS2811.h"
 
-#define MAX_LED_ACTIONS_PER_GROUP 5
-
 class LedGroupActions;
 class LedGroup;
 

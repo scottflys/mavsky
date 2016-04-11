@@ -109,12 +109,9 @@ LedGroups* led_groups;
 LedController::LedController() {
   leds = new OctoWS2811(MAX_LEDS_PER_STRIP, displayMemory, drawingMemory, WS2811_GRB | WS2811_800kHz);
   leds->begin();
-
-  reload();
-  
-  leds->show();
-
   led_groups = new LedGroups(leds);
+  reload();
+  leds->show();
 }
 
 void LedController::reload() {
@@ -147,7 +144,7 @@ void LedController::reload() {
     leds->setPixel(i, 0x000000);
   }
 
- // led_groups->clear_all_led_assignments();   // todo - this crashes it scs
+  led_groups->clear_all_led_assignments();   // todo - this crashes it scs
   
 }
 

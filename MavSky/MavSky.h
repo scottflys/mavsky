@@ -34,9 +34,14 @@
 #define EEPROM_LED_CODE_BASE           74         // LED code start
 #define EEPROM_LED_CODE_MAX_SIZE (2048-EEPROM_LED_CODE_BASE)      
 
-#define MAX_STRIPS          8
-#define MAX_REGISTERS       8
-#define MAX_STACK_SIZE     32
-#define MAX_LEDS_PER_STRIP 10
+#define MAX_STRIPS                      8
+#define MAX_REGISTERS                   8
+#define MAX_STACK_SIZE                 32
+#define MAX_LEDS_PER_STRIP             10
+
+#define MAX_LED_GROUPS                 20      
+#define MAX_LEDS_PER_GROUP             80
+#define MAX_LED_ACTIONS_PER_GROUP      10
+#define MAX_LED_LAYERS                 50      
 
 #endif

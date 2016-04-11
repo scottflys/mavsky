@@ -17,10 +17,6 @@
 #include "OctoWS2811.h"
 #include "LedGroupAction.h"
 
-#define MAX_LEDS_PER_GROUP 64
-#define MAX_LED_GROUPS     20      // scs
-#define MAX_LED_LAYERS     50      
-
 class LedGroups;
 
 class LedGroup {
