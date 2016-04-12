@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScottFlysConsole", "ScottFlysConsole\ScottFlysConsole.csproj", "{499F531D-D385-4853-B687-563981911572}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{D8325CDB-8412-4A65-AEDD-B82F76C5B72C}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{1C447841-5892-4103-8B05-B7173235B110}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +17,8 @@ Global
 		{499F531D-D385-4853-B687-563981911572}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{499F531D-D385-4853-B687-563981911572}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{499F531D-D385-4853-B687-563981911572}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8325CDB-8412-4A65-AEDD-B82F76C5B72C}.Debug|Any CPU.ActiveCfg = Debug
-		{D8325CDB-8412-4A65-AEDD-B82F76C5B72C}.Release|Any CPU.ActiveCfg = Release
+		{1C447841-5892-4103-8B05-B7173235B110}.Debug|Any CPU.ActiveCfg = Debug
+		{1C447841-5892-4103-8B05-B7173235B110}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

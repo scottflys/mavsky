@@ -314,7 +314,7 @@ void MavConsole::check_for_console_command() {
       cmd_index = 0;      
       if(led_data_mode) {
         if(strcmp(cmd_buffer, "datastop") == 0) {
-          console_print("datastop\r\n");            
+          console_print("\r\ndatastop\r\n");            
           if(led_code_size > 2) {
             uint16_t download_crc = (led_code_buffer[led_code_size-2] << 8) + led_code_buffer[led_code_size - 1];         
             uint16_t calculated_crc = get_crc(led_code_buffer, led_code_size - 2);
@@ -345,6 +345,8 @@ void MavConsole::check_for_console_command() {
             }
           }       
           cmd_index = 0;
+          console_print(".");            
+
         }
       } else {
         serial.write("\r\n");       

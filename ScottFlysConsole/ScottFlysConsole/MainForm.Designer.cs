@@ -1,6 +1,6 @@
 ﻿namespace ScottFlysConsole
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -87,9 +87,9 @@
             this.selectFileToolStripMenuItem.Text = "Compile";
             this.selectFileToolStripMenuItem.Click += new System.EventHandler(this.compileFileToolStripMenuItem_Click);
             // 
-            // uplloadToolStripMenuItem
+            // uploadToolStripMenuItem
             // 
-            this.uploadToolStripMenuItem.Name = "uplloadToolStripMenuItem";
+            this.uploadToolStripMenuItem.Name = "uploadToolStripMenuItem";
             this.uploadToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.uploadToolStripMenuItem.Text = "Upload";
             this.uploadToolStripMenuItem.Click += new System.EventHandler(this.uploadToolStripMenuItem_Click);
@@ -114,6 +114,7 @@
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // cmbSerialPorts
             // 
@@ -122,6 +123,7 @@
             this.cmbSerialPorts.Name = "cmbSerialPorts";
             this.cmbSerialPorts.Size = new System.Drawing.Size(249, 21);
             this.cmbSerialPorts.TabIndex = 1;
+            this.cmbSerialPorts.Text = "Please select a device then click Connect ...";
             // 
             // btnConnect
             // 
@@ -143,7 +145,7 @@
             this.txtConsole.TabIndex = 4;
             this.txtConsole.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtConsole_KeyPress);
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -153,8 +155,9 @@
             this.Controls.Add(this.cmbSerialPorts);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Scottflys Configuration Utility";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);

@@ -1,4 +1,9 @@
-// range 1000 to 2000 divided into 10 parts
+/////////////////////////////////////////////////////////////
+//
+// default_led_pattern.txt
+//
+// This is the test pattern used to generate the factory default firmware pattern
+//
 //
 /////////////////////////////////////////////////////////////
 
@@ -53,14 +58,14 @@ initialize begin
 end
 
 if ( rc.ch8 <= 1100 ) begin 
-	random group 1 200 10					 
-	color group 2 #ff0000									 
+	color group 1 #101010									 
+	color group 2 #100000									 
 end
   
 if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) begin 
 	color group 1 #000000									 
-	flash group 1 #ffff00 20 950 0							 
-	flash group 1 #ffff00 20 950	200						 
+	flash group 1 #ffff00 30 970 0							 
+	flash group 1 #ffff00 20 980	200						 
 end
   
 if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) begin 

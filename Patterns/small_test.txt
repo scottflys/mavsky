@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////
+//
+// small_test.txt
+//
+// This is a small pattern you can use for experimentation
+//
+/////////////////////////////////////////////////////////////
+
+initialize begin
+
+	// group 1 is defined as 8 leds on strip 1
+	append group 1 as strip 1 led 1 to 8
+
+	// group 2 is defined as 4 leds on strip 1
+	append group 2 as strip 1 led 3 to 6
+
+end
+
+color group 1 #110000									 
+flash group 2 #00ff00 100 900 						 
+	
+
+
+
+
+				 

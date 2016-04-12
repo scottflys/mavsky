@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ScottFlysConsole")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("This utility is used for configuring settings and LED patterns on the ScottFlys Teensy telemetry board")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("OpenBrainiacs")]
 [assembly: AssemblyProduct("ScottFlysConsole")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]

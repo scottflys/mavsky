@@ -1,22 +1,36 @@
-﻿using System;
+﻿//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.
+//  
+
+using System;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.IO;
 using System.Management;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScottFlysConsole
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         const string defaultSourceExtension = "txt";
         const string defaultCompiledExtension = "dat";
         SerialPort serialPort;
         bool connected = false;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -59,6 +73,11 @@ namespace ScottFlysConsole
             }
             else
             {
+                if(cmbSerialPorts.SelectedIndex < 0)
+                {
+                    MessageBox.Show(this, "Please select a COM port first", "Error");
+                    return;
+                }
                 string portName = ((ComboBoxItem)cmbSerialPorts.SelectedItem).HiddenValue;
                 serialPort = new SerialPort();
                 serialPort.PortName = portName;
@@ -82,24 +101,13 @@ namespace ScottFlysConsole
 
                 txtConsole.Focus();
 
-                serialPort.Write("\r");
+                serialPort.Write("\rhelp\r");
 
                 while (connected)
                 {
                     try
                     {
-                        if (serialPort.BytesToRead > 0)
-                        {
-                            byte[] buffer = new byte[serialPort.ReadBufferSize];
-                            int bytesRead = serialPort.Read(buffer, 0, buffer.Length);
-                            if (bytesRead > 0)
-                            {
-                                string s = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                                txtConsole.Text += s;
-                                txtConsole.Select(txtConsole.Text.Length, 0);
-                                txtConsole.ScrollToCaret();
-                            }
-                        }
+                        pollSerial();
                         Application.DoEvents();
                     }
                     catch (TimeoutException) { }
@@ -134,7 +142,7 @@ namespace ScottFlysConsole
                 string destinationFilename = Path.Combine(Path.GetDirectoryName(sourceFilename), Path.GetFileNameWithoutExtension(sourceFilename)) + "." + defaultCompiledExtension;
                 try
                 {
-                    string compileResult = await CompilationClient.Compile("http://watsys.com/compile_raw.php", sourceFilename, destinationFilename);
+                    string compileResult = await CompilationClient.Compile("http://openbrainiacs.com/compile_raw.php", sourceFilename, destinationFilename);
                     if (compileResult != null)
                     {
                         MessageBox.Show(this, compileResult, "Compilation Error");
@@ -153,6 +161,22 @@ namespace ScottFlysConsole
             return null;
         }
 
+        private void pollSerial()
+        {
+            if (serialPort.BytesToRead > 0)
+            {
+                byte[] buffer = new byte[serialPort.ReadBufferSize];
+                int bytesRead = serialPort.Read(buffer, 0, buffer.Length);
+                if (bytesRead > 0)
+                {
+                    string s = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    txtConsole.Text += s;
+                    txtConsole.Select(txtConsole.Text.Length, 0);
+                    txtConsole.ScrollToCaret();
+                }
+            }
+        }
+
         private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string compiledFilename = await doCompile();
@@ -169,8 +193,9 @@ namespace ScottFlysConsole
                 string[] lines = File.ReadAllLines(filename);
                 foreach (string line in lines)
                 {
-                    Console.WriteLine(line);
                     serialPort.Write(line + "\r");
+                    Thread.Sleep(10);
+                    pollSerial();
                 }
             }
             catch (Exception ex)
@@ -205,8 +230,27 @@ namespace ScottFlysConsole
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (connected)
+            {
+                connected = false;
+                serialPort.Close();
+            }
             Application.Exit();
         }
 
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox aboutBox = new AboutBox();
+            aboutBox.Show();
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (connected)
+            {
+                connected = false;
+                serialPort.Close();
+            }
+        }
     }
 }
