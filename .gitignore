@@ -1,3 +1,6 @@
 ScottFlysConsole/ScottFlysConsole/obj/*
 ScottFlysConsole/ScottFlysConsole/bin/*
+ScottFlysConsole/Setup/debug/*
 ScottFlysConsole/.vs/*
+Patterns/*.dat
+Package/*

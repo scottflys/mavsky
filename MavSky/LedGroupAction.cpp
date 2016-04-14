@@ -82,7 +82,7 @@ void LedGroupActions::set_solid(uint16_t pc, uint32_t color_param) {
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_SOLID, color_param, 0, 0, 0, 0, 0, 0, 0, 0);    
+    action->init(pc, GROUP_MODE_SOLID, color_param, 0, 0, 0, 0, 0, 0, 0, 0, 0);    
     push_layer(i);    
   } 
 }
@@ -99,7 +99,7 @@ void LedGroupActions::set_flash(uint16_t pc, uint32_t on_color_param, uint32_t o
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_FLASH, on_color_param, on_time_param, off_time_param, offset_time_param, 0, 0, 0, 0, 0);    
+    action->init(pc, GROUP_MODE_FLASH, on_color_param, on_time_param, off_time_param, offset_time_param, 0, 0, 0, 0, 0, 0);    
     push_layer(i);    
   } 
 }
@@ -117,7 +117,7 @@ void LedGroupActions::set_wave(uint16_t pc, uint32_t on_color_param, uint32_t st
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_WAVE, on_color_param, 0, 0, 0, state_time_param, on_width_param, 0, 0, reverse_param);    
+    action->init(pc, GROUP_MODE_WAVE, on_color_param, 0, 0, 0, state_time_param, on_width_param, 0, 0, 0, reverse_param);    
     push_layer(i);    
   } 
 }
@@ -134,7 +134,7 @@ void LedGroupActions::set_bounce(uint16_t pc, uint32_t on_color_param, uint32_t 
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_BOUNCE, on_color_param, 0, 0, 0, state_time_param, on_width_param, 0, 0, 0);    
+    action->init(pc, GROUP_MODE_BOUNCE, on_color_param, 0, 0, 0, state_time_param, on_width_param, 0, 0, 0, 0);    
     push_layer(i);    
   }   
 }
@@ -151,7 +151,7 @@ void LedGroupActions::set_random(uint16_t pc, uint32_t state_time_param, uint8_t
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_RANDOM, 0, 0, 0, 0, state_time_param, 0, intensity_param, 0, 0);    
+    action->init(pc, GROUP_MODE_RANDOM, 0, 0, 0, 0, state_time_param, 0, 0, intensity_param, 0, 0);    
     push_layer(i);    
   }
 }
@@ -169,9 +169,26 @@ void LedGroupActions::set_bar(uint16_t pc, uint32_t on_color_param, uint32_t per
   int i = get_next_empty_action();
   if(i >= 0) {
     LedGroupAction* action = group_action_ptrs[i];
-    action->init(pc, GROUP_MODE_BAR, on_color_param, 0, 0, 0, 0, 0, 0, on_led_count, reverse_param);    
+    action->init(pc, GROUP_MODE_BAR, on_color_param, 0, 0, 0, 0, 0, 0, 0, on_led_count, reverse_param);    
     push_layer(i);    
   }
+}
+
+void LedGroupActions::set_fill(uint16_t pc, uint32_t on_color_param, uint32_t state_time_param, uint32_t pause_time_param, uint8_t reverse_param) {
+  for(int i=0; i<MAX_LED_ACTIONS_PER_GROUP; i++) {
+    LedGroupAction* action = group_action_ptrs[i];
+    if(action->pc == pc && action->mode == GROUP_MODE_FILL && action->on_color == on_color_param && action->state_time == state_time_param && action->pause_time == pause_time_param && action->reverse == reverse_param) {
+      action->enabled = 1;
+      push_layer(i);
+      return;
+    }
+  }
+  int i = get_next_empty_action();
+  if(i >= 0) {
+    LedGroupAction* action = group_action_ptrs[i];
+    action->init(pc, GROUP_MODE_FILL, on_color_param, 0, 0, 0, state_time_param, 0, pause_time_param, 0, 0, reverse_param);    
+    push_layer(i);    
+  }   
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,8 +198,8 @@ LedGroupAction::LedGroupAction(OctoWS2811* led_ptr, LedGroup* group_ptr_param) {
   group_ptr = group_ptr_param;
 }
 
-void LedGroupAction::init(uint16_t pc_param, uint8_t mode_param, uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param, uint32_t state_time_param, uint32_t on_width_param, uint8_t intensity_param, uint8_t on_led_count_param, uint8_t reverse_param) {
-//  console->console_print("Action::init pc:%d mode:%d on_color:%06x on_time:%d off_time:%d offset_time:%d state_time:%d on_width:%d intensity:%d on_led_count:%d reverse:%d\r\n", pc_param, mode_param, on_color_param, on_time_param, off_time_param, offset_time_param, state_time_param, on_width_param, intensity_param, on_led_count_param, reverse_param);
+void LedGroupAction::init(uint16_t pc_param, uint8_t mode_param, uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param, uint32_t state_time_param, uint32_t on_width_param, uint32_t pause_time_param, uint8_t intensity_param, uint8_t on_led_count_param, uint8_t reverse_param) {
+//  console->console_print("Action::init pc:%d mode:%d on_color:%06x on_time:%d off_time:%d offset_time:%d state_time:%d on_width:%d pause_time:%d intensity:%d on_led_count:%d reverse:%d\r\n", pc_param, mode_param, on_color_param, on_time_param, off_time_param, offset_time_param, state_time_param, on_width_param, pause_time_param, intensity_param, on_led_count_param, reverse_param);
   pc = pc_param;
   mode = mode_param;
   on_color = on_color_param;
@@ -191,6 +208,7 @@ void LedGroupAction::init(uint16_t pc_param, uint8_t mode_param, uint32_t on_col
   offset_time = offset_time_param;
   state_time = state_time_param;
   on_width = on_width_param;
+  pause_time = pause_time_param;
   intensity = intensity_param;
   on_led_count = on_led_count_param;
   reverse = reverse_param;
@@ -243,6 +261,17 @@ void LedGroupAction::force_off() {
   }   
 }
 
+void LedGroupAction::set_led(int on_led, uint32_t color) {
+  uint8_t strip = group_ptr->strip_number[on_led];
+  if(strip >= 0) {
+    uint8_t pos = group_ptr->led_position[on_led];
+    if(reverse) {
+      pos = (group_ptr->led_count - 1) - pos;
+    }
+    leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
+  }
+}
+
 void LedGroupAction::process_10_millisecond() {
   uint8_t num_states = 0; 
   if(!enabled) {
@@ -250,53 +279,41 @@ void LedGroupAction::process_10_millisecond() {
   }
   switch(mode) {
     case GROUP_MODE_SOLID:    
-      for(int i = 0; i<group_ptr->led_count; i++) {      
-        uint8_t strip = group_ptr->strip_number[i];
-        uint8_t pos = group_ptr->led_position[i];
-        if(strip >= 0) {
-          leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
-        }
+      for(int i = 0; i<group_ptr->led_count; i++) {    
+        set_led(i,  on_color); 
       }
       break;  
 
     case GROUP_MODE_FLASH:
-      {
-        if((sequence_ms >= offset_time) && (sequence_ms < (offset_time + on_time))) {
-          for(int i = 0; i<group_ptr->led_count; i++) { 
-            uint8_t strip = group_ptr->strip_number[i];
-            uint8_t pos = group_ptr->led_position[i];
-            if(strip >= 0) {
-              leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
-            }
-          }
+      if((sequence_ms >= offset_time) && (sequence_ms < (offset_time + on_time))) {
+        for(int i = 0; i<group_ptr->led_count; i++) { 
+          set_led(i,  on_color); 
         }
-        sequence_ms += 10;   
-        if(sequence_ms >= (on_time + off_time)) {
-          sequence_ms = 0;    
-        }
+      }
+      sequence_ms += 10;   
+      if(sequence_ms >= (on_time + off_time)) {
+        sequence_ms = 0;    
       }
       break;
 
     case GROUP_MODE_WAVE:
-      {        
-        for(int i=state; i<state+on_width; i++) {
-          uint8_t on_led = i % group_ptr->led_count;
-          uint8_t strip = group_ptr->strip_number[on_led];
-          if(strip >= 0) {
-            uint8_t pos = group_ptr->led_position[on_led];
-            if(reverse) {
-              pos = group_ptr->led_count - pos - 1;
-            }          
-            leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
-          }
+      for(int i=state; i<state+on_width; i++) {
+        uint8_t on_led = i % group_ptr->led_count;
+        uint8_t strip = group_ptr->strip_number[on_led];
+        if(strip >= 0) {
+          uint8_t pos = group_ptr->led_position[on_led];
+          if(reverse) {
+            pos = group_ptr->led_count - pos - 1;
+          }          
+          leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
         }
-        if(sequence_ms >= state_time) {
-          state = (state + 1) % group_ptr->led_count;
-          sequence_ms = 0;       
-        } else {
-          sequence_ms += 10;       
-        }    
       }
+      if(sequence_ms >= state_time) {
+        state = (state + 1) % group_ptr->led_count;
+        sequence_ms = 0;       
+      } else {
+        sequence_ms += 10;       
+      }    
       break;   
        
     case GROUP_MODE_BOUNCE:
@@ -364,6 +381,34 @@ void LedGroupAction::process_10_millisecond() {
         }
       }
       break;
+
+    case GROUP_MODE_FILL:
+      {        
+        num_states = group_ptr->led_count + 1;
+        if(state < num_states)
+        {
+          for(int on_led=0; on_led<state; on_led++) {
+            set_led(on_led,  on_color);
+          }
+          if(sequence_ms >= state_time) {
+            state++;
+            sequence_ms = 0;               
+          } else {
+            sequence_ms += 10;       
+          }
+        } else {
+          for(int on_led=0; on_led<group_ptr->led_count; on_led++) {
+            set_led(on_led,  on_color);
+          }
+          if(sequence_ms >= pause_time) {
+            state = 0;
+            sequence_ms = 0;               
+          } else {
+            sequence_ms += 10;       
+          }
+        }     
+      }
+      break;    
            
     default:
       break;

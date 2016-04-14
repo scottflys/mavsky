@@ -41,17 +41,12 @@ class LedGroupAction {
     uint8_t  intensity = 0;                           // random
     uint8_t  reverse = 0;                             // wave, bar
     uint32_t offset_time = 0;                         // flash2
+    uint32_t pause_time = 0;                          // fill
     
     LedGroupAction(OctoWS2811* led_ptr, LedGroup*);
-    void init(uint16_t pc_param, uint8_t mode_param, uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param, uint32_t off_width_param, uint32_t state_time_param, uint8_t intensity_param, uint8_t led_count_param, uint8_t reverse_param);   
-    void process_10_millisecond();
+    void set_led(int on_led, uint32_t color);
+    void init(uint16_t pc_param, uint8_t mode_param, uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param, uint32_t state_time_param, uint32_t on_width_param, uint32_t pause_time_param, uint8_t intensity_param, uint8_t on_led_count_param, uint8_t reverse_param);    void process_10_millisecond();
     void disable();
-    void set_solid(uint32_t color);
-    void set_flash(uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param);
-    void set_wave(uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param, uint8_t reverse_param);
-    void set_bounce(uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param);
-    void set_random(uint32_t state_time_param, uint8_t intensity);
-    void set_bar(uint32_t on_color_param, uint32_t percent_register_param, uint8_t reverse_param);
     void force_off();
     void clear();
     void dump_diags();
@@ -75,7 +70,8 @@ class LedGroupActions {
     void set_wave(uint16_t pc, uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param, uint8_t reverse_param);
     void set_bounce(uint16_t pc, uint32_t on_color_param, uint32_t state_time_param, uint32_t on_width_param);
     void set_random(uint16_t pc, uint32_t state_time_param, uint8_t intensity);
-    void set_bar(uint16_t pc, uint32_t on_color_param, uint32_t percent_register_param, uint8_t reverse_param);    
+    void set_bar(uint16_t pc, uint32_t on_color_param, uint32_t percent_register_param, uint8_t reverse_param);  
+    void set_fill(uint16_t pc, uint32_t on_color_param, uint32_t state_time_param, uint32_t pause_time_param, uint8_t reverse_param);  
 };
 
 #endif

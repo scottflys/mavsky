@@ -83,6 +83,7 @@ extern int drawingMemory[];
 #define CMD_SETBAR              52                // gg                              gg = group number, (implied: R0 = on color, R1 = value, R2 = low, R3 = high, R4 = reverse)
 #define CMD_SETBOUNCE           53                // gg                              gg = group number, (R0 = on color, R1 = state time, R2 = on width)
 #define CMD_SETOFF              54                // gg                              gg = group number
+#define CMD_SETFILL             55                // gg                              gg = group number, (implied: R0 = on color, R1 = state time, R2 = pause time, R3 = reverse)
 
 #define CMD_LDAA8               64                // cc                              cc = short constant
 #define CMD_LDAB8               65                // cc                              cc = short constant
@@ -95,7 +96,6 @@ extern int drawingMemory[];
 #define CMD_LDAC16              74                // cccc                              cc = short constant
 #define CMD_LDAD16              75                // cccc                              cc = short constant
 #define CMD_LDAE16              76                // cccc                              cc = short constant
-
 
 uint8_t program[EEPROM_LED_CODE_MAX_SIZE];
 uint16_t program_size = 0;
@@ -401,6 +401,14 @@ void LedController::cmd_set_off() {
   }
 }
 
+void LedController::cmd_set_fill() {
+  uint8_t group_number = program[pc++];
+  if(group_number < led_groups->led_group_count) {
+    LedGroup* group_ptr = led_groups->get_led_group(group_number);
+    group_ptr->group_actions_ptr->set_fill(current_instruction_pc, registers[0], registers[1], registers[2], registers[3]);  
+  }
+}
+
 void LedController::cmd_0eq1() {
   if(registers[0] ==  registers[1]) {
     registers[0] = 1;
@@ -610,7 +618,10 @@ void LedController::process_command() {
     case CMD_SETOFF:
       cmd_set_off();
       break;
-      
+
+    case CMD_SETFILL:
+      cmd_set_fill();
+      break;
     case CMD_0EQ1:
       cmd_0eq1();
       break;

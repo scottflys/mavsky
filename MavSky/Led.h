@@ -23,6 +23,7 @@
 #define GROUP_MODE_RANDOM      4
 #define GROUP_MODE_BAR         5
 #define GROUP_MODE_BOUNCE      6
+#define GROUP_MODE_FILL        7
 
 class LedController {
   private:
@@ -55,6 +56,7 @@ class LedController {
     void cmd_set_random();
     void cmd_set_bar();
     void cmd_set_off();
+    void cmd_set_fill();
 
     void cmd_0eq1();
     void cmd_0ne1();
