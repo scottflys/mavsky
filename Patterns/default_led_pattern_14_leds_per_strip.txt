@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////
 //
-// default_led_pattern.txt
+// default_led_pattern_14_leds_per_strip.txt
 //
 // This is the test pattern used to generate the factory default firmware pattern
 //
@@ -12,14 +12,14 @@
 initialize begin
 
 	// group 1 is used for all leds - usually this group is used for background
-	append group 1 as strip 1 led 1 to 8
-	append group 1 as strip 2 led 1 to 8
-	append group 1 as strip 3 led 1 to 8
-	append group 1 as strip 4 led 1 to 8
-	append group 1 as strip 5 led 1 to 8
-	append group 1 as strip 6 led 1 to 8
-	append group 1 as strip 7 led 1 to 8
-	append group 1 as strip 8 led 1 to 8
+	append group 1 as strip 1 led 1 to 14
+	append group 1 as strip 2 led 1 to 14
+	append group 1 as strip 3 led 1 to 14
+	append group 1 as strip 4 led 1 to 14
+	append group 1 as strip 5 led 1 to 14
+	append group 1 as strip 6 led 1 to 14
+	append group 1 as strip 7 led 1 to 14
+	append group 1 as strip 8 led 1 to 14
 
 	// group 2 is used to identify the strip numbers
 	append group 2 as strip 1 led 1 to 1
@@ -32,30 +32,30 @@ initialize begin
 	append group 2 as strip 8 led 1 to 8
 
 	// 3 = front, 4 = back
-	append group 3 as strip 1 led 1 to 8
-	append group 3 as strip 2 led 1 to 8
-	append group 4 as strip 7 led 1 to 8
-	append group 4 as strip 8 led 1 to 8
+	append group 3 as strip 1 led 1 to 14
+	append group 3 as strip 2 led 1 to 14
+	append group 4 as strip 7 led 1 to 14
+	append group 4 as strip 8 led 1 to 14
 
 	// 5 = mid
-	append group 5 as strip 3 led 1 to 8
-	append group 5 as strip 4 led 1 to 8
-	append group 5 as strip 5 led 1 to 8
-	append group 5 as strip 6 led 1 to 8
+	append group 5 as strip 3 led 1 to 14
+	append group 5 as strip 4 led 1 to 14
+	append group 5 as strip 5 led 1 to 14
+	append group 5 as strip 6 led 1 to 14
   
   // Individual arms
 	// 6 front left, 7 = front right, 8 = rear left, 9 = rear right
-	append group 6 as strip 1 led 1 to 8
-	append group 7 as strip 2 led 1 to 8
-	append group 8 as strip 7 led 1 to 8
-	append group 9 as strip 8 led 1 to 8
+	append group 6 as strip 1 led 1 to 14
+	append group 7 as strip 2 led 1 to 14
+	append group 8 as strip 7 led 1 to 14
+	append group 9 as strip 8 led 1 to 14
  
   // Left right corners
 	// 10 = left, 11 = right
-	append group 10 as strip 1 led 1 to 8         // left 
-	append group 10 as strip 7 led 1 to 8         //  
-	append group 11 as strip 2 led 1 to 8         // right 
-	append group 11 as strip 8 led 1 to 8         //  
+	append group 10 as strip 1 led 1 to 14         // left 
+	append group 10 as strip 7 led 1 to 14         //  
+	append group 11 as strip 2 led 1 to 14         // right 
+	append group 11 as strip 8 led 1 to 14         //  
 	  
 end
 
