@@ -25,7 +25,7 @@ namespace ScottFlysConsole
 {
     class CompilationClient
     {
-        public static async Task<string> Compile(string url, string sourceFilename, string destinationFilename)
+        public static string CompileSync(string url, string sourceFilename, string destinationFilename)
         {
             MemoryStream ms = new MemoryStream();
             using (FileStream fs = File.OpenRead(sourceFilename))
@@ -34,23 +34,38 @@ namespace ScottFlysConsole
             }
             using (var client = new HttpClient())
             {
+                client.Timeout = new System.TimeSpan(0, 0, 10);
                 using (var content = new MultipartFormDataContent("Upload----" + DateTime.Now))
                 {
                     content.Add(new StreamContent(new FileStream(sourceFilename, FileMode.Open)), "fileToCompile", Path.GetFileName(sourceFilename));
-                    using (var message = await client.PostAsync(url, content))
+                    try
                     {
-                        var result = await message.Content.ReadAsStringAsync();
-                        object o = message.Content.Headers.ContentDisposition;
-                        if (o != null)
+                        using (var response = client.PostAsync(url, content))
                         {
-                            File.WriteAllText(destinationFilename, result);
-                            return null;
-                        } 
-                        else
-                        {
-                            return result;
+                            var responseContent = response.Result.Content;
+                            if (response.Result.IsSuccessStatusCode)
+                            {
+                                string responseString = responseContent.ReadAsStringAsync().Result;
+                                var headers = responseContent.Headers;
+                                if (headers.ContentDisposition != null)
+                                {
+                                    File.WriteAllText(destinationFilename, responseString);
+                                    return null;
+                                }
+                                else
+                                {
+                                    return responseString;
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception(response.Result.ReasonPhrase);
+                            }
                         }
-
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(string.Format("There was a problem accessing {0}.  Please make sure you are connected to the internet.  [{1}]", url, ex.Message));
                     }
                 }
             }

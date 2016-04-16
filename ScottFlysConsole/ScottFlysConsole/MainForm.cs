@@ -59,6 +59,8 @@ namespace ScottFlysConsole
             }
             uploadToolStripMenuItem.Enabled = false;
             compileAndUploadToolStripMenuItem.Enabled = false;
+
+            moveSerialPortComboAndConnectButton();
         }
 
         private void connect_Click(object sender, EventArgs e)
@@ -89,8 +91,16 @@ namespace ScottFlysConsole
                 serialPort.ReadTimeout = 500;
                 serialPort.WriteTimeout = 500;
 
-                serialPort.Open();
-
+                try
+                {
+                    serialPort.Open();
+                    serialPort.Write("\rhelp\r");
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Error.  Please check the device and retry");
+                    return;
+                }
                 Properties.Settings.Default.LastConnectedPort = portName;
                 Properties.Settings.Default.Save();
 
@@ -101,8 +111,6 @@ namespace ScottFlysConsole
 
                 txtConsole.Focus();
 
-                serialPort.Write("\rhelp\r");
-
                 while (connected)
                 {
                     try
@@ -110,7 +118,7 @@ namespace ScottFlysConsole
                         pollSerial();
                         Application.DoEvents();
                     }
-                    catch (TimeoutException) { }
+                    catch (Exception) { }
                 }
             }
         }
@@ -122,15 +130,20 @@ namespace ScottFlysConsole
             e.Handled = true;
         }
 
+        private void moveSerialPortComboAndConnectButton()
+        {
+            btnConnect.Left = this.Width - btnConnect.Width - 30;
+            cmbSerialPorts.Left = btnConnect.Left - cmbSerialPorts.Width - 20;
+        }
+
         private void Form1_Resize(object sender, EventArgs e)
         {
             txtConsole.Width = this.Width - 40;
             txtConsole.Height = this.Height - 90;
-            cmbSerialPorts.Left = this.Width - 355;
-            btnConnect.Left = this.Width - 100;
+            moveSerialPortComboAndConnectButton();
         }
 
-        private async Task<string> doCompile()
+        private string doCompileSync()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = string.Format("Source Files (.{0})|*.{0}|All Files (*.*)|*.*", defaultSourceExtension);
@@ -142,20 +155,22 @@ namespace ScottFlysConsole
                 string destinationFilename = Path.Combine(Path.GetDirectoryName(sourceFilename), Path.GetFileNameWithoutExtension(sourceFilename)) + "." + defaultCompiledExtension;
                 try
                 {
-                    string compileResult = await CompilationClient.Compile("http://openbrainiacs.com/compile_raw.php", sourceFilename, destinationFilename);
-                    if (compileResult != null)
+                    Cursor.Current = Cursors.WaitCursor;
+                    string compileErrorMessage = CompilationClient.CompileSync("http://openbrainiacs.com/led_compiler/compile_raw.php", sourceFilename, destinationFilename);
+                    Cursor.Current = Cursors.Default;
+                    if (compileErrorMessage == null)
                     {
-                        MessageBox.Show(this, compileResult, "Compilation Error");
-                        return null;
+                        return destinationFilename;
                     }
                     else
                     {
-                        return destinationFilename;
+                        MessageBox.Show(this, compileErrorMessage, "Compilation Error");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show(this, ex.Message, "Error");
                 }
             }
             return null;
@@ -179,7 +194,7 @@ namespace ScottFlysConsole
 
         private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string compiledFilename = await doCompile();
+            string compiledFilename = doCompileSync();
             if (compiledFilename != null)
             {
                 MessageBox.Show(this, string.Format("Successfully compiled to {0}", compiledFilename), "Status");
@@ -221,7 +236,7 @@ namespace ScottFlysConsole
 
         private async void compileAndUploadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string compiledFilename = await doCompile();
+            string compiledFilename = doCompileSync();
             if (compiledFilename != null)
             {
                 doUpload(compiledFilename);
