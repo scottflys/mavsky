@@ -324,6 +324,9 @@ void MavLinkData::process_mavlink_packets() {
         case MAVLINK_MSG_ID_RAW_IMU:
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_RAW_IMU);
           logger->debug_print(Logger::LOG_MAV_IMU, (char *)"MAVLINK_MSG_ID_RAW_IMU: xacc: %d, yacc: %d, zacc: %d", mavlink_msg_raw_imu_get_xacc(&msg), mavlink_msg_raw_imu_get_yacc(&msg), mavlink_msg_raw_imu_get_zacc(&msg));
+          imu_xacc = mavlink_msg_raw_imu_get_xacc(&msg);
+          imu_yacc = mavlink_msg_raw_imu_get_yacc(&msg);
+          imu_zacc = mavlink_msg_raw_imu_get_zacc(&msg);
           //debug_print(LOG_MAV_IMU, "MAVLINK_MSG_ID_RAW_IMU: #27");
           //debug_print(LOG_MAV_IMU, "time_usec: %d", mavlink_msg_raw_imu_get_time_usec(&msg));
           //debug_print(LOG_MAV_IMU, "xacc: %d", mav.imu_xacc);

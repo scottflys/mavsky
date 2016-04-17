@@ -27,6 +27,9 @@ namespace ScottFlysConsole
     {
         const string defaultSourceExtension = "txt";
         const string defaultCompiledExtension = "dat";
+        //const int consoleHighWaterMark = 50000;
+        //const int consoleLowWaterMark  = 40000;
+
         SerialPort serialPort;
         bool connected = false;
 
@@ -186,13 +189,17 @@ namespace ScottFlysConsole
                 {
                     string s = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     txtConsole.Text += s;
+                    //if (txtConsole.Text.Length >= consoleHighWaterMark)                                              // if at high, set to low
+                    //{
+                    //    txtConsole.Text = txtConsole.Text.Substring(txtConsole.Text.Length - consoleLowWaterMark);
+                    //}
                     txtConsole.Select(txtConsole.Text.Length, 0);
                     txtConsole.ScrollToCaret();
                 }
             }
         }
 
-        private async void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void compileFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string compiledFilename = doCompileSync();
             if (compiledFilename != null)

@@ -6,7 +6,7 @@
 //
 //
 /////////////////////////////////////////////////////////////
-// format:v1 DO NOT REMOVE OR ALTER THIS COMMENT
+// compiler_version:v2 PLEASE DO NOT REMOVE OR ALTER THIS LINE
 /////////////////////////////////////////////////////////////
 
 initialize begin
@@ -59,18 +59,18 @@ initialize begin
 	  
 end
 
-if ( rc.ch8 <= 1100 ) begin 
+if ( rc.ch8 <= 1100 ) then 
 	color group 1 #101010									 
 	color group 2 #100000									 
 end
   
-if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) begin 
+if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) then 
 	color group 1 #000000									 
 	flash group 1 #ffff00 30 970 0							 
 	flash group 1 #ffff00 20 980	200						 
 end
   
-if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) begin 
+if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) then 
 	random group 1 200 10					 
 	bar group 6 #ff0000 25  0 100  1   
   bar group 7 #00ff00 25  0 100  1     
@@ -78,7 +78,7 @@ if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) begin
 	bar group 9 #00ff00 25  0 100  1   		
 end
   
-if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) begin 
+if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) then 
 	color group 1 #000000						 
 	fill group 6 #ff0000 150 1000 1
 	fill group 7 #00ff00 150 1000 1
@@ -86,7 +86,7 @@ if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) begin
 	fill group 9 #00ff00 150 1000 0
 end
   
-if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) begin 
+if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) then 
 	random group 1 200 10					 
 	wave group 6 #ff0000 50 2	1
 	wave group 7 #00ff00 50 2  1
@@ -94,7 +94,7 @@ if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) begin
 	wave group 9 #00ff00 50 2  0		
 end
 
-if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) begin 
+if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) then 
 	color group 1 #050505		
 	bounce group 6 #ff0000 100 1                   // front left
 	bounce group 7 #00ff00 100 1                   // front right
@@ -102,7 +102,7 @@ if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) begin
 	bounce group 9 #00ff00 100 1   				         // rear right
 end
   
-if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) begin 
+if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) then 
 	color group  1 #000000						 
 	flash group 10 #ff0000 20 950   0     
 	flash group 10 #ff0000 20 950 100       
@@ -110,17 +110,17 @@ if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) begin
 	flash group 11 #00ff00 20 950 300   							
 end
   
-if ( 1700 < rc.ch8 and rc.ch8 <= 1800 ) begin   // DAN
+if ( 1700 < rc.ch8 and rc.ch8 <= 1800 ) then   // DAN
 	color group 3 #ff0000						              // Red				 
 	color group 4 #00ff00						              // Green	
 	color group 5 #ffffff						              // White	
 end
   
-if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) begin 
+if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) then 
 	color group 1 #000000						// off	
 end  
   
-if ( 1900 < rc.ch8 ) begin 
+if ( 1900 < rc.ch8 ) then 
 	color group 1 #ffffff						// White	
 	bar group 6 #ff0000    25  0   100  1   
   bar group 7 #00ff00    25  0   100  1     

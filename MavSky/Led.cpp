@@ -49,6 +49,7 @@ extern int drawingMemory[];
 #define VAR_MAV_FC_ARMED                0x40      // fc.armed
 #define VAR_MAV_FC_FLIGHTMODE           0x41      // fc.flightmode
 
+#define VAR_MAV_IMU_BRAKE               0x50      // imu.brake
 
 #define CMD_LOAD_REG_CONST      1                 // rr cccccccc                     rr = register number, cccccccc = constant value
 #define CMD_LOAD_REG_MAV        2                 // rr mm                           rr = register number, mm = mav value
@@ -209,6 +210,10 @@ uint32_t LedController::get_variable(uint16_t input) {
       
     case VAR_MAV_FC_FLIGHTMODE:
       return mav->custom_mode;
+      break;   
+         
+    case VAR_MAV_IMU_BRAKE:
+      return max(0, mav->imu_xacc);
       break;
       
     default:
@@ -670,7 +675,7 @@ void LedController::process_command() {
   }
 }
 
-void LedController::process_10_millisecond() {
+void LedController::process_10_millisecond() {  
   while(1) {
     if(pausing_time_left > (MS_PER_TIMESLICE/2)) {
       pausing_time_left -= MS_PER_TIMESLICE;

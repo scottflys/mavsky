@@ -122,7 +122,7 @@ void loop()  {
     mav->process_1000_millisecond();
   }
   
-   if(current_milli >= next_200_loop) {
+  if(current_milli >= next_200_loop) {
     next_200_loop = current_milli + 200;
     diags.update_led();
   }
@@ -132,8 +132,7 @@ void loop()  {
     if(current_milli > 10000) {
       check_for_faults();
     }
-    mav->process_100_millisecond();
-    
+    mav->process_100_millisecond();   
   }  
   
   if(current_milli >= next_10_loop) {

@@ -5,7 +5,7 @@
 // This is a small pattern you can use for experimentation
 //
 /////////////////////////////////////////////////////////////
-// format:v1 DO NOT REMOVE OR ALTER THIS COMMENT
+// compiler_version:v2 PLEASE DO NOT REMOVE OR ALTER THIS LINE
 /////////////////////////////////////////////////////////////
 
 initialize begin
