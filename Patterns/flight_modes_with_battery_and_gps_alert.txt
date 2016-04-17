@@ -1,0 +1,119 @@
+/////////////////////////////////////////////////////////////
+//
+// flight_modes_with_battery_alert.txt
+//
+// This is an example of how to set a baseline pattern by flight modes and then overlay a battery voltage warning
+//
+//
+/////////////////////////////////////////////////////////////
+// compiler_version:v2 PLEASE DO NOT REMOVE OR ALTER THIS LINE
+/////////////////////////////////////////////////////////////
+// rc.ch7
+// rc.ch8
+
+// bat.current
+// bat.voltage
+// bat.remaining
+// bat.consumed
+
+// gps.hdop         - value is in 1/100th.  i.e. 500 is HDOP of 5.00
+// gps.sats
+
+// fc.baralt
+// fc.cog
+// fc.heading
+// fc.speed
+
+// fc.armed
+// fc.flightmode
+//   0  Stabilize
+//   1  Acro
+//   3  Altitude Hold
+//   3  Auto
+//   4  Guided
+//   5  Loiter
+//   6  Return to launch
+//   7  Circle
+//   9  Land
+//   10 Optical Loiter
+//   11 Drift
+//   13 Sport
+//   14 Flip Mode
+//   15 Auto Tune
+//   16 Position Hold
+
+// imu.brake        - negated xacc value.  a value > 10 indicates braking
+
+/////////////////////////////////////////////////////////////
+
+initialize begin
+	// group 1 is used for all leds - usually this group is used for background
+	append group 1 as strip 1 led 1 to 8
+	append group 1 as strip 2 led 1 to 8
+	append group 1 as strip 3 led 1 to 8
+	append group 1 as strip 4 led 1 to 8
+	append group 1 as strip 5 led 1 to 8
+	append group 1 as strip 6 led 1 to 8
+	append group 1 as strip 7 led 1 to 8
+	append group 1 as strip 8 led 1 to 8
+ 
+	// group 2 is used for the two inner leds on the corner strips (used for battery)
+	append group 2 as strip 1 led 1 to 2
+	append group 2 as strip 2 led 1 to 2
+	append group 2 as strip 7 led 1 to 2
+	append group 2 as strip 8 led 1 to 2
+  
+  // Individual arms
+	// 6 front left, 7 = front right, 8 = rear left, 9 = rear right
+	append group 6 as strip 1 led 1 to 8
+	append group 7 as strip 2 led 1 to 8
+	append group 8 as strip 7 led 1 to 8
+	append group 9 as strip 8 led 1 to 8
+end
+
+/////////////////////////////////////////////////////////////
+// Flight modes
+/////////////////////////////////////////////////////////////
+
+if ( fc.flightmode == 0 ) then           // Stabilize
+	color group 1 [0 0 0]					 
+	fill group 6 #ff0000 150 1000 1
+	fill group 7 #00ff00 150 1000 1
+	fill group 8 #ff0000 150 1000 0
+	fill group 9 #00ff00 150 1000 0						 
+end
+
+if ( fc.flightmode == 16 ) then          // Position Hold
+	color group 1 [0 0 128]						 
+	fill group 6 #ff0000 150 1000 1
+	fill group 7 #00ff00 150 1000 1
+	fill group 8 #ff0000 150 1000 0
+	fill group 9 #00ff00 150 1000 0							 
+end
+  
+if ( fc.flightmode == 9 ) then           // Land
+	color group 1 [10 10 10]						 
+	color group 1 [255 255 255]						
+	flash group 1 [255 255 255] 30 970 0							 
+	flash group 1 [255 255 255] 20 980	200			 	  
+end  
+  
+/////////////////////////////////////////////////////////////
+// Warnings
+/////////////////////////////////////////////////////////////
+
+if ( gps.hdop > 1000 ) then                // Bad HDOP
+	color group 2 [0 0 0]									 
+	flash group 2 [0 255 0] 500 500 0							 
+end     
+   
+if ( bat.voltage < 110  ) then         // Battery < 11.0 Volts flash yellow
+	color group 2 [0 0 0]									 
+	flash group 2 [255 255 0] 500 500 0							 
+end
+
+if ( bat.voltage < 107  ) then         // Battery < 10.7 Volts flash red
+	color group 2 [0 0 0]								 
+	flash group 2 [255 0 0] 100 100 0							 
+end
+  
