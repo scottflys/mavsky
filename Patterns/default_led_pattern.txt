@@ -50,11 +50,15 @@ initialize begin
 	append group 8 as strip 7 led 1 to 8
 	append group 9 as strip 8 led 1 to 8
  
-  // Left right corners
+  // Left right
 	// 10 = left, 11 = right
 	append group 10 as strip 1 led 1 to 8         // left 
+	append group 10 as strip 3 led 1 to 8         //  
+	append group 10 as strip 5 led 1 to 8         //  
 	append group 10 as strip 7 led 1 to 8         //  
 	append group 11 as strip 2 led 1 to 8         // right 
+	append group 11 as strip 4 led 1 to 8         //  
+	append group 11 as strip 6 led 1 to 8         //  
 	append group 11 as strip 8 led 1 to 8         //  
 	  
 end
@@ -66,8 +70,8 @@ end
   
 if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) then 
 	color group 1 #000000									 
-	flash group 1 #ffff00 30 970 0							 
-	flash group 1 #ffff00 20 980	200						 
+	flash group 1 [ 255 255 0 ] 30 970 0							 
+	flash group 1 [ 255 255 0 ] 20 980	200						 
 end
   
 if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) then 
@@ -78,20 +82,22 @@ if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) then
 	bar group 9 #00ff00 25  0 100  1   		
 end
   
-if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) then 
+if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) then       // scotts nav pattern
 	color group 1 #000000						 
 	fill group 6 #ff0000 150 1000 1
 	fill group 7 #00ff00 150 1000 1
 	fill group 8 #ff0000 150 1000 0
 	fill group 9 #00ff00 150 1000 0
+	flash group 1 [ 100 100 100 ] 30 970   0							 
+	flash group 1 [ 100 100 100 ] 20 980 200		
 end
   
-if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) then 
+if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) then
 	random group 1 200 10					 
 	wave group 6 #ff0000 50 2	1
 	wave group 7 #00ff00 50 2  1
 	wave group 8 #ff0000 50 2  0
-	wave group 9 #00ff00 50 2  0		
+	wave group 9 #00ff00 50 2  0			  
 end
 
 if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) then 
@@ -102,7 +108,7 @@ if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) then
 	bounce group 9 #00ff00 100 1   				         // rear right
 end
   
-if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) then 
+if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) then
 	color group  1 #000000						 
 	flash group 10 #ff0000 20 950   0     
 	flash group 10 #ff0000 20 950 100       
@@ -123,9 +129,9 @@ if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) then
 end  
   
 if ( 1900 < rc.ch8 ) then 
-	color group 1 #ffffff						// White	
-	bar group 6 #ff0000    25  0   100  1   
-  bar group 7 #00ff00    25  0   100  1     
-	bar group 8 #ff0000    25  0   100  1     
-	bar group 9 #00ff00    25  0   100  1   	  
+	color group 1 [ 200 200 200]						// ~80% White	
+	bar group 6 [ 255 0 0 ] 25 0 100  1   
+  bar group 7 [ 0 255 0 ] 25 0 100  1     
+	bar group 8 [ 255 0 0 ] 25 0 100  1     
+	bar group 9 [ 0 255 0 ] 25 0 100  1   	  
 end
