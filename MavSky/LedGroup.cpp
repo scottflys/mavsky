@@ -29,9 +29,21 @@ LedGroups::LedGroups(OctoWS2811* led_ptr) {
 }
 
 void LedGroups::dump_diags() {
-  for(int i=0; i<MAX_LED_GROUPS; i++) {
-    group_ptrs[i]->dump_diags();
-  }  
+  for(int i=0; i<led_layer_count; i++) {
+    uint16_t layer_key = layers[i];
+    uint8_t group_number = layer_key >> 8;
+    uint8_t action_number = layer_key & 0xff;
+    LedGroup* group_ptr = group_ptrs[group_number];
+
+    LedGroupActions* led_group_actions = group_ptr->group_actions_ptr;
+    LedGroupAction* led_group_action = led_group_actions->group_action_ptrs[action_number];
+    
+    uint8_t enabled = led_group_action->enabled;
+    console->console_print("layer:%d - group:%d action:%d enabled:%d\r\n", i, group_number, action_number, enabled);
+  }
+//  for(int i=0; i<MAX_LED_GROUPS; i++) {
+//    group_ptrs[i]->dump_diags();
+//  }  
 }
 
 LedGroup* LedGroups::get_led_group(uint8_t group_number) {
@@ -86,7 +98,7 @@ void LedGroups::push_layer(uint8_t group_number, uint8_t action_number) {
       break;
     }
   }
-  if(old_pos == MAX_LED_LAYERS) {                             
+  if(old_pos == MAX_LED_LAYERS && led_layer_count < MAX_LED_LAYERS) {                             
     led_layer_count++;
   }
   for(int i=old_pos; i>0; i--) {
