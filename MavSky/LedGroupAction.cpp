@@ -36,6 +36,7 @@ LedGroupActions::LedGroupActions(OctoWS2811* led_ptr, LedGroup* led_group_ptr_pa
 void LedGroupActions::dump_diags() {  
   console->console_print("LedGroupActions\r\n");
   for(int i=0; i<MAX_LED_ACTIONS_PER_GROUP; i++) {
+    console->console_print("%d ", i);
     LedGroupAction* group_action_ptr = group_action_ptrs[i];
     group_action_ptr->dump_diags();
   }
@@ -60,6 +61,7 @@ void LedGroupActions::disable_all_actions() {
 }
 
 int LedGroupActions::get_next_empty_action() {
+  static int error_sequence = 0;
   for(int i=0; i<MAX_LED_ACTIONS_PER_GROUP; i++) {
     LedGroupAction* existing_action = group_action_ptrs[i];
     if(existing_action->in_use == 0) {
@@ -67,6 +69,10 @@ int LedGroupActions::get_next_empty_action() {
       return i;
     }
   }
+  if(error_sequence == 0) {
+    console->console_print("There are not enough actions available per group.  Consider recompiling with higher value for MAX_LED_ACTIONS_PER_GROUP\r\n");
+  } 
+  error_sequence = (error_sequence + 1) % 10;
   return -1;
 }
 
