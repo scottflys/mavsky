@@ -13,7 +13,7 @@
 #ifndef MAVSKY_H
 #define MAVSKY_H
 
-#define PRODUCT_STRING  "MAVSky Version 2.1.17.3"
+#define PRODUCT_STRING  "MAVSky Version 2.1.17.4"
 
 #define FAULT_MAV_OFFLINE               1
 #define FAULT_SPORT_OFFLINE             2
@@ -41,7 +41,9 @@
 
 #define MAX_LED_GROUPS                 20      
 #define MAX_LEDS_PER_GROUP            160
-#define MAX_LED_ACTIONS_PER_GROUP      10
+#define MAX_LED_ACTIONS_PER_GROUP      20
 #define MAX_LED_LAYERS                 50       
+
+
 
 #endif
