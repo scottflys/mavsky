@@ -107,39 +107,49 @@ uint32_t next_100_loop = 0L;
 uint32_t next_10_loop = 0L;
 
 void loop()  {
-  uint32_t current_milli;
-  
-  mav->process_mavlink_packets();
+  uint32_t current_milli = millis();
+  uint8_t state = (current_milli % 10);
 
-  frsky->frsky_process();         
-
-  console->check_for_console_command();
-  
-  current_milli = millis();
-
-  if(current_milli >= next_1000_loop) {
-    next_1000_loop = current_milli + 1000;
-    mav->process_1000_millisecond();
+  switch(state) {
+    case 0:
+      mav->process_mavlink_packets();
+    
+      frsky->frsky_process();         
+    
+      console->check_for_console_command();  
+    
+      if(current_milli >= next_1000_loop) {
+        next_1000_loop = current_milli + 1000;
+        mav->process_1000_millisecond();
+      }
+      
+      if(current_milli >= next_200_loop) {
+        next_200_loop = current_milli + 200;
+        diags.update_led();
+      }
+      
+      if(current_milli >= next_100_loop) {
+        next_100_loop = current_milli + 100;
+        if(current_milli > 10000) {
+          check_for_faults();
+        }
+        mav->process_100_millisecond();   
+      }
+      break;
+      
+   case 1:
+   case 2:
+   case 3:
+   case 4:
+     if(current_milli >= next_10_loop) {
+       next_10_loop = current_milli + 10;
+       led_strip_ptr->process_10_millisecond();
+     }
+     break;
+     
+   default:                                           // leave states 5-9 dormant to reduce LED flickering
+     break;
   }
-  
-  if(current_milli >= next_200_loop) {
-    next_200_loop = current_milli + 200;
-    diags.update_led();
-  }
-  
-  if(current_milli >= next_100_loop) {
-    next_100_loop = current_milli + 100;
-    if(current_milli > 10000) {
-      check_for_faults();
-    }
-    mav->process_100_millisecond();   
-  }  
-  
-  if(current_milli >= next_10_loop) {
-    next_10_loop = current_milli + 10;
-    led_strip_ptr->process_10_millisecond();
-  }
-
 }
 
 
