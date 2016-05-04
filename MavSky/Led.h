@@ -45,6 +45,7 @@ class LedController {
     void cmd_pause();
     void cmd_yield();
     void cmd_jump_absolute();
+    void cmd_jump_relative();
     void cmd_bz_relative();
     void cmd_bnz_relative();
     
@@ -78,6 +79,7 @@ class LedController {
     void process_10_millisecond();
     void process_command();
     void dump_diags();
+    void update_leds();
 };
 
 #endif
