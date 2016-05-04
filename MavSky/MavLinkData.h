@@ -59,6 +59,7 @@ class MavLinkData {
     int8_t    battery_remaining = 0;      // Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
     
     // MAVLINK_MSG_ID_GPS_RAW_INT 
+    int32_t   gps_time_msec = 0;          // time since epoch or boot time
     uint8_t   gps_fixtype = 0;            // 0= No GPS, 1 = No Fix, 2 = 2D Fix, 3 = 3D Fix
     uint8_t   gps_satellites_visible = 0; // number of visible satelites
     int32_t   gps_latitude = 0;           // 585522540;
@@ -126,6 +127,8 @@ class MavLinkData {
     uint16_t  calced_cog = 0;                         // in degrees (0-359)  
     uint32_t  calced_distance_travelled = 0;          // in cm
     uint32_t  tenth_amp_per_millisecond_consumed = 0;  
+    int16_t   armed_time = 0;                         // seconds since armed
+    int16_t   throttle_time = 0;                      // seconds that throttle has been above 25% since boot
     
     MavLinkData();
     ~MavLinkData();
