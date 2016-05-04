@@ -51,6 +51,13 @@ extern int drawingMemory[];
 
 #define VAR_MAV_IMU_BRAKE               0x50      // imu.brake
 
+#define VAR_MAV_TIME_BOOT               0x60      // time.boot
+#define VAR_MAV_TIME_ARM                0x61      // time.arm
+#define VAR_MAV_TIME_THROTTLE           0x62      // time.throttle
+#define VAR_MAV_TIME_GMT                0x63      // time.gmt
+#define VAR_MAV_TIME_LOCAL              0x64      // time.local
+#define VAR_MAV_TIME_BRIGHTNESS         0x65      // time.brightness
+
 #define CMD_LOAD_REG_CONST      1                 // rr cccccccc                     rr = register number, cccccccc = constant value
 #define CMD_LOAD_REG_MAV        2                 // rr mm                           rr = register number, mm = mav value
 #define CMD_PAUSE               3                 // rr                              rr = register with milliseconds               
@@ -64,6 +71,7 @@ extern int drawingMemory[];
 
 #define CMD_BZ_REL              13                // rrrr                            rrrr = relative jump
 #define CMD_BNZ_REL             14                // rrrr                            rrrr = relative jump
+#define CMD_JUMP_REL            15                // rrrr                            rrrr = relative jump
 
 #define CMD_0EQ1                16                // 0 = 0 == 1
 #define CMD_0NE1                17                // 0 = 0 != 1
@@ -216,10 +224,33 @@ uint32_t LedController::get_variable(uint16_t input) {
       return max(0, mav->imu_xacc);
       break;
       
-    default:
-      return 0;
+    case VAR_MAV_TIME_BOOT:
+      return millis() / 1000;
       break;
+
+    case VAR_MAV_TIME_ARM:
+      return mav->armed_time;
+      break;
+
+    case VAR_MAV_TIME_THROTTLE:
+      return mav->throttle_time;
+      break;
+
+//    case VAR_MAV_TIME_GMT:
+//      {
+//        uint32_t seconds = mav->gps_time_msec / 1000;
+//        seconds = seconds % (24L * 60L * 60L);            // seconds since midnight
+//      }
+//      break;
+//
+//    case VAR_MAV_TIME_LOCAL:
+//      break;
+//
+//    case VAR_MAV_TIME_BRIGHTNESS:
+//      break;
+      
   }
+  return 0;
 }
 
 void LedController::cmd_group_set() {
@@ -320,6 +351,12 @@ void LedController::cmd_jump_absolute() {
   uint16_t next_pc = program[pc++] << 8;                               
   next_pc |= program[pc++];                          
   pc = next_pc;
+}
+
+void LedController::cmd_jump_relative() {
+  uint16_t pc_change = program[pc++] << 8;                               
+  pc_change |= program[pc++];                           
+  pc += (int16_t)pc_change;
 }
 
 void LedController::cmd_bz_relative() {
@@ -584,6 +621,10 @@ void LedController::process_command() {
       cmd_jump_absolute();
       break;
 
+    case CMD_JUMP_REL:
+      cmd_jump_relative();
+      break;
+
     case CMD_BZ_REL:
       cmd_bz_relative();
       break;
@@ -675,6 +716,10 @@ void LedController::process_command() {
   }
 }
 
+void LedController::update_leds() {  
+  leds->show();
+}
+
 void LedController::process_10_millisecond() {  
   while(1) {
     if(pausing_time_left > (MS_PER_TIMESLICE/2)) {
@@ -690,7 +735,7 @@ void LedController::process_10_millisecond() {
     process_command();
   }
   led_groups->process_10_milliseconds();
-  leds->show();
+//  leds->show();
 }
 
 
