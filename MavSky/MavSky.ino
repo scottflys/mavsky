@@ -51,6 +51,7 @@
 #include "Led.h"
 
 #define LEDPIN          13
+#define PROBEPIN        12
                           
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +77,7 @@ void setup()  {
   delay(5000);
 
   pinMode(LEDPIN, OUTPUT);
+  pinMode(PROBEPIN, OUTPUT);
   console->console_print("%s\r\nStarting\r\n]", PRODUCT_STRING);
 
   led_strip_ptr = new LedController();  
@@ -104,14 +106,29 @@ void check_for_faults() {
 uint32_t next_1000_loop = 0L;
 uint32_t next_200_loop = 0L;
 uint32_t next_100_loop = 0L;
-uint32_t next_10_loop = 0L;
+uint8_t leds_changed = 0;
 
 void loop()  {
   uint32_t current_milli = millis();
   uint8_t state = (current_milli % 10);
-
   switch(state) {
     case 0:
+      if(leds_changed == 0) {
+        digitalWrite(PROBEPIN, HIGH);  
+        led_strip_ptr->process_10_millisecond();
+        digitalWrite(PROBEPIN, LOW);  
+        leds_changed = 1;
+      }
+      break;
+     
+    case 5:                                         // keep teensy quiet while LEDs are getting written (~0.85 milliseconds for 16 LEDs per strip)
+      if(leds_changed == 1) {
+        led_strip_ptr->update_leds();
+        leds_changed = 0;
+      }
+      break;
+
+    default:
       mav->process_mavlink_packets();
     
       frsky->frsky_process();         
@@ -135,24 +152,9 @@ void loop()  {
         }
         mav->process_100_millisecond();   
       }
-      break;
-      
-   case 1:
-   case 2:
-   case 3:
-   case 4:
-     if(current_milli >= next_10_loop) {
-       next_10_loop = current_milli + 10;
-       led_strip_ptr->process_10_millisecond();
-     }
-     break;
-     
-   default:                                           // leave states 5-9 dormant to reduce LED flickering
-     break;
+      break;     
   }
 }
-
-
 
 
 
