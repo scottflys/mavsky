@@ -6,132 +6,160 @@
 //
 //
 /////////////////////////////////////////////////////////////
-// compiler_version:v2 PLEASE DO NOT REMOVE OR ALTER THIS LINE
+// compiler_version:v2.3 PLEASE DO NOT REMOVE OR ALTER THIS LINE
 /////////////////////////////////////////////////////////////
+
+define MAX_LEDS_PER_STRIP 8
+
+// Define group numbers
+
+define ALL_LEDS         1
+define STRIP_NUMBER_ID  2
+
+define FRONT            3
+define BACK             4
+define MIDDLE_FOUR      5
+
+define LEFT             6
+define RIGHT            7
+
+define FRONT_LEFT       8
+define FRONT_RIGHT      9
+define BACK_LEFT       10
+define BACK_RIGHT      11
+
+// Define standard colors
+
+define RED            [255 0 0]
+define GREEN          [0 255 0]
+define BLUE           [0 0 255]
+define YELLOW         [255 255 0]
+define CYAN           [0 255 255]
+define MAJENTA        [255 0 255]
+
+define OFF            [0 0 0]	         
+       
+define WHITE_20       [50 50 50]	              // ~20% White	
+define WHITE_80       [200 200 200]	            // ~80% White	
+define RED_20         [50 0 0]                  // ~20% Red
 
 initialize begin
 
-	// group 1 is used for all leds - usually this group is used for background
-	append group 1 as strip 1 led 1 to 8
-	append group 1 as strip 2 led 1 to 8
-	append group 1 as strip 3 led 1 to 8
-	append group 1 as strip 4 led 1 to 8
-	append group 1 as strip 5 led 1 to 8
-	append group 1 as strip 6 led 1 to 8
-	append group 1 as strip 7 led 1 to 8
-	append group 1 as strip 8 led 1 to 8
+	// group ALL_LEDS is used for all leds - usually this group is used for background
+	append group ALL_LEDS as strip 1 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 2 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 3 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 4 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 5 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 6 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 7 led 1 to MAX_LEDS_PER_STRIP
+	append group ALL_LEDS as strip 8 led 1 to MAX_LEDS_PER_STRIP
 
-	// group 2 is used to identify the strip numbers
-	append group 2 as strip 1 led 1 to 1
-	append group 2 as strip 2 led 1 to 2
-	append group 2 as strip 3 led 1 to 3
-	append group 2 as strip 4 led 1 to 4
-	append group 2 as strip 5 led 1 to 5
-	append group 2 as strip 6 led 1 to 6
-	append group 2 as strip 7 led 1 to 7
-	append group 2 as strip 8 led 1 to 8
+	// group for strip number identification
+	append group STRIP_NUMBER_ID as strip 1 led 1 to 1
+	append group STRIP_NUMBER_ID as strip 2 led 1 to 2
+	append group STRIP_NUMBER_ID as strip 3 led 1 to 3
+	append group STRIP_NUMBER_ID as strip 4 led 1 to 4
+	append group STRIP_NUMBER_ID as strip 5 led 1 to 5
+	append group STRIP_NUMBER_ID as strip 6 led 1 to 6
+	append group STRIP_NUMBER_ID as strip 7 led 1 to 7
+	append group STRIP_NUMBER_ID as strip 8 led 1 to 8
 
-	// 3 = front, 4 = back
-	append group 3 as strip 1 led 1 to 8
-	append group 3 as strip 2 led 1 to 8
-	append group 4 as strip 7 led 1 to 8
-	append group 4 as strip 8 led 1 to 8
-
-	// 5 = mid
-	append group 5 as strip 3 led 1 to 8
-	append group 5 as strip 4 led 1 to 8
-	append group 5 as strip 5 led 1 to 8
-	append group 5 as strip 6 led 1 to 8
+	// groups for front, back and middle
+	append group FRONT as strip 1 led 1 to MAX_LEDS_PER_STRIP
+	append group FRONT as strip 2 led 1 to MAX_LEDS_PER_STRIP
+	append group BACK as strip 7 led 1 to MAX_LEDS_PER_STRIP
+	append group BACK as strip 8 led 1 to MAX_LEDS_PER_STRIP
+	append group MIDDLE_FOUR as strip 3 led 1 to MAX_LEDS_PER_STRIP
+	append group MIDDLE_FOUR as strip 4 led 1 to MAX_LEDS_PER_STRIP
+	append group MIDDLE_FOUR as strip 5 led 1 to MAX_LEDS_PER_STRIP
+	append group MIDDLE_FOUR as strip 6 led 1 to MAX_LEDS_PER_STRIP  
   
-  // Individual arms
-	// 6 front left, 7 = front right, 8 = rear left, 9 = rear right
-	append group 6 as strip 1 led 1 to 8
-	append group 7 as strip 2 led 1 to 8
-	append group 8 as strip 7 led 1 to 8
-	append group 9 as strip 8 led 1 to 8
- 
-  // Left right
-	// 10 = left, 11 = right
-	append group 10 as strip 1 led 1 to 8         // left 
-	append group 10 as strip 3 led 1 to 8         //  
-	append group 10 as strip 5 led 1 to 8         //  
-	append group 10 as strip 7 led 1 to 8         //  
-	append group 11 as strip 2 led 1 to 8         // right 
-	append group 11 as strip 4 led 1 to 8         //  
-	append group 11 as strip 6 led 1 to 8         //  
-	append group 11 as strip 8 led 1 to 8         //  
-	  
+  // groups for left and right
+	append group LEFT as strip 1 led 1 to MAX_LEDS_PER_STRIP        
+	append group LEFT as strip 3 led 1 to MAX_LEDS_PER_STRIP        
+	append group LEFT as strip 5 led 1 to MAX_LEDS_PER_STRIP         
+	append group LEFT as strip 7 led 1 to MAX_LEDS_PER_STRIP         
+	append group RIGHT as strip 2 led 1 to MAX_LEDS_PER_STRIP        
+	append group RIGHT as strip 4 led 1 to MAX_LEDS_PER_STRIP        
+	append group RIGHT as strip 6 led 1 to MAX_LEDS_PER_STRIP        
+	append group RIGHT as strip 8 led 1 to MAX_LEDS_PER_STRIP        
+	   
+  // groups for corner arms
+	append group FRONT_LEFT as strip 1 led 1 to MAX_LEDS_PER_STRIP
+	append group FRONT_RIGHT as strip 2 led 1 to MAX_LEDS_PER_STRIP
+	append group BACK_LEFT as strip 7 led 1 to MAX_LEDS_PER_STRIP
+	append group BACK_RIGHT as strip 8 led 1 to MAX_LEDS_PER_STRIP
+
 end
 
 if ( rc.ch8 <= 1100 ) then 
-	color group 1 #101010									 
-	color group 2 #100000									 
+	color group ALL_LEDS WHITE_20									 
+	color group STRIP_NUMBER_ID RED_20							 
 end
   
 if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) then 
-	color group 1 #000000									 
-	flash group 1 [ 255 255 0 ] 30 970 0							 
-	flash group 1 [ 255 255 0 ] 20 980	200						 
+	color group ALL_LEDS OFF									 
+	flash group ALL_LEDS YELLOW 30 970   0							 
+	flash group ALL_LEDS YELLOW 20 980 200						 
 end
   
 if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) then 
 	random group 1 200 10					 
-	bar group 6 #ff0000 25  0 100  1   
-  bar group 7 #00ff00 25  0 100  1     
-	bar group 8 #ff0000 25  0 100  1     
-	bar group 9 #00ff00 25  0 100  1   		
+	bar group FRONT_LEFT RED    25 0 100 1   
+  bar group FRONT_RIGHT GREEN 25 0 100 1     
+	bar group BACK_LEFT RED     25 0 100 1     
+	bar group BACK_RIGHT GREEN  25 0 100 1   		
 end
   
 if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) then       // scotts nav pattern
 	color group 1 #000000						 
-	fill group 6 #ff0000 150 1000 1
-	fill group 7 #00ff00 150 1000 1
-	fill group 8 #ff0000 150 1000 0
-	fill group 9 #00ff00 150 1000 0
-	flash group 1 [ 100 100 100 ] 30 970   0							 
-	flash group 1 [ 100 100 100 ] 20 980 200		
+	fill group FRONT_LEFT RED    150 1000 1
+	fill group FRONT_RIGHT GREEN 150 1000 1
+	fill group BACK_LEFT RED     150 1000 0
+	fill group BACK_RIGHT GREEN  150 1000 0
 end
   
 if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) then
 	random group 1 200 10					 
-	wave group 6 #ff0000 50 2	1
-	wave group 7 #00ff00 50 2  1
-	wave group 8 #ff0000 50 2  0
-	wave group 9 #00ff00 50 2  0			  
+	wave group FRONT_LEFT RED    50 2	1
+	wave group FRONT_RIGHT GREEN 50 2 1
+	wave group BACK_LEFT RED     50 2 0
+	wave group BACK_RIGHT GREEN  50 2 0			  
 end
 
 if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) then 
-	color group 1 #050505		
-	bounce group 6 #ff0000 100 1                   // front left
-	bounce group 7 #00ff00 100 1                   // front right
-	bounce group 8 #ff0000 100 1                   // rear left
-	bounce group 9 #00ff00 100 1   				         // rear right
+	color group ALL_LEDS #050505		
+	bounce group FRONT_LEFT RED    100 1                 
+	bounce group FRONT_RIGHT GREEN 100 1               
+	bounce group BACK_LEFT RED     100 1              
+	bounce group BACK_RIGHT GREEN  100 1   				        
 end
   
 if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) then
-	color group  1 #000000						 
-	flash group 10 #ff0000 20 950   0     
-	flash group 10 #ff0000 20 950 100       
-	flash group 11 #00ff00 20 950 200        
-	flash group 11 #00ff00 20 950 300   							
+	color group  ALL_LEDS OFF						 
+	flash group LEFT RED    20 950   0     
+	flash group LEFT RED    20 950 100       
+	flash group RIGHT GREEN 20 950 200        
+	flash group RIGHT GREEN 20 950 300   							
 end
   
 if ( 1700 < rc.ch8 and rc.ch8 <= 1800 ) then   
-  color group 3 [85 85 85]                      // Front white						 
-  color group 4 [85 0 0]                        // Back mid red					 
-  if ( imu.brake > 20 ) then                    // Braking
-    color group 4 [255 0 0]                     // Back bright red					 
+  color group FRONT WHITE_20                       // Front white						 
+  color group BACK RED_20                          // Back low red					 
+  if ( imu.brake > 20 ) then                       // Braking
+    color group BACK RED                           // Back bright red					 
   end   
 end
   
 if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) then 
-	color group 1 #000000						// off	
+	color group 1 OFF						// off	
 end  
   
 if ( 1900 < rc.ch8 ) then 
-	color group 1 [ 200 200 200]						// ~80% White	
-	bar group 6 [ 255 0 0 ] 25 0 100  1   
-  bar group 7 [ 0 255 0 ] 25 0 100  1     
-	bar group 8 [ 255 0 0 ] 25 0 100  1     
-	bar group 9 [ 0 255 0 ] 25 0 100  1   	  
+	color group ALL_LEDS WHITE_80					
+	bar group FRONT_LEFT RED    25 0 100  1   
+  bar group FRONT_RIGHT GREEN 25 0 100  1     
+	bar group BACK_LEFT RED     25 0 100  1     
+	bar group BACK_RIGHT GREEN  25 0 100  1   	  
 end
