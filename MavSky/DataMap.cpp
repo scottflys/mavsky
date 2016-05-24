@@ -123,14 +123,18 @@ DataMap::DataMap() {
     int8_t scale_power = EEPROM.read(EEPROM_ADDR_MAP_BEGIN + i*2 + 1);
     scale_for_target[i] = powf(10.0, scale_power);    
   }
-  if(EEPROM.read(EEPROM_ADDR_VERSION) != EEPROM_INIT_VALUE_217) {
+  if(EEPROM.read(EEPROM_ADDR_VERSION) == EEPROM_INIT_VALUE_217) {
+    EEPROM.write(EEPROM_ADDR_FRSKY_VARIO_ENABLE, 1);
+    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_218);
+  } else if(EEPROM.read(EEPROM_ADDR_VERSION) != EEPROM_INIT_VALUE_218) {
     write_factory_settings();
-    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_217);
+    EEPROM.write(EEPROM_ADDR_VERSION, EEPROM_INIT_VALUE_218);
   }
 }
 
 void DataMap::write_factory_settings() {
   EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
+  EEPROM.write(EEPROM_ADDR_FRSKY_VARIO_ENABLE, 1);
   add_map((char*)"bar_altitude", (char*)"vario_altitude", (char*)"100.0");  
   add_map((char*)"climb_rate", (char*)"vario_vertical_speed", (char*)"100.0");  
 

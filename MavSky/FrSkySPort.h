@@ -82,11 +82,11 @@ class FrSkySPort {
     uint32_t gps_heading = 0;  
     uint32_t rpm = 0;    
     uint32_t sp2uh_fuel = 0;
-    void (*vario_data_request_function)(int32_t *altitude, int32_t *vertical_speed);
-    void (*fas_data_request_function)(uint32_t *voltage, uint32_t *current);
-    void (*gps_data_request_function)(int32_t *lon, int32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading);  
-    void (*rpm_data_request_function)(uint32_t *rpm);  
-    void (*sp2uh_data_request_function)(uint32_t *fuel); 
+    void (*vario_data_request_function)(int32_t *altitude, int32_t *vertical_speed) = NULL;
+    void (*fas_data_request_function)(uint32_t *voltage, uint32_t *current) = NULL;
+    void (*gps_data_request_function)(int32_t *lon, int32_t *lat, int32_t *alt, uint32_t *speed, uint32_t *heading) = NULL;  
+    void (*rpm_data_request_function)(uint32_t *rpm) = NULL;  
+    void (*sp2uh_data_request_function)(uint32_t *fuel) = NULL; 
       
   public:
     FrSkySPort();

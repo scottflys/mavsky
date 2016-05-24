@@ -13,7 +13,7 @@
 #ifndef MAVSKY_H
 #define MAVSKY_H
 
-#define PRODUCT_STRING  "MAVSky Version 2.1.17.6"
+#define PRODUCT_STRING  "MAVSky Version 2.1.17.6.1"
 
 #define FAULT_MAV_OFFLINE               1
 #define FAULT_SPORT_OFFLINE             2
@@ -26,6 +26,7 @@
 // EEPROM
 #define EEPROM_ADDR_VERSION             0
 #define EEPROM_ADDR_FRSKY_VFAS_ENABLE   1
+#define EEPROM_ADDR_FRSKY_VARIO_ENABLE  2
 #define EEPROM_ADDR_MAP_BEGIN          32         // EEPROM address for start of map
 
 #define EEPROM_LED_MAP_BASE            64         // LED code start

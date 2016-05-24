@@ -68,7 +68,7 @@ void MavConsole::do_help() {
   console_print("map\r\n");
   console_print("map [bar_altitude|rangefinder_distance] vario_altitude [scale]\r\n");                                    
   console_print("map [climb_rate] vario_vertical_speed [scale]\r\n");                                    
-  console_print("frsky vfas   [enable|disable]\r\n");
+  console_print("frsky [vfas|vario] [enable|disable]\r\n");
   console_print("ledmap L1 R1 L2 R2 L3 R3 L4 R4\r\n");
   console_print("factory\r\n");
 }
@@ -156,6 +156,20 @@ void MavConsole::do_frsky() {
       console_print("frsky vfas enabled\r\n");
     } else {
       console_print("frsky vfas disabled\r\n");
+    }
+  } else if(strcmp(p, "vario") == 0) {
+    p = strtok(NULL, " ");
+    if(p != NULL) {
+      if(strcmp(p, "enable") == 0) {
+        EEPROM.write(EEPROM_ADDR_FRSKY_VARIO_ENABLE, 1);
+      } else if(strcmp(p, "disable") == 0) {
+        EEPROM.write(EEPROM_ADDR_FRSKY_VARIO_ENABLE, 0);
+      }
+    }
+    if(EEPROM.read(EEPROM_ADDR_FRSKY_VARIO_ENABLE)) {
+      console_print("frsky vario enabled\r\n");
+    } else {
+      console_print("frsky vario disabled\r\n");
     }
   }
 }
