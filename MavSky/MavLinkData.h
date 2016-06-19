@@ -23,11 +23,11 @@ class MavLinkData {
   private:  
     uint8_t    mavlink_buffer[MAVLINK_MAX_PACKET_LEN];
     
-    int16_t    battery_current_buffer[MAV_HISTORY_BUFFER_SIZE];
+    uint16_t    battery_current_buffer[MAV_HISTORY_BUFFER_SIZE];
     int16_t    battery_current_buffer_start = 0;
     int16_t    battery_current_buffer_length = 0;
     
-    int16_t    battery_voltage_buffer[MAV_HISTORY_BUFFER_SIZE];
+    uint16_t    battery_voltage_buffer[MAV_HISTORY_BUFFER_SIZE];
     int16_t    battery_voltage_buffer_start = 0;
     int16_t    battery_voltage_buffer_length = 0;
 
@@ -101,7 +101,7 @@ class MavLinkData {
     
     // MAVLINK_MSG_ID_RANGEFINDER
     int32_t   rangefinder_distance = 0;
-  
+
     // MAVLINK_MSG_ID_BATTERY_STATUS
     uint16_t  current_consumed = 0;    
     uint16_t  energy_consumed = 0;    
@@ -116,6 +116,7 @@ class MavLinkData {
     uint16_t rc6 = 0;
     uint16_t rc7 = 0;
     uint16_t rc8 = 0;
+    uint8_t rssi = 0;
   
     // Calculated
     uint16_t  average_battery_voltage = 0;          
@@ -134,8 +135,8 @@ class MavLinkData {
     ~MavLinkData();
     void start_mavlink_packet_type(mavlink_message_t* msg_ptr, uint8_t stream_id, uint16_t rate);
     void start_mavlink_if_stopped(mavlink_message_t* msg_ptr);
-    void mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length);
-    int16_t mavlink_get_average(int16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length);
+    void mavlink_average_push(uint16_t data, uint16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length);
+    uint16_t mavlink_get_average(uint16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length);
     int mavlink_heartbeat_data_valid();
     int mavlink_sys_status_data_valid();
     int mavlink_gps_data_valid();

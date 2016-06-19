@@ -38,7 +38,7 @@ MavLinkData::MavLinkData() {
   MAVLINK_SERIAL.begin(57600);
 }
 
-void MavLinkData::mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length) {
+void MavLinkData::mavlink_average_push(uint16_t data, uint16_t* p_buffer, int16_t* p_start, int16_t* p_length, int16_t max_length) {
   p_buffer[(*p_start + *p_length) % max_length] = data;
   if(*p_length >= max_length) {
     *p_start = (*p_start + 1) % max_length;
@@ -47,7 +47,7 @@ void MavLinkData::mavlink_average_push(int16_t data, int16_t* p_buffer, int16_t*
   }
 }
 
-int16_t MavLinkData::mavlink_get_average(int16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length) {
+uint16_t MavLinkData::mavlink_get_average(uint16_t* p_buffer, int16_t start, int16_t length, int16_t use_samples, int16_t max_length) {
   int16_t i;
   int32_t sum = 0;
   
@@ -64,7 +64,7 @@ int16_t MavLinkData::mavlink_get_average(int16_t* p_buffer, int16_t start, int16
   } else {
     round_val = (0 - use_samples) / 2;
   }
-  return (int16_t)((sum + round_val)/ use_samples);                     // round
+  return (uint16_t)((sum + round_val)/ use_samples);                     // round
 }
 
 int MavLinkData::mavlink_heartbeat_data_valid() {
@@ -355,11 +355,7 @@ void MavLinkData::process_mavlink_packets() {
 
         case MAVLINK_MSG_ID_SCALED_PRESSURE:             
           temperature = mavlink_msg_scaled_pressure_get_temperature(&msg);
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_SCALED_PRESSURE");
-          //debug_print(LOG_MAV_OTHER, "time_boot_ms: %d", mavlink_msg_scaled_pressure_get_time_boot_ms(&msg));
-          //debug_print(LOG_MAV_OTHER, "press_abs: %d", mavlink_msg_scaled_pressure_get_press_abs(&msg));
-          //debug_print(LOG_MAV_OTHER, "press_diff: %d", mavlink_msg_scaled_pressure_get_press_diff(&msg));
-          //debug_print(LOG_MAV_OTHER, "temperature: %d",  mav.temperature);          
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK MSG_ID_SCALED_PRESSURE");        
           logger->add_timestamp(Logger::TIMESTAMP_MAVLINK_MSG_ID_SCALED_PRESSURE);
           break;
 
@@ -406,7 +402,7 @@ void MavLinkData::process_mavlink_packets() {
           break;
           
         case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
-          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_HWSTATUS");          
+          logger->debug_print(Logger::LOG_MAV_OTHER, (char *)"MAVLINK_MSG_ID_RC_CHANNELS_RAW");          
           rc1 = mavlink_msg_rc_channels_get_chan1_raw(&msg);
           rc2 = mavlink_msg_rc_channels_get_chan2_raw(&msg);
           rc3 = mavlink_msg_rc_channels_get_chan3_raw(&msg);
@@ -415,6 +411,7 @@ void MavLinkData::process_mavlink_packets() {
           rc6 = mavlink_msg_rc_channels_get_chan6_raw(&msg);
           rc7 = mavlink_msg_rc_channels_get_chan7_raw(&msg);
           rc8 = mavlink_msg_rc_channels_get_chan8_raw(&msg);
+          rssi = mavlink_msg_rc_channels_get_rssi(&msg);
           logger->add_timestamp(logger->TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW);
           break;  
                  

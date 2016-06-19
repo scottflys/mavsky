@@ -60,7 +60,7 @@ void Logger::debug_print(int subsystem, char* fmt, ...) {
   } else if(subsystem == LOG_MAV_RANGEFINDER) {   
     if(debugMavRangeFinderEnable || debugMavAllEnable) {
       print_enable = 1;
-    }
+    }  
   } else if(subsystem == LOG_MAV_RCCHANNELSRAW) {   
     if(debugMavRcChannelsRawEnable || debugMavAllEnable) {
       print_enable = 1;

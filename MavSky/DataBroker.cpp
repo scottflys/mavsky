@@ -42,6 +42,7 @@ DataBroker::DataBroker() {
 void DataBroker::write_factory_settings() {
   data_map.write_factory_settings();
   EEPROM.write(EEPROM_ADDR_FRSKY_VFAS_ENABLE, 1);
+  EEPROM.write(EEPROM_ADDR_FRSKY_VARIO_ENABLE, 1);
 }
 
 void DataBroker::console_map(char* p) {

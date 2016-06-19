@@ -32,6 +32,7 @@ extern int drawingMemory[];
 
 #define VAR_MAV_RC_CH7                  0x01      // rc.ch7
 #define VAR_MAV_RC_CH8                  0x02      // rc.ch8
+#define VAR_MAV_RC_RSSI                 0x03      // rc.rssi
 
 #define VAR_MAV_BATTERY_CURRENT         0x10      // bat.current
 #define VAR_MAV_BATTERY_VOLTAGE         0x11      // bat.voltage
@@ -45,6 +46,7 @@ extern int drawingMemory[];
 #define VAR_MAV_VEHICLE_COG             0x31      // fc.cog
 #define VAR_MAV_VEHICLE_HEADING         0x32      // fc.heading
 #define VAR_MAV_VEHICLE_SPEED           0x33      // fc.speed
+#define VAR_MAV_VEHICLE_DISTANCE        0x34      // fc.distance                    distance from armed in meters
 
 #define VAR_MAV_FC_ARMED                0x40      // fc.armed
 #define VAR_MAV_FC_FLIGHTMODE           0x41      // fc.flightmode
@@ -171,6 +173,10 @@ uint32_t LedController::get_variable(uint16_t input) {
     case VAR_MAV_RC_CH8:
       return mav->rc8;
       break;
+          
+    case VAR_MAV_RC_RSSI:
+      return mav->rssi;
+      break;
       
     case VAR_MAV_BATTERY_CURRENT:
       return mav->average_battery_current;
@@ -206,6 +212,10 @@ uint32_t LedController::get_variable(uint16_t input) {
       
     case VAR_MAV_VEHICLE_HEADING:
       return mav->heading;
+      break;
+          
+    case VAR_MAV_VEHICLE_DISTANCE:
+      return mav->armed_distance;
       break;
       
     case VAR_MAV_VEHICLE_SPEED:
