@@ -14,7 +14,7 @@
 //  
 
 #include "MavSky.h"
-#include "OctoWS2811.h"
+#include "FastLED.h"
 #include "LedGroup.h"
 #include "Led.h"
 #include "MavLinkData.h"
@@ -22,7 +22,7 @@
 
 extern MavConsole *console;
 
-LedGroups::LedGroups(OctoWS2811* led_ptr) {
+LedGroups::LedGroups(CRGB led_ptr[]) {
   for(int i=0; i<MAX_LED_GROUPS; i++) {
     group_ptrs[i] = new LedGroup(led_ptr, this, i);
   }
@@ -111,7 +111,7 @@ void LedGroups::push_layer(uint8_t group_number, uint8_t action_number) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-LedGroup::LedGroup(OctoWS2811* led_ptr, LedGroups* led_groups_param, int group_number_param) {
+LedGroup::LedGroup(CRGB led_ptr[], LedGroups* led_groups_param, int group_number_param) {
   led_groups_ptr = led_groups_param;
   group_number = group_number_param;
   group_actions_ptr = new LedGroupActions(led_ptr, this);

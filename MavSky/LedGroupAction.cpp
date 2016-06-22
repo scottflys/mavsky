@@ -14,7 +14,7 @@
 //  
 
 #include "MavSky.h"
-#include "OctoWS2811.h"
+#include "FastLED.h"
 #include "LedGroupAction.h"
 #include "LedGroup.h"
 #include "Led.h"
@@ -26,7 +26,7 @@ extern MavConsole *console;
 extern int displayMemory[];
 extern int drawingMemory[];
 
-LedGroupActions::LedGroupActions(OctoWS2811* led_ptr, LedGroup* led_group_ptr_param) {
+LedGroupActions::LedGroupActions(CRGB led_ptr[], LedGroup* led_group_ptr_param) {
   led_group_ptr = led_group_ptr_param;
   for(int i=0; i<MAX_LED_ACTIONS_PER_GROUP; i++) {
     group_action_ptrs[i] = new LedGroupAction(led_ptr, led_group_ptr_param);
@@ -199,7 +199,7 @@ void LedGroupActions::set_fill(uint16_t pc, uint32_t on_color_param, uint32_t st
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LedGroupAction::LedGroupAction(OctoWS2811* led_ptr, LedGroup* group_ptr_param) {
+LedGroupAction::LedGroupAction(CRGB led_ptr[], LedGroup* group_ptr_param) {
   leds = led_ptr;
   group_ptr = group_ptr_param;
 }
@@ -262,7 +262,7 @@ void LedGroupAction::force_off() {
     uint8_t strip = group_ptr->strip_number[i];
     uint8_t pos = group_ptr->led_position[i];
     if(strip >= 0) {
-      leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), 0);
+      leds[pos+(strip*MAX_LEDS_PER_STRIP)] = 0;
     }     
   }   
 }
@@ -274,7 +274,7 @@ void LedGroupAction::set_led(int on_led, uint32_t color) {
     if(reverse) {
       pos = (group_ptr->led_count - 1) - pos;
     }
-    leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
+    leds[pos+(strip*MAX_LEDS_PER_STRIP)] = on_color;
   }
 }
 
@@ -311,7 +311,7 @@ void LedGroupAction::process_10_millisecond() {
           if(reverse) {
             pos = group_ptr->led_count - pos - 1;
           }          
-          leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
+          leds[pos+(strip*MAX_LEDS_PER_STRIP)] = on_color;
         }
       }
       if(sequence_ms >= state_time) {
@@ -329,7 +329,7 @@ void LedGroupAction::process_10_millisecond() {
           uint8_t strip = group_ptr->strip_number[on_led];
           if(strip >= 0) {
             uint8_t pos = group_ptr->led_position[on_led];
-            leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
+            leds[pos+(strip*MAX_LEDS_PER_STRIP)] = on_color;
           }
         }     
         if(sequence_ms >= state_time) {
@@ -363,7 +363,7 @@ void LedGroupAction::process_10_millisecond() {
             uint8_t strip = group_ptr->strip_number[i];
             uint8_t pos = group_ptr->led_position[i];
             if(strip >= 0) {
-              leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), color);
+              leds[pos+(strip*MAX_LEDS_PER_STRIP)] = color;
             }
           }
           sequence_ms = 0;       
@@ -382,7 +382,7 @@ void LedGroupAction::process_10_millisecond() {
             if(reverse) {
               pos = group_ptr->led_count - pos - 1;
             }
-            leds->setPixel(pos+(strip*MAX_LEDS_PER_STRIP), on_color);
+            leds[pos+(strip*MAX_LEDS_PER_STRIP)] = on_color;
           }
         }
       }

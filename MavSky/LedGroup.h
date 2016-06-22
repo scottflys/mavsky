@@ -14,7 +14,7 @@
 #define LEDGROUP_H
 
 #include <WProgram.h> 
-#include "OctoWS2811.h"
+#include "FastLED.h"
 #include "LedGroupAction.h"
 
 class LedGroups;
@@ -26,11 +26,10 @@ class LedGroup {
     
   public: 
     LedGroupActions* group_actions_ptr;
-
     uint8_t  led_count = 0;
     int8_t   strip_number[MAX_LEDS_PER_GROUP];
     int8_t   led_position[MAX_LEDS_PER_GROUP];
-    LedGroup(OctoWS2811* led_ptr, LedGroups*, int group_number_param);
+    LedGroup(CRGB led_ptr[], LedGroups*, int group_number_param);
     void clear_led_assignments();
     void clear_all_actions();
     void push_layer(uint8_t action_number);
@@ -45,7 +44,7 @@ class LedGroups {
     
   public:
     uint8_t led_group_count = MAX_LED_GROUPS;
-    LedGroups(OctoWS2811* led_ptr);
+    LedGroups(CRGB led_ptr[]);
     void add_led_to_group(uint8_t group_number, uint8_t strip, uint8_t pos);
     LedGroup* get_led_group(uint8_t group_number);    
     void clear_led_assignments();

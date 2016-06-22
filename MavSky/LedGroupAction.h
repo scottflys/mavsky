@@ -14,14 +14,14 @@
 #define LEDGROUPACTION_H
 
 #include <WProgram.h> 
-#include "OctoWS2811.h"
+#include "FastLED.h"
 
 class LedGroupActions;
 class LedGroup;
 
 class LedGroupAction {
   private:
-    OctoWS2811* leds;
+    CRGB* leds;
     uint8_t group_number;
     LedGroup* group_ptr;
 
@@ -43,7 +43,7 @@ class LedGroupAction {
     uint32_t offset_time = 0;                         // flash2
     uint32_t pause_time = 0;                          // fill
     
-    LedGroupAction(OctoWS2811* led_ptr, LedGroup*);
+    LedGroupAction(CRGB led_ptr[], LedGroup*);
     void set_led(int on_led, uint32_t color);
     void init(uint16_t pc_param, uint8_t mode_param, uint32_t on_color_param, uint32_t on_time_param, uint32_t off_time_param, uint32_t offset_time_param, uint32_t state_time_param, uint32_t on_width_param, uint32_t pause_time_param, uint8_t intensity_param, uint8_t on_led_count_param, uint8_t reverse_param);    void process_10_millisecond();
     void disable();
@@ -58,7 +58,7 @@ class LedGroupActions {
     
   public:
     LedGroupAction* group_action_ptrs[MAX_LED_ACTIONS_PER_GROUP];
-    LedGroupActions(OctoWS2811* led_ptr, LedGroup* group_ptr_param);
+    LedGroupActions(CRGB led_ptr[], LedGroup* group_ptr_param);
     void push_layer(uint8_t group_number);
     void disable_all_actions();
     LedGroupAction* get_led_group(uint8_t group_number);        /// todo this isn't named right

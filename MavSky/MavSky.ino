@@ -61,9 +61,6 @@ MavConsole *console;
 MavLinkData *mav;
 FrSkySPort *frsky;
 DataBroker *data_broker;
-
-DMAMEM int displayMemory[MAX_LEDS_PER_STRIP*6];
-int drawingMemory[MAX_LEDS_PER_STRIP*6];
   
 LedController* led_strip_ptr;
 
@@ -121,36 +118,41 @@ void loop()  {
       }
       break;
      
-    case 5:                                         // keep teensy quiet while LEDs are getting written (~0.85 milliseconds for 16 LEDs per strip)
+//    case 5:                                         // keep teensy quiet while LEDs are getting written (~0.85 milliseconds for 16 LEDs per strip)
+//      if(leds_changed == 1) {
+//        led_strip_ptr->update_leds();
+//        leds_changed = 0;
+//      }
+//      break;
+
+    default:
       if(leds_changed == 1) {
         led_strip_ptr->update_leds();
         leds_changed = 0;
-      }
-      break;
-
-    default:
-      mav->process_mavlink_packets();
-    
-      frsky->frsky_process();         
-    
-      console->check_for_console_command();  
-    
-      if(current_milli >= next_1000_loop) {
-        next_1000_loop = current_milli + 1000;
-        mav->process_1000_millisecond();
-      }
+      } else {
+        mav->process_mavlink_packets();
       
-      if(current_milli >= next_200_loop) {
-        next_200_loop = current_milli + 200;
-        diags.update_led();
-      }
+        frsky->frsky_process();         
       
-      if(current_milli >= next_100_loop) {
-        next_100_loop = current_milli + 100;
-        if(current_milli > 10000) {
-          check_for_faults();
+        console->check_for_console_command();  
+      
+        if(current_milli >= next_1000_loop) {
+          next_1000_loop = current_milli + 1000;
+          mav->process_1000_millisecond();
         }
-        mav->process_100_millisecond();   
+        
+        if(current_milli >= next_200_loop) {
+          next_200_loop = current_milli + 200;
+          diags.update_led();
+        }
+        
+        if(current_milli >= next_100_loop) {
+          next_100_loop = current_milli + 100;
+          if(current_milli > 10000) {
+            check_for_faults();
+          }
+          mav->process_100_millisecond();   
+        }
       }
       break;     
   }
