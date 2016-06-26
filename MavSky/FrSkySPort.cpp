@@ -35,6 +35,7 @@ extern MavConsole *console;    // todo probably not needed
 #define   DELAY_GPS_PERIOD             500
 #define   DELAY_RPM_PERIOD             100
 #define   DELAY_SP2UH_PERIOD           500
+#define   DELAY_SP2UR_PERIOD           500
 
 FrSkySPort::FrSkySPort() {
   frsky_port.begin(57600);
@@ -89,12 +90,17 @@ void FrSkySPort::set_sp2uh_request_callback(void (*callback)(uint32_t *fuel)) {
   sp2uh_data_request_function = callback;
 };
 
+void FrSkySPort::set_sp2ur_request_callback(void (*callback)(uint32_t *accx, uint32_t *accy, uint32_t *accz)) {
+  sp2ur_data_request_function = callback;
+};
+
 void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
   static uint32_t delay_vario_next = 0;
   static uint32_t delay_fas_next = 0;
   static uint32_t delay_rpm_next = 0;
   static uint32_t delay_gps_next = 0;
   static uint32_t delay_sp2uh_next = 0;
+  static uint32_t delay_sp2ur_next = 0;
   
   uint32_t latlong = 0;
   
@@ -254,7 +260,42 @@ void FrSkySPort::frsky_process_sensor_request(uint8_t sensorId) {
       break;
 
     case SENSOR_ID_SP2UR:
-      break;  
+      logger->add_timestamp(Logger::TIMESTAMP_FRSKY_OTHER); 
+      if(sp2ur_data_request_function == NULL) {
+        break;
+      }
+      switch(sp2ur_sensor_state) {
+        case 0:
+          if(process_timestamp > delay_sp2ur_next) {
+            sp2ur_data_request_function(&sp2ur_accx, &sp2ur_accy, &sp2ur_accz); 
+            frsky_send_package(FR_ID_ACCX, sp2ur_accx); 
+            delay_sp2ur_next = process_timestamp + DELAY_SP2UR_PERIOD;   
+            sp2ur_sensor_state = 0;
+//            sp2ur_sensor_state = 1;
+          } else {
+            frsky_send_null(FR_ID_ACCX);   
+          }   
+          break;
+//        case 1:
+//          if(process_timestamp > delay_sp2ur_next) {
+//            frsky_send_package(FR_ID_ACCY, sp2ur_accy); 
+//            delay_sp2ur_next = process_timestamp + DELAY_SP2UR_PERIOD;   
+//            sp2ur_sensor_state = 2;
+//          } else {
+//            frsky_send_null(FR_ID_ACCY);   
+//          }   
+//          break;            
+//        case 2:
+//          if(process_timestamp > delay_sp2ur_next) {
+//            frsky_send_package(FR_ID_ACCZ, sp2ur_accz); 
+//            delay_sp2ur_next = process_timestamp + DELAY_SP2UR_PERIOD;   
+//            sp2ur_sensor_state = 0;
+//          } else {
+//            frsky_send_null(FR_ID_ACCZ);   
+//          }   
+//          break;            
+      }
+      break;
       
     case SENSOR_ID_FLVSS:
       break;           

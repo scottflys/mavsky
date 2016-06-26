@@ -1,5 +1,6 @@
 --
 --  Author: Scott Simpson
+--  Version 2.1.18
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,7 +14,6 @@
 --
 --  A copy of the GNU General Public License is available at <http://www.gnu.org/licenses/>.  
 --    
---  Version 2.1.13a2
 -- 
 local ArmedModeWavFile = {}
 local FlightModeWavFile = {}

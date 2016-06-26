@@ -1,12 +1,13 @@
 /////////////////////////////////////////////////////////////
 //
 // default_led_pattern.txt
+// version 2.1.18
 //
 // This is the test pattern used to generate the factory default firmware pattern
 //
 //
 /////////////////////////////////////////////////////////////
-// compiler_version:v2.3 PLEASE DO NOT REMOVE OR ALTER THIS LINE
+// compiler_version:v2 PLEASE DO NOT REMOVE OR ALTER THIS LINE
 /////////////////////////////////////////////////////////////
 
 define MAX_LEDS_PER_STRIP 8
@@ -19,14 +20,26 @@ define STRIP_NUMBER_ID  2
 define FRONT            3
 define BACK             4
 define MIDDLE_FOUR      5
+define CORNERS          6
 
-define LEFT             6
-define RIGHT            7
+define LEFT             7
+define RIGHT            8
 
-define FRONT_LEFT       8
-define FRONT_RIGHT      9
-define BACK_LEFT       10
-define BACK_RIGHT      11
+define FRONT_LEFT       9
+define FRONT_RIGHT     10
+define BACK_LEFT       11
+define BACK_RIGHT      12
+
+// Define flight modes
+
+define MODE_STABILIZE   0
+define MODE_ACRO        1
+define MODE_ALT_HOLD    2
+define MODE_AUTO        3
+define MODE_RTL         6
+define MODE_LAND        9
+define MODE_TUNE       15
+define MODE_POSHOLD    16
 
 // Define standard colors
 
@@ -65,7 +78,7 @@ initialize begin
 	append group STRIP_NUMBER_ID as strip 7 led 1 to 7
 	append group STRIP_NUMBER_ID as strip 8 led 1 to 8
 
-	// groups for front, back and middle
+	// groups for front, back, middle and corners
 	append group FRONT as strip 1 led 1 to MAX_LEDS_PER_STRIP
 	append group FRONT as strip 2 led 1 to MAX_LEDS_PER_STRIP
 	append group BACK as strip 7 led 1 to MAX_LEDS_PER_STRIP
@@ -74,7 +87,12 @@ initialize begin
 	append group MIDDLE_FOUR as strip 4 led 1 to MAX_LEDS_PER_STRIP
 	append group MIDDLE_FOUR as strip 5 led 1 to MAX_LEDS_PER_STRIP
 	append group MIDDLE_FOUR as strip 6 led 1 to MAX_LEDS_PER_STRIP  
-  
+	append group CORNERS as strip 1 led 1 to MAX_LEDS_PER_STRIP
+	append group CORNERS as strip 2 led 1 to MAX_LEDS_PER_STRIP
+	append group CORNERS as strip 7 led 1 to MAX_LEDS_PER_STRIP
+	append group CORNERS as strip 8 led 1 to MAX_LEDS_PER_STRIP
+ 
+ 
   // groups for left and right
 	append group LEFT as strip 1 led 1 to MAX_LEDS_PER_STRIP        
 	append group LEFT as strip 3 led 1 to MAX_LEDS_PER_STRIP        
@@ -93,73 +111,88 @@ initialize begin
 
 end
 
-if ( rc.ch8 <= 1100 ) then 
-	color group ALL_LEDS WHITE_20									 
-	color group STRIP_NUMBER_ID RED_20							 
-end
+loop begin
+  //
+  // One of the following if conditions will match depending on the value of channel 8.  When channel 8 is max, an auto mode is enabled and that uses flight modes to set LEDs
+  //
+  if ( rc.ch8 <= 1100 ) then 
+    //
+    // LED test - identify strip numbers (see documentation for which strip should be on which arm)
+    //
+    color group ALL_LEDS WHITE_20									 
+    color group STRIP_NUMBER_ID RED_20							 
+  elsif ( rc.ch8 <= 1200  ) then 
+    color group ALL_LEDS OFF									 
+    flash group ALL_LEDS YELLOW 30 970   0							 
+    flash group ALL_LEDS YELLOW 20 980 200						 
+  elsif ( rc.ch8 <= 1300  ) then 
+    random group 1 200 10					 
+    bar group FRONT_LEFT RED    25 0 100 1   
+    bar group FRONT_RIGHT GREEN 25 0 100 1     
+    bar group BACK_LEFT RED     25 0 100 1     
+    bar group BACK_RIGHT GREEN  25 0 100 1   		
+  elsif ( rc.ch8 <= 1400 ) then       // scotts nav pattern
+    color group 1 #000000						 
+    fill group FRONT_LEFT RED    150 1000 1
+    fill group FRONT_RIGHT GREEN 150 1000 1
+    fill group BACK_LEFT RED     150 1000 0
+    fill group BACK_RIGHT GREEN  150 1000 0
+  elsif ( rc.ch8 <= 1500 ) then
+    random group 1 200 10					 
+    wave group FRONT_LEFT RED    50 2	1
+    wave group FRONT_RIGHT GREEN 50 2 1
+    wave group BACK_LEFT RED     50 2 0
+    wave group BACK_RIGHT GREEN  50 2 0			  
+  elsif ( rc.ch8 <= 1600 ) then 
+    color group ALL_LEDS #050505		
+    bounce group FRONT_LEFT RED    100 1                 
+    bounce group FRONT_RIGHT GREEN 100 1               
+    bounce group BACK_LEFT RED     100 1              
+    bounce group BACK_RIGHT GREEN  100 1   				        
+  elsif ( rc.ch8 <= 1700 ) then
+    //
+    // Double flash left (red) to right (green)
+    //
+    color group  ALL_LEDS OFF						 
+    flash group LEFT RED    20 950   0     
+    flash group LEFT RED    20 950 100       
+    flash group RIGHT GREEN 20 950 200        
+    flash group RIGHT GREEN 20 950 300   							
+  elsif ( rc.ch8 <= 1800 ) then     
+    color group ALL_LEDS WHITE_80					
+    bar group FRONT_LEFT RED    25 0 100  1   
+    bar group FRONT_RIGHT GREEN 25 0 100  1     
+    bar group BACK_LEFT RED     25 0 100  1     
+    bar group BACK_RIGHT GREEN  25 0 100  1  
+  elsif ( rc.ch8 <= 1900 ) then 
+    //
+    // Stealth mode
+    //
+    color group 1 OFF					
+  else
+    //
+    // Auto mode
+    // When ch8 is maxed, the LED mode is specified by flight mode (and braking)
+    //
+    color group ALL_LEDS OFF						 
+    if ( fc.flightmode == MODE_STABILIZE ) then 
+      color group ALL_LEDS CYAN						 
+    elsif ( fc.flightmode == MODE_ALT_HOLD ) then
+      color group CORNERS RED                     						   
+    elsif ( fc.flightmode == MODE_POSHOLD ) then
+      color group CORNERS GREEN						 
+    elsif ( fc.flightmode == MODE_RTL ) then
+      color group CORNERS BLUE						 
+    elsif ( fc.flightmode == MODE_AUTO ) then
+      color group CORNERS MAJENTA
+    elsif ( fc.flightmode == MODE_LAND ) then
+      color group CORNERS YELLOW						 
+    else
+      color group MIDDLE_FOUR WHITE_20               			 
+    end
+    if ( imu.brake > 20 ) then                       // Braking
+      color group BACK RED                           // Back bright red							   
+    end  
+  end
   
-if ( 1100 < rc.ch8 and rc.ch8 <= 1200  ) then 
-	color group ALL_LEDS OFF									 
-	flash group ALL_LEDS YELLOW 30 970   0							 
-	flash group ALL_LEDS YELLOW 20 980 200						 
-end
-  
-if ( 1200 < rc.ch8 and rc.ch8 <= 1300  ) then 
-	random group 1 200 10					 
-	bar group FRONT_LEFT RED    25 0 100 1   
-  bar group FRONT_RIGHT GREEN 25 0 100 1     
-	bar group BACK_LEFT RED     25 0 100 1     
-	bar group BACK_RIGHT GREEN  25 0 100 1   		
-end
-  
-if ( 1300 < rc.ch8 and rc.ch8 <= 1400 ) then       // scotts nav pattern
-	color group 1 #000000						 
-	fill group FRONT_LEFT RED    150 1000 1
-	fill group FRONT_RIGHT GREEN 150 1000 1
-	fill group BACK_LEFT RED     150 1000 0
-	fill group BACK_RIGHT GREEN  150 1000 0
-end
-  
-if ( 1400 < rc.ch8 and rc.ch8 <= 1500 ) then
-	random group 1 200 10					 
-	wave group FRONT_LEFT RED    50 2	1
-	wave group FRONT_RIGHT GREEN 50 2 1
-	wave group BACK_LEFT RED     50 2 0
-	wave group BACK_RIGHT GREEN  50 2 0			  
-end
-
-if ( 1500 < rc.ch8 and rc.ch8 <= 1600 ) then 
-	color group ALL_LEDS #050505		
-	bounce group FRONT_LEFT RED    100 1                 
-	bounce group FRONT_RIGHT GREEN 100 1               
-	bounce group BACK_LEFT RED     100 1              
-	bounce group BACK_RIGHT GREEN  100 1   				        
-end
-  
-if ( 1600 < rc.ch8 and rc.ch8 <= 1700 ) then
-	color group  ALL_LEDS OFF						 
-	flash group LEFT RED    20 950   0     
-	flash group LEFT RED    20 950 100       
-	flash group RIGHT GREEN 20 950 200        
-	flash group RIGHT GREEN 20 950 300   							
-end
-  
-if ( 1700 < rc.ch8 and rc.ch8 <= 1800 ) then   
-  color group FRONT WHITE_20                       // Front white						 
-  color group BACK RED_20                          // Back low red					 
-  if ( imu.brake > 20 ) then                       // Braking
-    color group BACK RED                           // Back bright red					 
-  end   
-end
-  
-if ( 1800 < rc.ch8 and rc.ch8 <= 1900 ) then 
-	color group 1 OFF						// off	
-end  
-  
-if ( 1900 < rc.ch8 ) then 
-	color group ALL_LEDS WHITE_80					
-	bar group FRONT_LEFT RED    25 0 100  1   
-  bar group FRONT_RIGHT GREEN 25 0 100  1     
-	bar group BACK_LEFT RED     25 0 100  1     
-	bar group BACK_RIGHT GREEN  25 0 100  1   	  
 end

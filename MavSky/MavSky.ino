@@ -39,6 +39,7 @@
 //    pin 3 - Do not use as PWM.  Normal use is ok.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include <GCS_MAVLink.h>
 #include <EEPROM.h>
 #include "MavSky.h"
@@ -103,63 +104,41 @@ void check_for_faults() {
 uint32_t next_1000_loop = 0L;
 uint32_t next_200_loop = 0L;
 uint32_t next_100_loop = 0L;
-uint8_t leds_changed = 0;
+uint32_t next_10_loop = 0L;
 
 void loop()  {
   uint32_t current_milli = millis();
-  uint8_t state = (current_milli % 10);
-  switch(state) {
-    case 0:
-      if(leds_changed == 0) {
-        digitalWrite(PROBEPIN, HIGH);  
-        led_strip_ptr->process_10_millisecond();
-        digitalWrite(PROBEPIN, LOW);  
-        leds_changed = 1;
-      }
-      break;
-     
-//    case 5:                                         // keep teensy quiet while LEDs are getting written (~0.85 milliseconds for 16 LEDs per strip)
-//      if(leds_changed == 1) {
-//        led_strip_ptr->update_leds();
-//        leds_changed = 0;
-//      }
-//      break;
 
-    default:
-      if(leds_changed == 1) {
-        led_strip_ptr->update_leds();
-        leds_changed = 0;
-      } else {
-        mav->process_mavlink_packets();
-      
-        frsky->frsky_process();         
-      
-        console->check_for_console_command();  
-      
-        if(current_milli >= next_1000_loop) {
-          next_1000_loop = current_milli + 1000;
-          mav->process_1000_millisecond();
-        }
-        
-        if(current_milli >= next_200_loop) {
-          next_200_loop = current_milli + 200;
-          diags.update_led();
-        }
-        
-        if(current_milli >= next_100_loop) {
-          next_100_loop = current_milli + 100;
-          if(current_milli > 10000) {
-            check_for_faults();
-          }
-          mav->process_100_millisecond();   
-        }
-      }
-      break;     
+  mav->process_mavlink_packets();
+
+  frsky->frsky_process();         
+
+  console->check_for_console_command();  
+
+  if(current_milli >= next_1000_loop) {
+    next_1000_loop = current_milli + 1000;
+    mav->process_1000_millisecond();
+  }
+  
+  if(current_milli >= next_200_loop) {
+    next_200_loop = current_milli + 200;
+    diags.update_led();
+  }
+  
+  if(current_milli >= next_100_loop) {
+    next_100_loop = current_milli + 100;
+    if(current_milli > 10000) {
+      check_for_faults();
+    }
+    mav->process_100_millisecond();   
+  }
+
+  if(current_milli >= next_10_loop) {
+    next_10_loop = current_milli + 10;
+    digitalWrite(PROBEPIN, HIGH);  
+    led_strip_ptr->process_10_millisecond();
+    digitalWrite(PROBEPIN, LOW);  
+    led_strip_ptr->update_leds();
   }
 }
-
-
-
-
-
 
