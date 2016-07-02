@@ -23,13 +23,17 @@ class MavLinkData {
   private:  
     uint8_t    mavlink_buffer[MAVLINK_MAX_PACKET_LEN];
     
-    uint16_t    battery_current_buffer[MAV_HISTORY_BUFFER_SIZE];
+    uint16_t   battery_current_buffer[MAV_HISTORY_BUFFER_SIZE];
     int16_t    battery_current_buffer_start = 0;
     int16_t    battery_current_buffer_length = 0;
     
-    uint16_t    battery_voltage_buffer[MAV_HISTORY_BUFFER_SIZE];
+    uint16_t   battery_voltage_buffer[MAV_HISTORY_BUFFER_SIZE];
     int16_t    battery_voltage_buffer_start = 0;
     int16_t    battery_voltage_buffer_length = 0;
+
+    uint16_t   rssi_buffer[MAV_HISTORY_BUFFER_SIZE];
+    int16_t    rssi_buffer_start = 0;
+    int16_t    rssi_buffer_length = 0;
 
     uint32_t   last_process_100_millisecond_time = 0;
     uint32_t   last_process_1000_gps_latitude = 0;
@@ -120,7 +124,8 @@ class MavLinkData {
   
     // Calculated
     uint16_t  average_battery_voltage = 0;          
-    int16_t   average_battery_current = 0;       
+    uint16_t  average_battery_current = 0;       
+    uint16_t  average_rssi= 0;       
     int32_t   armed_latitude = 0;               
     int32_t   armed_longitude = 0;
     uint32_t  armed_distance = 0;                     // in m

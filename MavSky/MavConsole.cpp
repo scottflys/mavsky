@@ -110,6 +110,7 @@ void MavConsole::do_dump() {
   console_print("rc7:                       %d\r\n", mav->rc7);
   console_print("rc8:                       %d\r\n", mav->rc8);
   console_print("rssi:                      %d\r\n", mav->rssi);
+  console_print("average rssi:              %d\r\n", mav->average_rssi);
 
   //led_strip_ptr->dump_diags();
 }

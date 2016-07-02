@@ -412,6 +412,9 @@ void MavLinkData::process_mavlink_packets() {
           rc7 = mavlink_msg_rc_channels_get_chan7_raw(&msg);
           rc8 = mavlink_msg_rc_channels_get_chan8_raw(&msg);
           rssi = mavlink_msg_rc_channels_get_rssi(&msg);
+          mavlink_average_push(rssi, rssi_buffer, &rssi_buffer_start, &rssi_buffer_length, MAV_HISTORY_BUFFER_SIZE);    
+          average_rssi = mavlink_get_average(rssi_buffer, rssi_buffer_start, rssi_buffer_length, 10, MAV_HISTORY_BUFFER_SIZE);
+
           logger->add_timestamp(logger->TIMESTAMP_MAVLINK_MSG_ID_RC_CHANNELS_RAW);
           break;  
                  
