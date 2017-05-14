@@ -1,6 +1,6 @@
 --
 --  Author: Scott Simpson
---  Version 2.1.18
+--  Version 2.1.18.1
 --
 -- 	This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -677,7 +677,7 @@ local function run(event)
     drawVerticalSpeed(Position[Slot["VerticalSpeed"]].x, Position[Slot["VerticalSpeed"]].y)
   end
   if Slot["Heading"] > 0 then
-    drawVerticalSpeed(Position[Slot["Heading"]].x, Position[Slot["Heading"]].y)
+    drawHeading(Position[Slot["Heading"]].x, Position[Slot["Heading"]].y)
   end
   
   drawSats(72, 40)	
